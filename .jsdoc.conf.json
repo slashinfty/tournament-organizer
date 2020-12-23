@@ -1,0 +1,29 @@
+{
+  "plugins": ["plugins/markdown"],
+  "recurseDepth": 10,
+  "opts": {
+    "recurse": true,
+    "destination": "./docs/"
+  },
+  "source": {
+    "include": ["./src/", "./lib/"],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "node_modules"
+  },
+  "sourceType": "module",
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "systemName": "Tournament Organizer",
+    "copyright": "MIT License - Copyright (c) 2020 Matt Braddock",
+    "theme": "paper"
+  },
+  "markdown": {
+    "parser": "gfm",
+    "hardwrap": true
+  }
+}
