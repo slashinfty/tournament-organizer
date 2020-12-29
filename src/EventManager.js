@@ -1,7 +1,7 @@
 'use strict';
 
-import { Util } from '../lib/Utilities';
-import { Tournament } from './Tournament';
+const Utilities = require('../lib/Utilities');
+const Tournament = require('./Tournament');
 
 /** Class representing an event manager. */
 class EventManager {
@@ -22,10 +22,10 @@ class EventManager {
      * @param {?String[]} [tiebreakers=null] Array of tiebreakers to use in round-robin and swiss formats.
      * @return {Tournament} The newly created tournament.
      */
-    createTournament(options = {}, tiebreakers = null) {
-        let id = Util.randomString(16);
+    createTournament(options = {}, tiebreakers = null) { // ADD CUSTOM ID
+        let id = Utilities.randomString(16);
         while (this.tournaments.findIndex(i => i.eventID === id) > -1) {
-            id = Util.randomString(16);
+            id = Utilities.randomString(16);
         }
         const tournament = new Tournament(id, options, tiebreakers);
         this.tournaments.push(tournament);

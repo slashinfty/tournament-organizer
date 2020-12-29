@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Tournament Organizer Class: EventManager</title>
+	<title>Tournament Organizer Namespace: Algorithms</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,16 +72,14 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: EventManager</h1>
+	<h1 class="page-title">Namespace: Algorithms</h1>
 <section>
 
 <header>
     
         <h2>
-        EventManager
+        Algorithms
         </h2>
-        
-            <div class="class-description"><p>Class representing an event manager.</p></div>
         
     
 </header>
@@ -91,28 +89,10 @@
     <div class="container-overview">
     
         
-<hr>
-<dt>
-    <h4 class="name" id="EventManager"><span class="type-signature"></span>new EventManager()</h4>
-    
-    
-</dt>
-<dd>
+            <div class="description"><p>Pairing algorithms.</p></div>
+        
 
-    
-    <div class="description">
-        <p>Create an event manager.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
+        
 <dl class="details">
     
 
@@ -152,21 +132,7 @@
 </dl>
 
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
+        
     
     </div>
 
@@ -180,81 +146,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Members</h3>
-
-        <dl>
-            
-<hr>
-<dt class="name" id="tournaments">
-    <h4 id="tournaments"><span class="type-signature"></span>tournaments<span class="type-signature"> :Array.&lt;<a href="Tournament.html">Tournament</a>></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Array of all tournaments being managed.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array.&lt;<a href="Tournament.html">Tournament</a>></span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        </dl>
     
 
     
@@ -264,7 +155,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="createTournament"><span class="type-signature"></span>createTournament( [options] [, tiebreakers])</h4>
+    <h4 class="name" id=".bracket"><span class="type-signature">&lt;static> </span>bracket(power)</h4>
     
     
 </dt>
@@ -272,7 +163,7 @@
 
     
     <div class="description">
-        <p>Create a new tournament.</p>
+        <p>Determines seeding for elimination brackets.</p>
     </div>
     
 
@@ -295,11 +186,7 @@
         <th>Type</th>
 
         
-        <th>Argument</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -311,13 +198,13 @@
 
         <tr>
             
-                <td class="name"><code>options</code></td>
+                <td class="name"><code>power</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">Number</span>
 
 
 
@@ -325,68 +212,10 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                    {}
-                
-                </td>
-            
 
-            <td class="description last"><p>Options a user can define for a tournament.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>tiebreakers</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;String></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    null
-                
-                </td>
-            
-
-            <td class="description last"><p>Array of tiebreakers to use in round-robin and swiss formats.</p></td>
+            <td class="description last"><p>Power of 2 for determining number of matches in first round.</p></td>
         </tr>
 
     
@@ -449,10 +278,6 @@
     <h5>Returns:</h5>
     
             
-<div class="param-desc">
-    <p>The newly created tournament.</p>
-</div>
-
 
 
 <dl>
@@ -461,7 +286,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Tournament.html">Tournament</a></span>
+<span class="param-type">Array.&lt;Number></span>
 
 
 
@@ -478,7 +303,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="removeTournament"><span class="type-signature"></span>removeTournament(tournament)</h4>
+    <h4 class="name" id=".doubleElim"><span class="type-signature">&lt;static> </span>doubleElim(players)</h4>
     
     
 </dt>
@@ -486,7 +311,7 @@
 
     
     <div class="description">
-        <p>Remove an existing tournament from the manager.</p>
+        <p>Double elimination bracket generation.</p>
     </div>
     
 
@@ -521,13 +346,13 @@
 
         <tr>
             
-                <td class="name"><code>tournament</code></td>
+                <td class="name"><code>players</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="Tournament.html">Tournament</a></span>
+<span class="param-type">Array.&lt;<a href="Player.html">Player</a>></span>
 
 
 
@@ -538,7 +363,7 @@
 
             
 
-            <td class="description last"><p>The tournament to be removed.</p></td>
+            <td class="description last"><p>The players for the tournament.</p></td>
         </tr>
 
     
@@ -601,10 +426,6 @@
     <h5>Returns:</h5>
     
             
-<div class="param-desc">
-    <p>If the tournament was removed.</p>
-</div>
-
 
 
 <dl>
@@ -613,7 +434,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Boolean</span>
+<span class="param-type">Array.&lt;<a href="Pairings.html">Pairings</a>></span>
 
 
 
@@ -622,6 +443,506 @@
 
 
         
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".elim"><span class="type-signature">&lt;static> </span>elim(players, thirdPlace)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Single elimination bracket generation.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>players</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Player.html">Player</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The players for the tournament.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>thirdPlace</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>If there is a third place consolation match.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="Pairings.html">Pairings</a>></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".loserFill"><span class="type-signature">&lt;static> </span>loserFill(num, count)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Determines the order in which to fill the loser's bracket for double elimination.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>num</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The amount of matches.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>How many times (starting at 0) the bracket has been filled.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;Number></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".robin"><span class="type-signature">&lt;static> </span>robin()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Round-robin algorithm (Berger tables).</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".swiss"><span class="type-signature">&lt;static> </span>swiss()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Swiss pairing algorithm.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 </dd>

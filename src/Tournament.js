@@ -1,7 +1,10 @@
 'use strict';
 
+const Match = require("./Match");
 const Player = require("./Player");
 const Pairings = require("./Pairings");
+const Utilities = require("../lib/Utilities");
+const Algorithms = require("../lib/Algorithms");
 
 /** Class representing a tournament. */
 class Tournament {
@@ -13,13 +16,12 @@ class Tournament {
      * @param {?Number} [options.numberOfRounds=null] Set number of rounds.
      * @param {Boolean} [options.seededPlayers=false] If players are seeded.
      * @param {('asc'|'des')} [options.seedOrder='asc'] Order of the seeding.
-     * @param {('elim'|'2xelim'|'robin'|'2xrobin'|'swiss')} [options.firstFormat='elim'] Format for first stage.
-     * @param {?('elim'|'2xelim')} [options.secondFormat=null] Format for second stage.
+     * @param {('elim'|'2xelim'|'robin'|'2xrobin'|'swiss')} [options.format='elim'] Format for first stage.
+     * @param {?('elim'|'2xelim')} [options.playoffs=null] Format for second stage.
      * @param {Boolean} [options.thirdPlaceMatch=false] If there's a 3rd place match in elimination.
      * @param {?Number} [options.maxPlayers=null] If there's a maximum number of players.
      * @param {('rank'|'score')} [options.cutType='rank'] How to cut off players between stages.
      * @param {Number} [options.cutLimit=0] The cutoff limit.
-     * @param {Number} [options.bestOf=1] Number of games in a match.
      * @param {Number} [options.winValue=1] Value of a win.
      * @param {Number} [options.drawValue=0.5] Value of a draw/tie.
      * @param {Number} [options.lossValue=0] Value of a loss.
@@ -66,7 +68,7 @@ class Tournament {
          * @type {('elim'|'2xelim'|'robin'|'2xrobin'|'swiss')}
          * @default 'elim'
          */
-        this.mainFormat = options.hasOwnProperty('mainFormat') && ['elim', '2xelim', 'robin', '2xrobin', 'swiss'].includes(options.mainFormat) ? options.mainFormat : 'elim';
+        this.format = options.hasOwnProperty('format') && ['elim', '2xelim', 'robin', '2xrobin', 'swiss'].includes(options.format) ? options.format : 'elim';
 
         /**
          * Format for the second stage of the tournament.
@@ -74,7 +76,7 @@ class Tournament {
          * @type {?('elim'|'2xelim')}
          * @default null
          */
-        this.playoffFormat = options.hasOwnProperty('playoffFormat') && ['elim', '2xelim'].includes(options.playoffFormat) ? options.playoffFormat : null;
+        this.playoffs = options.hasOwnProperty('playoffs') && ['elim', '2xelim'].includes(options.playoffs) ? options.playoffs : null;
 
         /**
          * If there is a third place consolation match in the second stage of the tournament.
@@ -106,15 +108,7 @@ class Tournament {
          * @default 0
          */
         this.cutLimit = options.hasOwnProperty('cutLimit') && Number.isInteger(options.cutLimit) && options.cutLimit >= -1 ? options.cutLimit : 0;
-        if (this.cutLimit === 0) this.playoffFormat = null;
-
-        /**
-         * The number of games in a match, where the winner must win a majority of games up to (n + 1) / 2.
-         * Must be an odd number.
-         * @type {Number}
-         * @default 1
-         */
-        this.bestOf = options.hasOwnProperty('bestOf') && Number.isInteger(options.bestOf) && options.bestOf >= 1 && options.bestOf % 2 === 1 ? options.bestOf : 1;
+        if (this.cutLimit === 0) this.playoffs = null;
 
         /**
          * The value of a win.
@@ -149,16 +143,18 @@ class Tournament {
          * @default null
          */
         this.tiebreakers = tiebreakers;
+
+        // Validating tiebreakers.
         const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'baumbach', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
         if (this.tiebreakers === null) {
-            if (this.mainFormat === 'swiss') this.tiebreakers = ['solkoff', 'cumulative'];
-            else if (this.mainFormat === 'robin' || this.mainFormat === '2xrobin') this.tiebreakers = ['sonneborn-berger', 'versus'];
+            if (this.format === 'swiss') this.tiebreakers = ['solkoff', 'cumulative'];
+            else if (this.format.includes('robin')) this.tiebreakers = ['sonneborn-berger', 'versus'];
         } else {
-            if (this.mainFormat === 'swiss' || this.mainFormat === 'robin' || this.mainFormat === '2xrobin') {
+            if (this.format === 'swiss' || this.format.includes('robin')) {
                 const filtered = this.tiebreakers.filter(t => tiebreakerOptions.includes(t));
                 if (filtered === []) {
-                    if (this.mainFormat === 'swiss') this.tiebreakers = ['solkoff', 'cumulative'];
-                    else if (this.mainFormat === 'robin' || this.mainFormat === '2xrobin') this.tiebreakers = ['sonneborn-berger', 'versus'];
+                    if (this.format === 'swiss') this.tiebreakers = ['solkoff', 'cumulative'];
+                    else if (this.format.includes('robin')) this.tiebreakers = ['sonneborn-berger', 'versus'];
                 } else this.tiebreakers = filtered;
             }
         }
@@ -182,7 +178,15 @@ class Tournament {
         this.rounds = [];
 
         /**
-         * Current round number (0 if the tournament has not started, -1 if the tournament is finished).
+         * If the tournament is active.
+         * @type {Boolean}
+         * @default false
+         */
+        this.active = false;
+
+        /**
+         * Current round number, used by round-robin and Swiss tournaments.
+         * 0 if the tournament has not started, -1 if the tournament is finished.
          * @type {Number}
          */
         this.currentRound = 0;
@@ -200,9 +204,9 @@ class Tournament {
         if (typeof alias !== 'string' || alias.length === 0) return false;
         let playerID;
         if (id === null) {
-            playerID = Util.randomString(8);
+            playerID = Utilities.randomString(8);
             while (this.players.findIndex(p => p.id === playerID) > -1) {
-                playerID = Util.randomString(16);
+                playerID = Utilities.randomString(16);
             }
         } else {
             if (this.players.findIndex(p => p.id === id) > -1) return false;
@@ -217,40 +221,94 @@ class Tournament {
      * Remove a player from the tournament.
      * If the tournament hasn't started, they are removed entirely.
      * If the tournament has started, they are dropped and marked inactive.
-     * @param {String} id The ID of the player.
+     * @param {Player} player The player to be removed.
      * @returns {Boolean} If the player was removed or dropped.
      */
-    removePlayer(id) {
-        const playerIndex = this.players.findIndex(p => p.id === id);
+    removePlayer(player) {
+        const playerIndex = this.players.findIndex(p => p.id === player.id);
         if (playerIndex > -1) {
-            if (this.currentRound === 0) {
+            if (!this.active) {
                 this.players.splice(playerIndex, 1);
                 return true;
             } else {
-                const player = this.players.find(p => p.id === id);
                 if (!player.active) return false;
                 else {
                     player.active = false;
-                    player.dropped = this.currentRound;
                     return true;
                 }
             }
         } else return false;
     }
 
-    // start event
     /**
      * Start the tournament.
      */
-    start() {
-        if (this.mainFormat === 'elim') {
+    startEvent() {
+        this.active = true;
+        if (this.format === 'elim') {
+            if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
+            else Utilities.shuffle(this.players);
+            this.rounds = Algorithms.elim(this.players, this.thirdPlaceMatch);
+        } else if (this.format === '2xelim') {
+            if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
+            else Utilities.shuffle(this.players);
+            this.rounds = Algorithms.doubleElim(this.players);
+        } else if (this.format === 'robin') {
+
+        } else if (this.format === '2xrobin') {
+
+        } else if (this.format === 'swiss') {
             
         }
     }
 
-    // get active matches
+    /**
+     * Get the active matches in the tournament.
+     * If no round is specified, it returns all active matches for all rounds.
+     * @param {?Number} round Optional round selector.
+     * @return {Match[]}
+     */
+    getActiveMatches(round = null) {
+        let a = [];
+        if (round !== null) a = this.rounds.find(p => p.round === round).matches.filter(m => m.active);
+        else {
+            this.rounds.forEach(p => {
+                const m = p.matches.filter(m => m.active);
+                a = a.concat(m);
+            });
+        }
+        return a;
+    }
 
-    // report results
+    /**
+     * Storing results of a match.
+     * @param {Match} match The match being reported.
+     * @param {Number} playerOneWins Number of wins for player one.
+     * @param {Number} playerTwoWins Number of wins for player two.
+     * @param {Number} [draws=0] Number of draws.
+     */
+    result(match, playerOneWins, playerTwoWins, draws = 0) {
+        match.playerOneWins = playerOneWins;
+        match.playerTwoWins = playerTwoWins;
+        match.draws = draws;
+        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
+        match.active = false;
+        if (match.winnerPath !== null) {
+            if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
+            else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
+            if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
+        }
+        if (match.loserPath !== null) {
+            if (match.loserPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
+            else if (match.loserPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
+            if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
+        }
+        if (this.format === 'elim') {
+            if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
+            else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
+        }
+        // If Swiss or round-robin, compute tiebreakers
+    }
 
     // get standings - tiebreakers in lib
 }

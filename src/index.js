@@ -5,5 +5,5 @@ module.exports = {
     Tournament: require('./Tournament'),
     Player: require('./Player'),
     Pairings: require('./Pairings'),
-    Match: require('.Match')
+    Match: require('./Match')
 };

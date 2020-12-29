@@ -33,14 +33,14 @@
 			<li class="dropdown">
 				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Utilities.html">Utilities</a></li>
+					<li><a href="Algorithms.html">Algorithms</a></li><li><a href="Utilities.html">Utilities</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="EventManager.html">EventManager</a></li><li><a href="Pairings.html">Pairings</a></li><li><a href="Player.html">Player</a></li><li><a href="Tournament.html">Tournament</a></li>
+					<li><a href="EventManager.html">EventManager</a></li><li><a href="Match.html">Match</a></li><li><a href="Pairings.html">Pairings</a></li><li><a href="Player.html">Player</a></li><li><a href="Tournament.html">Tournament</a></li>
 				</ul>
 			</li>
 			
@@ -406,7 +406,7 @@
 
         <tr>
             
-                <td class="name"><code>firstFormat</code></td>
+                <td class="name"><code>format</code></td>
             
 
             <td class="type">
@@ -458,7 +458,7 @@
 
         <tr>
             
-                <td class="name"><code>secondFormat</code></td>
+                <td class="name"><code>playoffs</code></td>
             
 
             <td class="type">
@@ -662,46 +662,6 @@
             
 
             <td class="description last"><p>The cutoff limit.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>bestOf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    1
-                
-                </td>
-            
-
-            <td class="description last"><p>Number of games in a match.</p></td>
         </tr>
 
     
@@ -953,16 +913,15 @@
         <dl>
             
 <hr>
-<dt class="name" id="bestOf">
-    <h4 id="bestOf"><span class="type-signature"></span>bestOf<span class="type-signature"> :Number</span></h4>
+<dt class="name" id="active">
+    <h4 id="active"><span class="type-signature"></span>active<span class="type-signature"> :Boolean</span></h4>
 
     
 </dt>
 <dd>
     
     <div class="description">
-        <p>The number of games in a match, where the winner must win a majority of games up to (n + 1) / 2.<br>
-Must be an odd number.</p>
+        <p>If the tournament is active.</p>
     </div>
     
 
@@ -971,7 +930,7 @@ Must be an odd number.</p>
         <ul>
             <li>
                 
-<span class="param-type">Number</span>
+<span class="param-type">Boolean</span>
 
 
 
@@ -1009,7 +968,7 @@ Must be an odd number.</p>
 	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
 	<dd class="tag-default">
 		<ul class="dummy">
-			<li>1</li>
+			<li>false</li>
 		</ul>
 	</dd>
 	
@@ -1040,7 +999,8 @@ Must be an odd number.</p>
 <dd>
     
     <div class="description">
-        <p>Current round number (0 if the tournament has not started, -1 if the tournament is finished).</p>
+        <p>Current round number, used by round-robin and Swiss tournaments.<br>
+0 if the tournament has not started, -1 if the tournament is finished.</p>
     </div>
     
 
@@ -1414,87 +1374,8 @@ Must be 0 or greater.</p>
         
             
 <hr>
-<dt class="name" id="lossValue">
-    <h4 id="lossValue"><span class="type-signature"></span>lossValue<span class="type-signature"> :Number</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>The value of a loss.<br>
-Must be an integer.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Number</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>0</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="mainFormat">
-    <h4 id="mainFormat"><span class="type-signature"></span>mainFormat<span class="type-signature"> :'elim'|'2xelim'|'robin'|'2xrobin'|'swiss'</span></h4>
+<dt class="name" id="format">
+    <h4 id="format"><span class="type-signature"></span>format<span class="type-signature"> :'elim'|'2xelim'|'robin'|'2xrobin'|'swiss'</span></h4>
 
     
 </dt>
@@ -1561,6 +1442,85 @@ Must be an integer.</p>
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>'elim'</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="lossValue">
+    <h4 id="lossValue"><span class="type-signature"></span>lossValue<span class="type-signature"> :Number</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>The value of a loss.<br>
+Must be an integer.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Number</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>0</li>
 		</ul>
 	</dd>
 	
@@ -1890,8 +1850,8 @@ If null, the value is determined by the number of players and the format.</p>
         
             
 <hr>
-<dt class="name" id="playoffFormat">
-    <h4 id="playoffFormat"><span class="type-signature">&lt;nullable> </span>playoffFormat<span class="type-signature"> :'elim'|'2xelim'</span></h4>
+<dt class="name" id="playoffs">
+    <h4 id="playoffs"><span class="type-signature">&lt;nullable> </span>playoffs<span class="type-signature"> :'elim'|'2xelim'</span></h4>
 
     
 </dt>
@@ -2734,7 +2694,176 @@ Must be a positive integer.</p>
             
 <hr>
 <dt>
-    <h4 class="name" id="removePlayer"><span class="type-signature"></span>removePlayer(id)</h4>
+    <h4 class="name" id="getActiveMatches"><span class="type-signature"></span>getActiveMatches(round)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Get the active matches in the tournament.<br>
+If no round is specified, it returns all active matches for all rounds.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>round</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last"><p>Optional round selector.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="removePlayer"><span class="type-signature"></span>removePlayer(player)</h4>
     
     
 </dt>
@@ -2779,13 +2908,13 @@ If the tournament has started, they are dropped and marked inactive.</p>
 
         <tr>
             
-                <td class="name"><code>id</code></td>
+                <td class="name"><code>player</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
 
@@ -2796,7 +2925,7 @@ If the tournament has started, they are dropped and marked inactive.</p>
 
             
 
-            <td class="description last"><p>The ID of the player.</p></td>
+            <td class="description last"><p>The player to be removed.</p></td>
         </tr>
 
     
@@ -2888,7 +3017,263 @@ If the tournament has started, they are dropped and marked inactive.</p>
             
 <hr>
 <dt>
-    <h4 class="name" id="start"><span class="type-signature"></span>start()</h4>
+    <h4 class="name" id="result"><span class="type-signature"></span>result(match, playerOneWins, playerTwoWins [, draws])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Storing results of a match.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>match</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Match.html">Match</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>The match being reported.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>playerOneWins</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Number of wins for player one.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>playerTwoWins</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Number of wins for player two.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>draws</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"><p>Number of draws.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="startEvent"><span class="type-signature"></span>startEvent()</h4>
     
     
 </dt>
@@ -3016,7 +3401,7 @@ If the tournament has started, they are dropped and marked inactive.</p>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a>
 	
-		on 2020-12-23T14:40:32-05:00
+		on 2020-12-27T23:18:22-05:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

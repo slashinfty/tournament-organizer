@@ -18,8 +18,7 @@
     "swiss",
     "round robin",
     "single elimination",
-    "double elimination",
-    "compass draw"
+    "double elimination"
   ],
   "author": "Matt Braddock",
   "license": "MIT",
@@ -29,7 +28,6 @@
   "homepage": "https://github.com/slashinfty/tournament-organizer#readme",
   "devDependencies": {
     "ink-docstrap": "^1.3.2",
-    "jsdoc": "^3.6.6",
-    "minami": "^1.2.3"
+    "jsdoc": "^3.6.6"
   }
 }

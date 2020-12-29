@@ -13,19 +13,19 @@ class Player {
          * Name of the player.
          * @type {String}
          */
-        this.alias = alias;
+        this.alias = alias.toString();
 
         /**
          * Alphanumeric string ID.
          * @type {String}
          */
-        this.id = id;
+        this.id = id.toString();
 
         /**
          * Value to sort players.
          * @type {?Number}
          */
-        this.seed = seed;
+        this.seed = typeof seed === 'number' ? seed : null;
 
         /**
          * Number of match points the player has.
@@ -74,12 +74,6 @@ class Player {
          * @type {Boolean}
          */
         this.active = true;
-
-        /**
-         * The round in which the player was dropped.
-         * @type {?Number}
-         */
-        this.dropped = null;
 
         /**
          * Tiebreaker values.
