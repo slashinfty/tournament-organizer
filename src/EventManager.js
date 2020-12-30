@@ -20,7 +20,6 @@ class EventManager {
      * Create a new tournament.
      * @param {?String} [id=null] User-defined ID.
      * @param {Object} [options={}] Options a user can define for a tournament.
-     * @param {?String[]} [tiebreakers=null] Array of tiebreakers to use in round-robin and swiss formats.
      * @return {Tournament} The newly created tournament.
      */
     createTournament(id = null, options = {}) {
