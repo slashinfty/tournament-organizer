@@ -67,7 +67,7 @@ class Player {
          * If the player is paired in the current round.
          * @type {Boolean}
          */
-        this.paired = false;
+        //this.paired = false;
 
         /**
          * If the player is still in the tournament.

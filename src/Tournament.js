@@ -19,6 +19,7 @@ class Tournament {
      * @param {('elim'|'2xelim'|'robin'|'2xrobin'|'swiss')} [options.format='elim'] Format for first stage.
      * @param {?('elim'|'2xelim')} [options.playoffs=null] Format for second stage.
      * @param {Boolean} [options.thirdPlaceMatch=false] If there's a 3rd place match in elimination.
+     * @param {Number} [options.bestOf=1] Number of possible games for a match.
      * @param {?Number} [options.maxPlayers=null] If there's a maximum number of players.
      * @param {('rank'|'score')} [options.cutType='rank'] How to cut off players between stages.
      * @param {Number} [options.cutLimit=0] The cutoff limit.
@@ -84,6 +85,14 @@ class Tournament {
          * @default false
          */
         this.thirdPlaceMatch = options.hasOwnProperty('thirdPlaceMatch') && options.thirdPlaceMatch ? true : false;
+
+        /**
+         * Number of possible games for a match, where the winner must win the majority of games up to 1 + x/2.
+         * Used for byes in Swiss and round-robin formats.
+         * @type {Number}
+         * @default 1
+         */
+        this.bestOf = options.hasOwnProperty('bestOf') && Number.isInteger(options.bestOf) && options.bestOf % 2 === 1 ? options.bestOf : 1;
 
         /**
          * Maximum number of players allowed to register for the tournament (minimum 4).
@@ -258,7 +267,10 @@ class Tournament {
         } else if (this.format === '2xrobin') {
 
         } else if (this.format === 'swiss') {
-            
+            this.currentRound++;
+            this.rounds.push(Algorithms.swiss(this.players, this.currentRound, 0));
+            const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
+            this.result(bye, this.bestOf, 0);
         }
     }
 
@@ -289,23 +301,36 @@ class Tournament {
      */
     result(match, playerOneWins, playerTwoWins, draws = 0) {
         match.playerOneWins = playerOneWins;
+        match.active = false;
+        if (match.playerTwo === null) {
+            match.assignBye(this.winValue);
+            return;
+        }
         match.playerTwoWins = playerTwoWins;
         match.draws = draws;
         match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
-        match.active = false;
         if (match.winnerPath !== null) {
             if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
             else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
             if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
         }
         if (match.loserPath !== null) {
-            if (match.loserPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-            else if (match.loserPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
+            if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
+            else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
             if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
         }
-        if (this.format === 'elim') {
+        if (match.loserPath === null && this.format.includes('elim')) {
             if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
             else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
+        }
+        if (this.format === 'swiss') {
+            const active = this.getActiveMatches();
+            if (active.length === 0) {
+                this.currentRound++;
+                this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound));
+                const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
+                this.result(bye, this.bestOf, 0);
+            }
         }
         // If Swiss or round-robin, compute tiebreakers
     }

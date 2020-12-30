@@ -106,6 +106,17 @@ class Match {
         this.playerOne.opponents.push(this.playerTwo);
         this.playerTwo.opponents.push(this.playerOne);
     }
+
+    /**
+     * Assign a bye to player one.
+     */
+    assignBye(wv) {
+        this.playerOne.gamePoints += this.playerOneWins * wv;
+        this.playerOne.games += this.playerOneWins;
+        this.playerOne.matchPoints += wv;
+        this.playerOne.matches++;
+        this.playerOne.byes++;
+    }
 }
 
 module.exports = Match;
