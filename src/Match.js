@@ -109,6 +109,7 @@ class Match {
 
     /**
      * Assign a bye to player one.
+     * @param {Number} wv The value of a win.
      */
     assignBye(wv) {
         this.playerOne.gamePoints += this.playerOneWins * wv;

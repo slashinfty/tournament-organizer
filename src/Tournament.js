@@ -26,9 +26,9 @@ class Tournament {
      * @param {Number} [options.winValue=1] Value of a win.
      * @param {Number} [options.drawValue=0.5] Value of a draw/tie.
      * @param {Number} [options.lossValue=0] Value of a loss.
-     * @param {?String[]} [tiebreakers=null] Array of tiebreakers to use in round-robin and swiss formats.
+     * @param {?String[]} [options.tiebreakers=null] Array of tiebreakers to use in round-robin and swiss formats.
      */
-    constructor(id, options = {}, tiebreakers = null) {
+    constructor(id, options = {}) {
         /**
          * Alphanumeric string ID.
          * @type {String}
@@ -143,6 +143,7 @@ class Tournament {
          */
         this.lossValue = options.hasOwnProperty('lossValue') && Number.isInteger(options.lossValue) ? options.lossValue : 0;
 
+        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'baumbach', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
         /**
          * Array of tiebreakers to use in round-robin and swiss formats, in order of precedence.
          * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, baumbach, cumulative, versus, magic-tcg, pokemon-tcg.
@@ -151,21 +152,13 @@ class Tournament {
          * @type {String[]}
          * @default null
          */
-        this.tiebreakers = tiebreakers;
+        this.tiebreakers = options.hasOwnProperty('tiebreakers') && Array.isArray(options.tiebreakers) ? options.tiebreakers.filter(t => tiebreakerOptions.includes(t)) : null;
 
         // Validating tiebreakers.
-        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'baumbach', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
-        if (this.tiebreakers === null) {
+        if (this.tiebreakers === null || this.tiebreakers.length === 0) {
             if (this.format === 'swiss') this.tiebreakers = ['solkoff', 'cumulative'];
             else if (this.format.includes('robin')) this.tiebreakers = ['sonneborn-berger', 'versus'];
-        } else {
-            if (this.format === 'swiss' || this.format.includes('robin')) {
-                const filtered = this.tiebreakers.filter(t => tiebreakerOptions.includes(t));
-                if (filtered === []) {
-                    if (this.format === 'swiss') this.tiebreakers = ['solkoff', 'cumulative'];
-                    else if (this.format.includes('robin')) this.tiebreakers = ['sonneborn-berger', 'versus'];
-                } else this.tiebreakers = filtered;
-            }
+            else this.tiebreakers = null;
         }
 
         /**
@@ -267,10 +260,11 @@ class Tournament {
         } else if (this.format === '2xrobin') {
 
         } else if (this.format === 'swiss') {
+            if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
             this.currentRound++;
-            this.rounds.push(Algorithms.swiss(this.players, this.currentRound, 0));
+            this.rounds.push(Algorithms.swiss(this.players, this.currentRound, 0, this.seededPlayers));
             const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
-            this.result(bye, this.bestOf, 0);
+            if (bye !== undefined) this.result(bye, this.bestOf, 0);
         }
     }
 
@@ -325,11 +319,11 @@ class Tournament {
         }
         if (this.format === 'swiss') {
             const active = this.getActiveMatches();
-            if (active.length === 0) {
+            if (active.length === 0) { // check to see if moving to playoffs
                 this.currentRound++;
-                this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound));
+                this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound, this.seededPlayers));
                 const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
-                this.result(bye, this.bestOf, 0);
+                if (bye !== undefined) this.result(bye, this.bestOf, 0);
             }
         }
         // If Swiss or round-robin, compute tiebreakers

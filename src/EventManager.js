@@ -18,16 +18,24 @@ class EventManager {
 
     /**
      * Create a new tournament.
+     * @param {?String} [id=null] User-defined ID.
      * @param {Object} [options={}] Options a user can define for a tournament.
      * @param {?String[]} [tiebreakers=null] Array of tiebreakers to use in round-robin and swiss formats.
      * @return {Tournament} The newly created tournament.
      */
-    createTournament(options = {}, tiebreakers = null) { // ADD CUSTOM ID
-        let id = Utilities.randomString(16);
-        while (this.tournaments.findIndex(i => i.eventID === id) > -1) {
-            id = Utilities.randomString(16);
+    createTournament(id = null, options = {}) {
+        let thisid;
+        if (id === null) {
+            do {
+                thisid = Utilities.randomString(16);
+            } while (this.tournaments.findIndex(i => i.eventID === thisid) > -1);
+        } else {
+            thisid = null;
+            while (this.tournaments.findIndex(i => i.eventID === thisid) > -1) {
+                thisid = Utilities.randomString(16);
+            }
         }
-        const tournament = new Tournament(id, options, tiebreakers);
+        const tournament = new Tournament(thisid, options);
         this.tournaments.push(tournament);
         return tournament;
     }
