@@ -21,6 +21,8 @@ class Tournament {
      * @param {Boolean} [options.thirdPlaceMatch=false] If there's a 3rd place match in elimination.
      * @param {Number} [options.bestOf=1] Number of possible games for a match.
      * @param {?Number} [options.maxPlayers=null] If there's a maximum number of players.
+     * @param {?Number} [options.groupNumber=null] Either the size of each group, or maximum number of groups for round-robin.
+     * @param {Boolean} [options.groupBySize=true] Whether to make groups by size. If false, the groups by number of groups.
      * @param {('rank'|'score')} [options.cutType='rank'] How to cut off players between stages.
      * @param {Number} [options.cutLimit=0] The cutoff limit.
      * @param {Number} [options.winValue=1] Value of a win.
@@ -103,6 +105,23 @@ class Tournament {
         this.maxPlayers = options.hasOwnProperty('maxPlayers') && Number.isInteger(options.maxPlayers) && options.maxPlayers >= 4 ? options.maxPlayers : null;
 
         /**
+         * Either the maximum size of each group, or the number of groups (minimum 2).
+         * If null, there are no groups.
+         * Used by round-robin tournaments.
+         * @type {?Number}
+         * @default null
+         */
+        this.groupNumber = options.hasOwnProperty('groupNumber') && Number.isInteger(options.groupNumber) && options.groupNumber >= 2 ? options.groupNumber : null;
+
+        /**
+         * If groups are formed by size or by number of groups.
+         * Used by round-robin tournaments.
+         * @type {Boolean}
+         * @default true
+         */
+        this.groupBySize = options.hasOwnProperty('groupBySize') && !options.groupBySize ? false : true;
+
+        /**
          * Method to determine which players advance to the second stage of the tournament.
          * @type {('rank'|'points')}
          * @default 'rank'
@@ -160,6 +179,7 @@ class Tournament {
             else if (this.format.includes('robin')) this.tiebreakers = ['sonneborn-berger', 'versus'];
             else this.tiebreakers = null;
         }
+        if (this.tiebreakers !== null) this.tiebreakers.unshift('match-points');
 
         /**
          * Creation date and time of the tournament.
@@ -172,6 +192,13 @@ class Tournament {
          * @type {Player[]}
          */
         this.players = [];
+
+        /**
+         * Array of groups of players.
+         * Used in round-robin tournaments.
+         * @type {Array[]}
+         */
+        this.groups = [];
 
         /**
          * Array of all pairings in the tournament.
@@ -201,7 +228,7 @@ class Tournament {
      * @param {Number} seed The seed value of the player. Mandatory if seededPlayers is true.
      * @returns {Boolean} If the player was created and added.
      */
-    addPlayer(alias, id, seed = null) {
+    addPlayer(alias, id = null, seed = null) {
         if (this.players.length === this.maxPlayers) return false;
         if (typeof alias !== 'string' || alias.length === 0) return false;
         let playerID;
@@ -255,10 +282,34 @@ class Tournament {
             if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
             else Utilities.shuffle(this.players);
             this.rounds = Algorithms.doubleElim(this.players);
-        } else if (this.format === 'robin') {
-
-        } else if (this.format === '2xrobin') {
-
+        } else if (this.format.includes('robin')) {
+            if (typeof this.groupNumber === 'number') {
+                if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
+                else Utilities.shuffle(this.players);
+                const numberOfGroups = Math.ceil(this.players.length / this.groupNumber);
+                let j = 0;
+                let k = 0;
+                for (let i = 0; i < numberOfGroups; i++) {
+                    if (j < numberOfGroups - (this.groupNumber * numberOfGroups - this.players.length)) {
+                        const a = [];
+                        for (let l = 0; l < this.groupNumber; l++) {
+                            a.push(this.players[k]);
+                            k++;
+                        }
+                        this.groups.push(a);
+                        j++;
+                    } else if (j < numberOfGroups) {
+                        const a = [];
+                        for (let l = 0; l < this.groupNumber - 1; l++) {
+                            a.push(this.players[k]);
+                            k++;
+                        }
+                        this.groups.push(a);
+                        j++;
+                    }
+                }
+                // start with this.groups
+            } // else start with this.players
         } else if (this.format === 'swiss') {
             if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
             this.currentRound++;

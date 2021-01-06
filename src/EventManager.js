@@ -1,7 +1,7 @@
 'use strict';
 
-const Utilities = require('../lib/Utilities');
 const Tournament = require('./Tournament');
+const Utilities = require('../lib/Utilities');
 
 /** Class representing an event manager. */
 class EventManager {
