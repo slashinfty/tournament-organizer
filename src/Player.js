@@ -64,10 +64,17 @@ class Player {
         this.opponents = [];
 
         /**
-         * If the player is paired in the current round.
-         * @type {Boolean}
+         * Color preference for chess tournaments.
+         * Add 1 for white (player one) and subtract 1 for black (player two).
+         * @type {Number}
          */
-        //this.paired = false;
+        this.colorPref = 0;
+
+        /**
+         * Array of colors that player has played in a chess tournament.
+         * @type {String[]}
+         */
+        this.colors = [];
 
         /**
          * If the player is still in the tournament.

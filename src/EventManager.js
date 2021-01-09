@@ -34,7 +34,10 @@ class EventManager {
                 thisid = Utilities.randomString(16);
             }
         }
-        const tournament = new Tournament(thisid, options);
+        let tournament;
+        if (options.format === 'swiss') tournament = new Tournament.Swiss(thisid, options);
+        else if (options.format === 'robin') tournament = new Tournament.RoundRobin(thisid, options);
+        else tournament = new Tournament.Elimination(thisid, options);
         this.tournaments.push(tournament);
         return tournament;
     }

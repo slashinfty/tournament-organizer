@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Tournament Organizer Class: Tournament</title>
+	<title>Tournament Organizer Class: Elimination</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,16 +72,16 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Tournament</h1>
+	<h1 class="page-title">Class: Elimination</h1>
 <section>
 
 <header>
     
         <h2>
-        Tournament
+        Elimination
         </h2>
         
-            <div class="class-description"><p>Class representing a tournament.</p></div>
+            <div class="class-description"><p>Class representing an elimination tournament.</p></div>
         
     
 </header>
@@ -93,7 +93,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="Tournament"><span class="type-signature"></span>new Tournament(id, options)</h4>
+    <h4 class="name" id="Elimination"><span class="type-signature"></span>new Elimination(id [, options])</h4>
     
     
 </dt>
@@ -101,7 +101,7 @@
 
     
     <div class="description">
-        <p>Create a new tournament.</p>
+        <p>Create a new elimination tournament.</p>
     </div>
     
 
@@ -124,7 +124,11 @@
         <th>Type</th>
 
         
+        <th>Argument</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -150,7 +154,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>String to be the event ID.</p></td>
@@ -174,7 +190,23 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
             
 
             <td class="description last"><p>Options that can be defined for a tournament.</p></td>
@@ -245,6 +277,17 @@
     </div>
 
     
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="Tournament.html">Tournament</a></li>
+    </ul>
+
+
+    
 
     
 
@@ -269,6 +312,98 @@
     
     <div class="description">
         <p>If the tournament is active.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Boolean</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#active">Tournament#active</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#active">Tournament#active</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>false</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="doubleElim">
+    <h4 id="doubleElim"><span class="type-signature"></span>doubleElim<span class="type-signature"> :Boolean</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>If the format is double elimination.</p>
     </div>
     
 
@@ -373,7 +508,21 @@ Must be 0 or greater.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#drawValue">Tournament#drawValue</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#drawValue">Tournament#drawValue</a>
+    </li></ul></dd>
     
 
     
@@ -451,7 +600,21 @@ Must be 0 or greater.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#eventID">Tournament#eventID</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#eventID">Tournament#eventID</a>
+    </li></ul></dd>
     
 
     
@@ -528,7 +691,21 @@ Must be 0 or greater.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#format">Tournament#format</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#format">Tournament#format</a>
+    </li></ul></dd>
     
 
     
@@ -607,7 +784,21 @@ Must be an integer.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#lossValue">Tournament#lossValue</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#lossValue">Tournament#lossValue</a>
+    </li></ul></dd>
     
 
     
@@ -686,7 +877,21 @@ If null, there is no maximum.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#maxPlayers">Tournament#maxPlayers</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#maxPlayers">Tournament#maxPlayers</a>
+    </li></ul></dd>
     
 
     
@@ -764,7 +969,21 @@ If null, there is no maximum.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#name">Tournament#name</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#name">Tournament#name</a>
+    </li></ul></dd>
     
 
     
@@ -842,7 +1061,21 @@ If null, there is no maximum.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#players">Tournament#players</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#players">Tournament#players</a>
+    </li></ul></dd>
     
 
     
@@ -920,7 +1153,21 @@ If null, there is no maximum.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#rounds">Tournament#rounds</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#rounds">Tournament#rounds</a>
+    </li></ul></dd>
     
 
     
@@ -998,7 +1245,21 @@ If null, there is no maximum.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#seededPlayers">Tournament#seededPlayers</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#seededPlayers">Tournament#seededPlayers</a>
+    </li></ul></dd>
     
 
     
@@ -1079,7 +1340,21 @@ If null, there is no maximum.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#seedOrder">Tournament#seedOrder</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#seedOrder">Tournament#seedOrder</a>
+    </li></ul></dd>
     
 
     
@@ -1157,6 +1432,91 @@ If null, there is no maximum.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#startTime">Tournament#startTime</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#startTime">Tournament#startTime</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="thirdPlaceMatch">
+    <h4 id="thirdPlaceMatch"><span class="type-signature"></span>thirdPlaceMatch<span class="type-signature"> :Boolean</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>If there is a third place consolation match in the second stage of the tournament.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Boolean</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
 
     
 
@@ -1174,6 +1534,13 @@ If null, there is no maximum.</p>
 
 	
 
+	
+	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>false</li>
+		</ul>
+	</dd>
 	
 
 
@@ -1229,7 +1596,21 @@ Must be a positive integer.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#winValue">Tournament#winValue</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#winValue">Tournament#winValue</a>
+    </li></ul></dd>
     
 
     
@@ -1424,7 +1805,21 @@ Must be a positive integer.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#addPlayer">Tournament#addPlayer</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#addPlayer">Tournament#addPlayer</a>
+    </li></ul></dd>
     
 
     
@@ -1597,7 +1992,21 @@ If no round is specified, it returns all active matches for all rounds.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#getActiveMatches">Tournament#getActiveMatches</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#getActiveMatches">Tournament#getActiveMatches</a>
+    </li></ul></dd>
     
 
     
@@ -1747,7 +2156,21 @@ If the tournament has started, they are dropped and marked inactive.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#removePlayer">Tournament#removePlayer</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#removePlayer">Tournament#removePlayer</a>
+    </li></ul></dd>
     
 
     
@@ -2016,6 +2439,98 @@ If the tournament has started, they are dropped and marked inactive.</p>
     </tbody>
 </table>
 
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Tournament.html#result">Tournament#result</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Tournament.html#result">Tournament#result</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="startEvent"><span class="type-signature"></span>startEvent()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Starts the tournament.</p>
+    </div>
+    
+
+    
+
+    
+
+    
     
 
     

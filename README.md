@@ -1,18 +1,18 @@
 ## Tournament Organizer
 A zero dependency module for organizing tournaments
 
-<span style="color:red;font-weight:bold">This is a work in progress and is currently incomplete and nonfunctional.</span>.
+<span style="color:red;font-weight:bold">This is a work in progress and is currently incomplete and nonfunctional</span>.
 
 [![npm](https://img.shields.io/npm/v/tournament-organizer?style=flat-square)](https://npmjs.org/package/tournament-organizer) [![GitHub last commit](https://img.shields.io/github/last-commit/slashinfty/tournament-organizer?style=flat-square)](https://github.com/slashinfty/tournament-organizer/commits/main) [![GitHub issues](https://img.shields.io/github/issues-raw/slashinfty/tournament-organizer?style=flat-square)](https://github.com/slashinfty/tournament-organizer/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/slashinfty/tournament-organizer?style=flat-square)](https://github.com/slashinfty/tournament-organizer/pulls) [![GitHub](https://img.shields.io/github/license/slashinfty/tournament-organizer?style=flat-square)](https://github.com/slashinfty/tournament-organizer/blob/main/LICENSE) [![Ko-Fi](https://img.shields.io/badge/Ko--Fi-Buy%20Me%20a%20Coffee-a87b00)](https://ko-fi.com/mattbraddock)
 
 ### About
 This JavaScript module for Node.js facilitates the organization and execution of tournaments.
 
-Tournaments can be paired by single elimination, double elimination, round-robin, double round-robin, and Swiss.
+Tournaments can be paired by single elimination, double elimination, round-robin, double round-robin, Swiss, and Dutch.
 
-If round-robin, double round-robin, or Swiss are chosen, then a single elimination or double elimination playoffs can follow.
+If round-robin, double round-robin, Swiss, or Dutch are chosen, then a single elimination or double elimination playoffs can follow.
 
-For Swiss and round-robin tournaments, the following tiebreakers systems are supported:
+For Swiss, Dutch, and round-robin tournaments, the following tiebreakers systems are supported:
 * Buchholz Cut 1
 * Solkoff (Buchholz)
 * Median-Buchholz
