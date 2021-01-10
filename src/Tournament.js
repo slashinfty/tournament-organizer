@@ -5,6 +5,7 @@ const Player = require("./Player");
 const Pairings = require("./Pairings");
 const Utilities = require("../lib/Utilities");
 const Algorithms = require("../lib/Algorithms");
+const Tiebreakers = require("../lib/Tiebreakers");
 
 /** Class representing a tournament. */
 class Tournament {
@@ -162,7 +163,7 @@ class Tournament {
      * @param {?Number} round Optional round selector.
      * @return {Match[]}
      */
-    getActiveMatches(round = null) {
+    activeMatches(round = null) {
         let a = [];
         if (round !== null) a = this.rounds.find(p => p.round === round).matches.filter(m => m.active);
         else {
@@ -207,10 +208,12 @@ class Tournament {
             else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
         }
         if (this.format === 'swiss') {
-            const active = this.getActiveMatches();
+            const active = this.activeMatches();
             if (active.length === 0) { // check to see if moving to playoffs
                 this.currentRound++;
-                this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound, this.seededPlayers));
+                if (this.dutch) this.rounds.push(Algorithms.dutch(this.players, this.currentRound, this.winValue * this.currentRound));
+                else if (this.format === 'swiss') this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound, this.seededPlayers));
+                // else if round robin
                 const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
                 if (bye !== undefined) this.result(bye, this.bestOf, 0);
             }
@@ -218,7 +221,23 @@ class Tournament {
         // If Swiss or round-robin, compute tiebreakers
     }
 
-    // get standings - tiebreakers in lib
+    /**
+     * Get the current standings of the tournament.
+     * @param {Boolean} [active=true] Filtering only active players.
+     * @return {Player[]}
+     */
+    standings(active = true) {
+        let thesePlayers = active ? this.players.filter(p => p.active) : [...this.players];
+        thesePlayers.sort((a, b) => {
+            for (let i = 0; i < this.tiebreakers.length; i++) {
+                if (Tiebreakers.sorting[prop].equal(a, b)) {
+                    if (i = this.tiebreakers.length - 1) return Math.random() * 2 - 1;
+                    else continue;
+                } else return Tiebreakers.sorting[prop].diff(a, b);
+            }
+        });
+        return thesePlayers;
+    }
 }
 
 /** 
@@ -309,8 +328,8 @@ class Swiss extends Tournament {
     startEvent() {
         if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
         this.currentRound++;
-        // change if dutch
-        this.rounds.push(Algorithms.swiss(this.players, this.currentRound, 0, this.seededPlayers));
+        if (this.dutch) this.rounds.push(Algorithms.dutch(this.players, this.currentRound, 0));
+        else this.rounds.push(Algorithms.swiss(this.players, this.currentRound, 0, this.seededPlayers));
         const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
         if (bye !== undefined) this.result(bye, this.bestOf, 0);
     }
@@ -416,9 +435,9 @@ class RoundRobin extends Tournament {
      * Starts the tournament.
      */
     startEvent() {
+        if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
+        else Utilities.shuffle(this.players);
         if (typeof this.groupNumber === 'number') {
-            if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
-            else Utilities.shuffle(this.players);
             const numberOfGroups = Math.ceil(this.players.length / this.groupNumber);
             let j = 0;
             let k = 0;
@@ -442,7 +461,7 @@ class RoundRobin extends Tournament {
                 }
             }
             // start with this.groups
-        } // else start with this.players
+        } else this.rounds = Algorithms.robin(this.players, false, this.doubleRR);
     }
 }
 
