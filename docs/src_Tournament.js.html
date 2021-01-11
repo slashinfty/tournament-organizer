@@ -1,0 +1,303 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta name="generator" content="JSDoc 3.6.6">
+  <meta charset="utf-8">
+  <title>Source: src/Tournament.js</title>
+  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
+  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
+  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
+  <link href="css/baseline.css" rel="stylesheet">
+</head>
+
+<body onload="prettyPrint()">
+  <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
+    <div id="jsdoc-navbar-container">
+      <div id="jsdoc-navbar-content">
+        <a href="index.html" class="jsdoc-navbar-package-name">Home</a>
+      </div>
+    </div>
+  </nav>
+  <div id="jsdoc-body-container">
+    <div id="jsdoc-content">
+      <div id="jsdoc-content-container">
+        <div id="jsdoc-banner" role="banner">
+        </div>
+        <div id="jsdoc-main" role="main">
+          <header class="page-header">
+            <h1>Source: src/Tournament.js</h1>
+          </header>
+          <article>
+            <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
+
+const Player &#x3D; require(&quot;./Player&quot;);
+
+/** Class representing a tournament. */
+class Tournament {
+    /**
+     * Create a new tournament.
+     * @param {String} id String to be the event ID.
+     * @param {Object} [options&#x3D;{}] Options that can be defined for a tournament.
+     * @param {?String} [options.name&#x3D;null]
+     * @param {?Number} [options.numberOfRounds&#x3D;null]
+     * @param {Boolean} [options.seededPlayers&#x3D;false]
+     * @param {(&#x27;asc&#x27;|&#x27;des&#x27;)} [options.seedOrder&#x3D;&#x27;asc&#x27;]
+     * @param {(&#x27;elim&#x27;|&#x27;2xelim&#x27;|&#x27;robin&#x27;|&#x27;2xrobin&#x27;|&#x27;swiss&#x27;)} [options.firstFormat&#x3D;&#x27;elim&#x27;]
+     * @param {?(&#x27;elim&#x27;|&#x27;2xelim&#x27;)} [options.secondFormat&#x3D;null]
+     * @param {Boolean} [options.thirdPlaceMatch&#x3D;false]
+     * @param {?Number} [options.maxPlayers&#x3D;null]
+     * @param {(&#x27;rank&#x27;|&#x27;score&#x27;)} [options.cutType&#x3D;&#x27;rank&#x27;]
+     * @param {Number} [options.cutLimit&#x3D;0]
+     * @param {Number} [options.bestOf&#x3D;1]
+     * @param {Number} [options.winValue&#x3D;1]
+     * @param {Number} [options.drawValue&#x3D;0.5]
+     * @param {Number} [options.lossValue&#x3D;0]
+     * @param {?String[]} [tiebreakers&#x3D;null] Array of tiebreakers to use in round-robin and swiss formats.
+     */
+    constructor(id, options &#x3D; {}, tiebreakers &#x3D; null) {
+        /**
+         * Alphanumeric string ID.
+         * @type {String}
+         */
+        this.eventID &#x3D; id;
+
+        /**
+         * Name of the tournament.
+         * @type {?String}
+         * @default null
+         */
+        this.name &#x3D; options.hasOwnProperty(&#x27;name&#x27;) &amp;amp;&amp;amp; typeof options.name &#x3D;&#x3D;&#x3D; &#x27;string&#x27; ? options.name : null;
+
+        /**
+         * Number of rounds for the first phase of the tournament.
+         * If null, the value is determined by the number of players and the format.
+         * @type {?Number}
+         * @default null
+         */
+        this.numberOfRounds &#x3D; options.hasOwnProperty(&#x27;numberOfRounds&#x27;) &amp;amp;&amp;amp; Number.isInteger(options.numberOfRounds) &amp;amp;&amp;amp; options.numberOfRounds &gt; 0 ? options.numberOfRounds : null;
+
+        /**
+         * Whether or not to organize players by seed when pairing.
+         * @type {Boolean}
+         * @default false
+         */
+        this.seededPlayers &#x3D; options.hasOwnProperty(&#x27;seededPlayers&#x27;) &amp;amp;&amp;amp; typeof options.seededPlayers &#x3D;&#x3D;&#x3D; &#x27;boolean&#x27; ? options.seededPlayers : false;
+
+        /**
+         * If the seeding should be sorted in ascending or descending order.
+         * @type {(&#x27;asc&#x27;|&#x27;des&#x27;)}
+         * @default &#x27;asc&#x27;
+         */
+        this.seedOrder &#x3D; options.hasOwnProperty(&#x27;seedOrder&#x27;) &amp;amp;&amp;amp; options.seedOrder &#x3D;&#x3D;&#x3D; &#x27;des&#x27; ? &#x27;des&#x27; : &#x27;asc&#x27;;
+
+        /**
+         * Format for the first stage of the tournament.
+         * @type {(&#x27;elim&#x27;|&#x27;2xelim&#x27;|&#x27;robin&#x27;|&#x27;2xrobin&#x27;|&#x27;swiss&#x27;)}
+         * @default &#x27;elim&#x27;
+         */
+        this.mainFormat &#x3D; options.hasOwnProperty(&#x27;mainFormat&#x27;) &amp;amp;&amp;amp; [&#x27;elim&#x27;, &#x27;2xelim&#x27;, &#x27;robin&#x27;, &#x27;2xrobin&#x27;, &#x27;swiss&#x27;].includes(options.mainFormat) ? options.mainFormat : &#x27;elim&#x27;;
+
+        /**
+         * Format for the second stage of the tournament.
+         * If null, there is only one stage.
+         * @type {?(&#x27;elim&#x27;|&#x27;2xelim&#x27;)}
+         * @default null
+         */
+        this.playoffFormat &#x3D; options.hasOwnProperty(&#x27;playoffFormat&#x27;) &amp;amp;&amp;amp; [&#x27;elim&#x27;, &#x27;2xelim&#x27;].includes(options.playoffFormat) ? options.playoffFormat : null;
+
+        /**
+         * If there is a third place consolation match in the second stage of the tournament.
+         * @type {Boolean}
+         * @default false
+         */
+        this.thirdPlaceMatch &#x3D; options.hasOwnProperty(&#x27;thirdPlaceMatch&#x27;) &amp;amp;&amp;amp; options.thirdPlaceMatch ? true : false;
+
+        /**
+         * Maximum number of players allowed to register for the tournament (minimum 4).
+         * If null, there is no maximum.
+         * @type {?Number}
+         * @default null
+         */
+        this.maxPlayers &#x3D; options.hasOwnProperty(&#x27;maxPlayers&#x27;) &amp;amp;&amp;amp; Number.isInteger(options.maxPlayers) &amp;amp;&amp;amp; options.maxPlayers &gt;&#x3D; 4 ? options.maxPlayers : null;
+
+        /**
+         * Method to determine which players advance to the second stage of the tournament.
+         * @type {(&#x27;rank&#x27;|&#x27;points&#x27;)}
+         * @default &#x27;rank&#x27;
+         */
+        this.cutType &#x3D; options.hasOwnProperty(&#x27;cutType&#x27;) &amp;amp;&amp;amp; options.cutType &#x3D;&#x3D;&#x3D; &#x27;points&#x27; ? &#x27;points&#x27; : &#x27;rank&#x27;;
+
+        /**
+         * Breakpoint for determining how many players advance to the second stage of the tournament.
+         * If 0, it will override the playoff format to null.
+         * If -1, all players will advance.
+         * @type {Number}
+         * @default 0
+         */
+        this.cutLimit &#x3D; options.hasOwnProperty(&#x27;cutLimit&#x27;) &amp;amp;&amp;amp; Number.isInteger(options.cutLimit) &amp;amp;&amp;amp; options.cutLimit &gt;&#x3D; -1 ? options.cutLimit : 0;
+        if (this.cutLimit &#x3D;&#x3D;&#x3D; 0) this.playoffFormat &#x3D; null;
+
+        /**
+         * The number of games in a match, where the winner must win a majority of games up to (n + 1) / 2.
+         * Must be an odd number.
+         * @type {Number}
+         * @default 1
+         */
+        this.bestOf &#x3D; options.hasOwnProperty(&#x27;bestOf&#x27;) &amp;amp;&amp;amp; Number.isInteger(options.bestOf) &amp;amp;&amp;amp; options.bestOf &gt;&#x3D; 1 &amp;amp;&amp;amp; options.bestOf % 2 &#x3D;&#x3D;&#x3D; 1 ? options.bestOf : 1;
+
+        /**
+         * The value of a win.
+         * Must be a positive integer.
+         * @type {Number}
+         * @default 1
+         */
+        this.winValue &#x3D; options.hasOwnProperty(&#x27;winValue&#x27;) &amp;amp;&amp;amp; Number.isInteger(options.winValue) &amp;amp;&amp;amp; options.winValue &gt; 0 ? options.winValue : 1;
+
+        /**
+         * The value of a draw/tie.
+         * Must be 0 or greater.
+         * @type {Number}
+         * @default 0.5
+         */
+        this.drawValue &#x3D; options.hasOwnProperty(&#x27;drawValue&#x27;) &amp;amp;&amp;amp; typeof options.drawValue &#x3D;&#x3D;&#x3D; &#x27;number&#x27; &amp;amp;&amp;amp; options.drawValue &gt;&#x3D; 0 ? options.drawValue : 0.5;
+
+        /**
+         * The value of a loss.
+         * Must be an integer.
+         * @type {Number}
+         * @default 0
+         */
+        this.lossValue &#x3D; options.hasOwnProperty(&#x27;lossValue&#x27;) &amp;amp;&amp;amp; Number.isInteger(options.lossValue) ? options.lossValue : 0;
+
+        /**
+         * Array of tiebreakers to use in round-robin and swiss formats, in order of precedence.
+         * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, baumbach, cumulative, versus, magic-tcg, pokemon-tcg.
+         * Defaults for swiss are solkoff and cumulative.
+         * Defaults for round-robin are sonneborn-berger and versus.
+         * @type {String[]}
+         * @default null
+         */
+        const tiebreakerOptions &#x3D; [&#x27;buchholz-cut1&#x27;, &#x27;solkoff&#x27;, &#x27;median-buchholz&#x27;, &#x27;sonneborn-berger&#x27;, &#x27;baumbach&#x27;, &#x27;cumulative&#x27;, &#x27;versus&#x27;, &#x27;magic-tcg&#x27;, &#x27;pokemon-tcg&#x27;];
+        this.tiebreakers &#x3D; tiebreakers;
+        if (this.tiebreakers &#x3D;&#x3D;&#x3D; null) {
+            if (this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;swiss&#x27;) this.tiebreakers &#x3D; [&#x27;solkoff&#x27;, &#x27;cumulative&#x27;];
+            else if (this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;robin&#x27; || this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;2xrobin&#x27;) this.tiebreakers &#x3D; [&#x27;sonneborn-berger&#x27;, &#x27;versus&#x27;];
+        } else {
+            if (this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;swiss&#x27; || this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;robin&#x27; || this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;2xrobin&#x27;) {
+                const filtered &#x3D; this.tiebreakers.filter(t &#x3D;&gt; tiebreakerOptions.includes(t));
+                if (filtered &#x3D;&#x3D;&#x3D; []) {
+                    if (this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;swiss&#x27;) this.tiebreakers &#x3D; [&#x27;solkoff&#x27;, &#x27;cumulative&#x27;];
+                    else if (this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;robin&#x27; || this.mainFormat &#x3D;&#x3D;&#x3D; &#x27;2xrobin&#x27;) this.tiebreakers &#x3D; [&#x27;sonneborn-berger&#x27;, &#x27;versus&#x27;];
+                } else this.tiebreakers &#x3D; filtered;
+            }
+        }
+
+        /**
+         * Creation date and time of the tournament.
+         * @type {Date}
+         */
+        this.startTime &#x3D; new Date(Date.now());
+
+        /**
+         * Array of all players in the tournament.
+         * @type {Player[]}
+         */
+        this.players &#x3D; [];
+
+        /**
+         * Array of all pairings in the tournament.
+         * @type {Pairings[]}
+         */
+        this.rounds &#x3D; [];
+
+        /**
+         * Current round number (0 if the tournament has not started, -1 if the tournament is finished).
+         * @type {Number}
+         */
+        this.currentRound &#x3D; 0;
+    }
+
+    /**
+     * Create a new player and add them to the tournament.
+     * @param {String} alias The name of the new player.
+     * @param {String} id The ID of the new player. If null, one will be randomly generated.
+     * @param {Number} seed The seed value of the player. Mandatory if seededPlayers is true.
+     * @returns {Boolean} If the player was created and added.
+     */
+    addPlayer(alias, id, seed &#x3D; null) {
+        if (this.players.length &#x3D;&#x3D;&#x3D; this.maxPlayers) return false;
+        if (typeof alias !&#x3D;&#x3D; &#x27;string&#x27; || alias.length &#x3D;&#x3D;&#x3D; 0) return false;
+        let playerID;
+        if (id &#x3D;&#x3D;&#x3D; null) {
+            playerID &#x3D; Util.randomString(8);
+            while (this.players.findIndex(p &#x3D;&gt; p.id &#x3D;&#x3D;&#x3D; playerID) &gt; -1) {
+                playerID &#x3D; Util.randomString(16);
+            }
+        } else {
+            if (this.players.findIndex(p &#x3D;&gt; p.id &#x3D;&#x3D;&#x3D; id) &gt; -1) return false;
+            else playerID &#x3D; id;
+        }
+        if (seed &#x3D;&#x3D;&#x3D; null &amp;amp;&amp;amp; this.seededPlayers) return false;
+        this.players.push(new Player(alias, playerID, seed));
+        return true;
+    }
+
+    /**
+     * Remove a player from the tournament.
+     * If the tournament hasn&#x27;t started, they are removed entirely.
+     * If the tournament has started, they are dropped and marked inactive.
+     * @param {String} id The ID of the player.
+     * @returns {Boolean} If the player was removed or dropped.
+     */
+    removePlayer(id) {
+        const playerIndex &#x3D; this.players.findIndex(p &#x3D;&gt; p.id &#x3D;&#x3D;&#x3D; id);
+        if (playerIndex &gt; -1) {
+            if (this.currentRound &#x3D;&#x3D;&#x3D; 0) {
+                this.players.splice(playerIndex, 1);
+                return true;
+            } else {
+                const player &#x3D; this.players.find(p &#x3D;&gt; p.id &#x3D;&#x3D;&#x3D; id);
+                if (!player.active) return false;
+                else {
+                    player.active &#x3D; false;
+                    player.dropped &#x3D; this.currentRound;
+                    return true;
+                }
+            }
+        } else return false;
+    }
+
+    // start event
+
+    // next round
+
+    // report results
+
+    // get standings - tiebreakers in lib
+}
+
+module.exports &#x3D; Tournament;
+</code></pre>
+          </article>
+        </div>
+      </div>
+      <nav id="jsdoc-toc-nav" role="navigation"></nav>
+    </div>
+  </div>
+  <footer id="jsdoc-footer" class="jsdoc-footer">
+    <div id="jsdoc-footer-container">
+      <p>
+        Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.6 on December 21, 2020.
+      </p>
+    </div>
+  </footer>
+  <script src="scripts/jquery.min.js"></script>
+  <script src="scripts/tree.jquery.js"></script>
+  <script src="scripts/prettify.js"></script>
+  <script src="scripts/jsdoc-toc.js"></script>
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/scrollanchor.js"></script>
+</body>
+
+</html>

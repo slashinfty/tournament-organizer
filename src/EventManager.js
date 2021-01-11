@@ -29,7 +29,7 @@ class EventManager {
                 thisid = Utilities.randomString(16);
             } while (this.tournaments.findIndex(i => i.eventID === thisid) > -1);
         } else {
-            thisid = null;
+            thisid = id;
             while (this.tournaments.findIndex(i => i.eventID === thisid) > -1) {
                 thisid = Utilities.randomString(16);
             }
