@@ -108,15 +108,24 @@ class Match {
     }
 
     /**
-     * Assign a bye to player one.
+     * Assign a bye to a player.
+     * @param {1|2} player Which player in the match gets a bye.
      * @param {Number} wv The value of a win.
      */
-    assignBye(wv) {
-        this.playerOne.gamePoints += this.playerOneWins * wv;
-        this.playerOne.games += this.playerOneWins;
-        this.playerOne.matchPoints += wv;
-        this.playerOne.matches++;
-        this.playerOne.byes++;
+    assignBye(player, wv) {
+        if (player === 1) {
+            this.playerOne.gamePoints += this.playerOneWins * wv;
+            this.playerOne.games += this.playerOneWins;
+            this.playerOne.matchPoints += wv;
+            this.playerOne.matches++;
+            this.playerOne.byes++;
+        } else {
+            this.playerTwo.gamePoints += this.playerTwoWins * wv;
+            this.playerTwo.games += this.playerTwoWins;
+            this.playerTwo.matchPoints += wv;
+            this.playerTwo.matches++;
+            this.playerTwo.byes++;
+        }
     }
 }
 

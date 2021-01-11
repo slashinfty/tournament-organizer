@@ -176,52 +176,6 @@ class Tournament {
     }
 
     /**
-     * Storing results of a match.
-     * @param {Match} match The match being reported.
-     * @param {Number} playerOneWins Number of wins for player one.
-     * @param {Number} playerTwoWins Number of wins for player two.
-     * @param {Number} [draws=0] Number of draws.
-     */
-    result(match, playerOneWins, playerTwoWins, draws = 0) {
-        match.playerOneWins = playerOneWins;
-        if (match.playerTwo === null) {
-            match.assignBye(this.winValue);
-            return;
-        }
-        match.playerTwoWins = playerTwoWins;
-        match.draws = draws;
-        //if match.active === false, edit past result
-        match.active = false;
-        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
-        if (match.winnerPath !== null) {
-            if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-            else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-            if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
-        }
-        if (match.loserPath !== null) {
-            if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-            else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-            if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
-        }
-        if (match.loserPath === null && this.format.includes('elim')) {
-            if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
-            else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
-        }
-        if (this.format === 'swiss') {
-            const active = this.activeMatches();
-            if (active.length === 0) { // check to see if moving to playoffs
-                this.currentRound++;
-                if (this.dutch) this.rounds.push(Algorithms.dutch(this.players, this.currentRound, this.winValue * this.currentRound));
-                else if (this.format === 'swiss') this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound, this.seededPlayers));
-                // else if round robin
-                const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
-                if (bye !== undefined) this.result(bye, this.bestOf, 0);
-            }
-        }
-        // If Swiss or round-robin, compute tiebreakers
-    }
-
-    /**
      * Get the current standings of the tournament.
      * @param {Boolean} [active=true] Filtering only active players.
      * @return {Player[]}
@@ -322,6 +276,7 @@ class Swiss extends Tournament {
          */
         this.currentRound = 0;
     }
+    
     /**
      * Starts the tournament.
      */
@@ -332,6 +287,35 @@ class Swiss extends Tournament {
         else this.rounds.push(Algorithms.swiss(this.players, this.currentRound, 0, this.seededPlayers));
         const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
         if (bye !== undefined) this.result(bye, this.bestOf, 0);
+    }
+
+    /**
+     * Storing results of a match.
+     * @param {Match} match The match being reported.
+     * @param {Number} playerOneWins Number of wins for player one.
+     * @param {Number} playerTwoWins Number of wins for player two.
+     * @param {Number} [draws=0] Number of draws.
+     */
+    result(match, playerOneWins, playerTwoWins, draws = 0) {
+        match.playerOneWins = playerOneWins;
+        if (match.playerTwo === null) {
+            match.assignBye(1, this.winValue);
+            return;
+        }
+        match.playerTwoWins = playerTwoWins;
+        match.draws = draws;
+        //if match.active === false, edit past result
+        match.active = false;
+        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
+        const active = this.activeMatches();
+        if (active.length === 0) { // check to see if moving to playoffs
+            this.currentRound++;
+            if (this.dutch) this.rounds.push(Algorithms.dutch(this.players, this.currentRound, this.winValue * this.currentRound));
+            else if (this.format === 'swiss') this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound, this.seededPlayers));
+            const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
+            if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
+        }
+        //tiebreakers
     }
 }
 
@@ -431,6 +415,7 @@ class RoundRobin extends Tournament {
          */
         this.currentRound = 0;
     }
+
     /**
      * Starts the tournament.
      */
@@ -460,8 +445,46 @@ class RoundRobin extends Tournament {
                     j++;
                 }
             }
-            // start with this.groups
+            this.rounds = Algorithms.robin(this.groups, true, this.doubleRR);
         } else this.rounds = Algorithms.robin(this.players, false, this.doubleRR);
+        this.currentRound++;
+        const byes = this.rounds.find(r => r.round === this.currentRound).matches.filter(m => m.playerOne === null || m.playerTwo === null);
+        byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
+    }
+
+    /**
+     * Storing results of a match.
+     * @param {Match} match The match being reported.
+     * @param {Number} playerOneWins Number of wins for player one.
+     * @param {Number} playerTwoWins Number of wins for player two.
+     * @param {Number} [draws=0] Number of draws.
+     */
+    result(match, playerOneWins, playerTwoWins, draws = 0) {
+        if (match.playerOne === null) {
+            match.assignBye(2, this.winValue);
+            return;
+        }
+        match.playerOneWins = playerOneWins;
+        if (match.playerTwo === null) {
+            match.assignBye(1, this.winValue);
+            return;
+        }
+        match.playerTwoWins = playerTwoWins;
+        match.draws = draws;
+        //if match.active === false, edit past result
+        match.active = false;
+        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
+        const active = this.activeMatches();
+        if (active.length === 0) { // check to see if moving to playoffs
+            this.currentRound++;
+            const nextRound = this.rounds.find(p => p.round === this.currentRound);
+            nextRound.matches.forEach(m => {
+                if (m.playerOne !== null && m.playerTwo !== null) m.active === true;
+            });
+            const byes = nextRound.matches.filter(m => m.playerOne === null || m.playerTwo === null);
+            byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
+        }
+        //tiebreakers
     }
 }
 
@@ -492,6 +515,7 @@ class Elimination extends Tournament {
          */
         this.doubleElim = options.hasOwnProperty('doubleElim') && typeof options.doubleElim === 'boolean' ? options.doubleElim : false;
     }
+
     /**
      * Starts the tournament.
      */
@@ -500,6 +524,35 @@ class Elimination extends Tournament {
         if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
         else Utilities.shuffle(this.players);
         this.rounds = this.doubleElim ? Algorithms.doubleElim(this.players) : Algorithms.elim(this.players, this.thirdPlaceMatch);
+    }
+
+    /**
+     * Storing results of a match.
+     * @param {Match} match The match being reported.
+     * @param {Number} playerOneWins Number of wins for player one.
+     * @param {Number} playerTwoWins Number of wins for player two.
+     * @param {Number} [draws=0] Number of draws.
+     */
+    result(match, playerOneWins, playerTwoWins, draws = 0) {
+        match.playerOneWins = playerOneWins;
+        match.playerTwoWins = playerTwoWins;
+        match.draws = draws;
+        match.active = false;
+        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
+        if (match.winnerPath !== null) {
+            if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
+            else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
+            if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
+        }
+        if (match.loserPath !== null) {
+            if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
+            else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
+            if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
+        }
+        if (match.loserPath === null) {
+            if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
+            else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
+        }
     }
 }
 
