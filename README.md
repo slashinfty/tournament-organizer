@@ -34,7 +34,46 @@ npm install tournament-organizer
 ```
 
 ## Basic Usage
-TODO
+```js
+const TO = require('tournament-organizer');
+
+// Create an event manager
+const manager = new TO.EventManager();
+
+// Create a tournament
+// First parameter can be set to a custom ID
+// More options are available to set
+const tourney = manager.createTournament(null, {
+    name: 'My Example Tournament',
+    format: 'swiss',
+    playoffs: 'elim',
+    cutLimit: 8,
+    bestOf: 3,
+    winValue: 3,
+    drawValue: 1,
+    tiebreakers: ['magic-tcg']
+});
+
+// Add players
+tourney.addPlayer('Liam S');
+tourney.addPlayer('Emma P.');
+tourney.addPlayer('Noah B.');
+// Can include custom IDs
+tourney.addPlayer('Sophia R.', 'Aj3W2mZ');
+// As many as desired
+
+// Start the tournament
+tourney.startEvent();
+
+// Get all active matches
+const active = tourney.activeMatches();
+
+// Record a result
+tourney.result(active[0], 2, 1);
+
+// Get standings
+tourney.standings();
+```
 
 ## Implementations
 TODO
