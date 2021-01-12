@@ -64,6 +64,12 @@ class Player {
         this.opponents = [];
 
         /**
+         * Array of results. Options are w (win), l (loss), and d (draw).
+         * @type {String[]}
+         */
+        this.results = [];
+
+        /**
          * Color preference for chess tournaments.
          * Add 1 for white (player one) and subtract 1 for black (player two).
          * @type {Number}
@@ -94,7 +100,6 @@ class Player {
             gameWinPct: 0,
             oppGameWinPct: 0,
             oppOppMatchWinPct: 0,
-            oppMatchPoints: [],
             solkoff: 0,
             cutOne: 0,
             median: 0,

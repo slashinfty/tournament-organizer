@@ -99,8 +99,22 @@ class Match {
         this.playerTwo.gamePoints += this.playerTwoWins * wv + this.draws * dv;
         this.playerOne.games += this.playerOneWins + this.playerTwoWins + this.draws;
         this.playerTwo.games += this.playerOneWins + this.playerTwoWins + this.draws;
-        this.playerOne.matchPoints += this.playerOneWins > this.playerTwoWins ? wv : this.playerOneWins < this.playerTwoWins ? lv : dv;
-        this.playerTwo.matchPoints += this.playerTwoWins > this.playerOneWins ? wv : this.playerTwoWins < this.playerOneWins ? lv : dv;
+        if (this.playerOneWins > this.playerTwoWins) {
+            this.playerOne.matchPoints += wv;
+            this.playerOne.results.push('w');
+            this.playerTwo.matchPoints += lv;
+            this.playerTwo.results.push('l');
+        } else if (this.playerOneWins < this.playerTwoWins) {
+            this.playerOne.matchPoints += lv;
+            this.playerOne.results.push('l');
+            this.playerTwo.matchPoints += wv;
+            this.playerTwo.results.push('w');
+        } else {
+            this.playerOne.matchPoints += dv;
+            this.playerOne.results.push('d');
+            this.playerTwo.matchPoints += dv;
+            this.playerTwo.results.push('d');
+        }
         this.playerOne.matches++;
         this.playerTwo.matches++;
         this.playerOne.opponents.push(this.playerTwo);
