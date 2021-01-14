@@ -122,6 +122,37 @@ class Match {
     }
 
     /**
+     * Clearing previous results of a match for player values.
+     * @param {Number} wv The value of a win. 
+     * @param {Number} lv The value of a loss.
+     * @param {Number} dv The value of a draw.
+     */
+    resetResults(wv, lv, dv) {
+        this.playerOne.gamePoints -= this.playerOneWins * wv + this.draws * dv;
+        this.playerTwo.gamePoints -= this.playerTwoWins * wv + this.draws * dv;
+        this.playerOne.games -= this.playerOneWins + this.playerTwoWins + this.draws;
+        this.playerTwo.games -= this.playerOneWins + this.playerTwoWins + this.draws;
+        if (this.playerOneWins > this.playerTwoWins) {
+            this.playerOne.matchPoints -= wv;
+            this.playerTwo.matchPoints -= lv;
+        } else if (this.playerOneWins < this.playerTwoWins) {
+            this.playerOne.matchPoints -= lv;
+            this.playerTwo.matchPoints -= wv;
+        } else {
+            this.playerOne.matchPoints -= dv;
+            this.playerTwo.matchPoints -= dv;
+        }
+        this.playerOne.matches--;
+        this.playerTwo.matches--;
+        const i = this.playerOne.opponents.find(o => o.id === this.playerTwo.id);
+        this.playerOne.opponents.splice(i, 1);
+        this.playerOne.results.splice(i, 1);
+        const j = this.playerTwo.opponents.find(o => o.id === this.playerOne.id);
+        this.playerTwo.opponents.splice(j, 1);
+        this.playerTwo.results.splice(j, 1);
+    }
+
+    /**
      * Assign a bye to a player.
      * @param {1|2} player Which player in the match gets a bye.
      * @param {Number} wv The value of a win.

@@ -17,7 +17,6 @@ For Swiss, Dutch, and round-robin tournaments, the following tiebreakers systems
 * Solkoff (Buchholz)
 * Median-Buchholz
 * Sonneborn-Berger (Neustadtl)
-* Baumbach (Most Wins)
 * Cumulative (and Cumulative Opponent's)
 * Versus
 * Magic TCG
@@ -35,14 +34,16 @@ npm install tournament-organizer
 
 ## Basic Usage
 ```js
-const TO = require('tournament-organizer');
+const TournamentOrganizer = require('tournament-organizer');
 
 // Create an event manager
-const manager = new TO.EventManager();
+
+const manager = new TournamentOrganizer.EventManager();
 
 // Create a tournament
 // First parameter can be set to a custom ID
 // More options are available to set
+
 const tourney = manager.createTournament(null, {
     name: 'My Example Tournament',
     format: 'swiss',
@@ -55,31 +56,35 @@ const tourney = manager.createTournament(null, {
 });
 
 // Add players
+
 tourney.addPlayer('Liam S');
 tourney.addPlayer('Emma P.');
 tourney.addPlayer('Noah B.');
-// Can include custom IDs
-tourney.addPlayer('Sophia R.', 'Aj3W2mZ');
+tourney.addPlayer('Sophia R.');
 // As many as desired
 
 // Start the tournament
+
 tourney.startEvent();
 
 // Get all active matches
+
 const active = tourney.activeMatches();
 
 // Record a result
+
 tourney.result(active[0], 2, 1);
 
 // Get standings
-tourney.standings();
+
+const standings = tourney.standings();
 ```
 
 ## Implementations
 TODO
 
 ## Contributing
-Please only submit an issue if you encounter a bug or have a feature suggestion.
+Please submit an issue if you encounter a bug or have a feature suggestion.
 
 If you are interested, please feel free to fork and clone the repository (on main branch), then submit a pull request.
 

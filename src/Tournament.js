@@ -151,6 +151,18 @@ class Tournament {
                 if (!player.active) return false;
                 else {
                     player.active = false;
+                    if (this.format.includes('elim')) {
+                        const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
+                        m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
+                    } else if (this.format === 'robin') {
+                        const now = this.activeMatches(this.currentRound).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
+                        if (now !== undefined && now.active) now.playerOne.id === player.id ? this.result(now, 0, 2) : this.result(now, 2, 0);
+                        for (let i = this.currentRound + 1; i < this.rounds.length; i++) {
+                            const curr = this.rounds.find(r => r.round === i).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
+                            if (curr.playerOne.id === player.id) curr.playerOne = null;
+                            else curr.playerTwo = null;
+                        }
+                    }
                     return true;
                 }
             }
@@ -181,13 +193,17 @@ class Tournament {
      * @return {Player[]}
      */
     standings(active = true) {
+        this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
         let thesePlayers = active ? this.players.filter(p => p.active) : [...this.players];
         thesePlayers.sort((a, b) => {
             for (let i = 0; i < this.tiebreakers.length; i++) {
-                if (Tiebreakers.sorting[prop].equal(a, b)) {
-                    if (i = this.tiebreakers.length - 1) return Math.random() * 2 - 1;
+                const prop = this.tiebreakers[i].replace('-', '');
+                const eqCheck = Tiebreakers[prop].equal(a, b);
+                if (eqCheck === true) {
+                    if (i === this.tiebreakers.length - 1) return Math.random() * 2 - 1;
                     else continue;
-                } else return Tiebreakers.sorting[prop].diff(a, b);
+                } else if (typeof eqCheck === 'number') return Tiebreakers[prop].diff(a, b, eqCheck);
+                else return Tiebreakers[prop].diff(a, b);
             }
         });
         return thesePlayers;
@@ -247,10 +263,10 @@ class Swiss extends Tournament {
         this.cutLimit = options.hasOwnProperty('cutLimit') && Number.isInteger(options.cutLimit) && options.cutLimit >= -1 ? options.cutLimit : 0;
         if (this.cutLimit === 0) this.playoffs = null;
 
-        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'baumbach', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
+        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
         /**
          * Array of tiebreakers to use, in order of precedence.
-         * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, baumbach, cumulative, versus, magic-tcg, pokemon-tcg.
+         * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, cumulative, versus, magic-tcg, pokemon-tcg.
          * Defaults for Swiss and Dutch are solkoff and cumulative.
          * @type {String[]}
          * @default null
@@ -315,7 +331,7 @@ class Swiss extends Tournament {
             const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
             if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
         }
-        //tiebreakers
+        this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
     }
 }
 
@@ -379,10 +395,10 @@ class RoundRobin extends Tournament {
          */
         this.cutEachGroup = options.hasOwnProperty('cutEachGroup') && typeof options.cutEachGroup === 'boolean' ? options.cutEachGroup : false;
 
-        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'baumbach', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
+        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
         /**
          * Array of tiebreakers to use, in order of precedence.
-         * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, baumbach, cumulative, versus, magic-tcg, pokemon-tcg.
+         * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, cumulative, versus, magic-tcg, pokemon-tcg.
          * Defaults for round-robin are sonneborn-berger and versus.
          * @type {String[]}
          * @default null
@@ -460,6 +476,12 @@ class RoundRobin extends Tournament {
      * @param {Number} [draws=0] Number of draws.
      */
     result(match, playerOneWins, playerTwoWins, draws = 0) {
+        if (!match.active) {
+            match.resetResults(this.winValue, this.lossValue, this.drawValue);
+            match.playerOneWins = 0;
+            match.playerTwoWins = 0;
+            match.draws = 0;
+        }
         if (match.playerOne === null) {
             match.assignBye(2, this.winValue);
             return;
@@ -471,7 +493,6 @@ class RoundRobin extends Tournament {
         }
         match.playerTwoWins = playerTwoWins;
         match.draws = draws;
-        //if match.active === false, edit past result
         match.active = false;
         match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
         const active = this.activeMatches();
@@ -484,7 +505,7 @@ class RoundRobin extends Tournament {
             const byes = nextRound.matches.filter(m => m.playerOne === null || m.playerTwo === null);
             byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
         }
-        //tiebreakers
+        this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
     }
 }
 
