@@ -58,14 +58,8 @@ class Player {
         this.byes = 0;
 
         /**
-         * Array of players played against.
-         * @type {Player[]}
-         */
-        this.opponents = [];
-
-        /**
          * Array of results. Options are w (win), l (loss), and d (draw).
-         * @type {String[]}
+         * @type {Object[]}
          */
         this.results = [];
 

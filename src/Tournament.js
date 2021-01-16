@@ -2,7 +2,6 @@
 
 const Match = require("./Match");
 const Player = require("./Player");
-const Pairings = require("./Pairings");
 const Utilities = require("../lib/Utilities");
 const Algorithms = require("../lib/Algorithms");
 const Tiebreakers = require("../lib/Tiebreakers");
@@ -95,11 +94,11 @@ class Tournament {
         this.players = [];
 
         /**
-         * Array of all pairings in the tournament.
-         * @type {Pairings[]}
+         * Array of all matches in the tournament.
+         * @type {Match[]}
          * @default []
          */
-        this.rounds = [];
+        this.matches = [];
 
         /**
          * If the tournament is active.
@@ -121,10 +120,9 @@ class Tournament {
         if (typeof alias !== 'string' || alias.length === 0) return false;
         let playerID;
         if (id === null) {
-            playerID = Utilities.randomString(8);
-            while (this.players.findIndex(p => p.id === playerID) > -1) {
-                playerID = Utilities.randomString(16);
-            }
+            do {
+                playerID = Utilities.randomString(8);
+            } while (this.players.findIndex(p => p.id === playerID) > -1);
         } else {
             if (this.players.findIndex(p => p.id === id) > -1) return false;
             else playerID = id;
@@ -176,15 +174,7 @@ class Tournament {
      * @return {Match[]}
      */
     activeMatches(round = null) {
-        let a = [];
-        if (round !== null) a = this.rounds.find(p => p.round === round).matches.filter(m => m.active);
-        else {
-            this.rounds.forEach(p => {
-                const m = p.matches.filter(m => m.active);
-                a = a.concat(m);
-            });
-        }
-        return a;
+        return round === null ? this.matches.filter(m => m.active) : this.matches.filter(r => r.round === round).filter(m => m.active);
     }
 
     /**
@@ -299,9 +289,9 @@ class Swiss extends Tournament {
     startEvent() {
         if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
         this.currentRound++;
-        if (this.dutch) this.rounds.push(Algorithms.dutch(this.players, this.currentRound, 0));
-        else this.rounds.push(Algorithms.swiss(this.players, this.currentRound, 0, this.seededPlayers));
-        const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
+        if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players, this.currentRound, 0));
+        else this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, 0, this.seededPlayers));
+        const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
         if (bye !== undefined) this.result(bye, this.bestOf, 0);
     }
 
@@ -313,6 +303,12 @@ class Swiss extends Tournament {
      * @param {Number} [draws=0] Number of draws.
      */
     result(match, playerOneWins, playerTwoWins, draws = 0) {
+        if (!match.active && match.playerOne !== null && match.playerTwo !== null) {
+            match.resetResults(this.winValue, this.lossValue, this.drawValue);
+            match.playerOneWins = 0;
+            match.playerTwoWins = 0;
+            match.draws = 0;
+        }
         match.playerOneWins = playerOneWins;
         if (match.playerTwo === null) {
             match.assignBye(1, this.winValue);
@@ -320,7 +316,6 @@ class Swiss extends Tournament {
         }
         match.playerTwoWins = playerTwoWins;
         match.draws = draws;
-        //if match.active === false, edit past result
         match.active = false;
         match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
         const active = this.activeMatches();
@@ -461,10 +456,10 @@ class RoundRobin extends Tournament {
                     j++;
                 }
             }
-            this.rounds = Algorithms.robin(this.groups, true, this.doubleRR);
-        } else this.rounds = Algorithms.robin(this.players, false, this.doubleRR);
+            this.matches = Algorithms.robin(this.groups, true, this.doubleRR);
+        } else this.matches = Algorithms.robin(this.players, false, this.doubleRR);
         this.currentRound++;
-        const byes = this.rounds.find(r => r.round === this.currentRound).matches.filter(m => m.playerOne === null || m.playerTwo === null);
+        const byes = this.matches.filter(r => r.round === this.currentRound && (m => m.playerOne === null || m.playerTwo === null));
         byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
     }
 
@@ -476,7 +471,7 @@ class RoundRobin extends Tournament {
      * @param {Number} [draws=0] Number of draws.
      */
     result(match, playerOneWins, playerTwoWins, draws = 0) {
-        if (!match.active) {
+        if (!match.active && match.playerOne !== null && match.playerTwo !== null) {
             match.resetResults(this.winValue, this.lossValue, this.drawValue);
             match.playerOneWins = 0;
             match.playerTwoWins = 0;
@@ -498,11 +493,11 @@ class RoundRobin extends Tournament {
         const active = this.activeMatches();
         if (active.length === 0) { // check to see if moving to playoffs
             this.currentRound++;
-            const nextRound = this.rounds.find(p => p.round === this.currentRound);
-            nextRound.matches.forEach(m => {
+            const nextRound = this.matches.filter(p => p.round === this.currentRound);
+            nextRound.forEach(m => {
                 if (m.playerOne !== null && m.playerTwo !== null) m.active === true;
             });
-            const byes = nextRound.matches.filter(m => m.playerOne === null || m.playerTwo === null);
+            const byes = nextRound.filter(m => m.playerOne === null || m.playerTwo === null);
             byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
         }
         this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
@@ -544,7 +539,7 @@ class Elimination extends Tournament {
         this.active = true;
         if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
         else Utilities.shuffle(this.players);
-        this.rounds = this.doubleElim ? Algorithms.doubleElim(this.players) : Algorithms.elim(this.players, this.thirdPlaceMatch);
+        this.doubleElim ? Algorithms.doubleElim(this.matches, this.players) : Algorithms.elim(this.matches, this.players, this.thirdPlaceMatch);
     }
 
     /**

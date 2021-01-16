@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Elimination.html">Elimination</a></li><li><a href="EventManager.html">EventManager</a></li><li><a href="Match.html">Match</a></li><li><a href="Pairings.html">Pairings</a></li><li><a href="Player.html">Player</a></li><li><a href="RoundRobin.html">RoundRobin</a></li><li><a href="Swiss.html">Swiss</a></li><li><a href="Tournament.html">Tournament</a></li>
+					<li><a href="Elimination.html">Elimination</a></li><li><a href="EventManager.html">EventManager</a></li><li><a href="Match.html">Match</a></li><li><a href="Player.html">Player</a></li><li><a href="RoundRobin.html">RoundRobin</a></li><li><a href="Swiss.html">Swiss</a></li><li><a href="Tournament.html">Tournament</a></li>
 				</ul>
 			</li>
 			
@@ -152,6 +152,182 @@
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id=".blankMatches"><span class="type-signature">&lt;static> </span>blankMatches(array, count, round)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Creates blank matches.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>array</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array of matches.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Number of matches to create.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>round</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Round number.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
             
 <hr>
 <dt>
@@ -303,7 +479,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".doubleElim"><span class="type-signature">&lt;static> </span>doubleElim(players)</h4>
+    <h4 class="name" id=".doubleElim"><span class="type-signature">&lt;static> </span>doubleElim(matches, players)</h4>
     
     
 </dt>
@@ -342,6 +518,30 @@
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>matches</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The matches for the tournament.</p></td>
+        </tr>
+
     
 
         <tr>
@@ -423,26 +623,6 @@
     
 
     
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array.&lt;<a href="Pairings.html">Pairings</a>></span>
-
-
-
-    </dd>
-</dl>
-
-
-        
 
     
 </dd>
@@ -451,7 +631,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".dutch"><span class="type-signature">&lt;static> </span>dutch(players, round, maxPoints)</h4>
+    <h4 class="name" id=".dutch"><span class="type-signature">&lt;static> </span>dutch(matches, players, round, maxPoints)</h4>
     
     
 </dt>
@@ -490,6 +670,30 @@
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>matches</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The matches for the tournament.</p></td>
+        </tr>
+
     
 
         <tr>
@@ -630,7 +834,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Pairings.html">Pairings</a></span>
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
 
 
 
@@ -647,7 +851,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".elim"><span class="type-signature">&lt;static> </span>elim(players, thirdPlace)</h4>
+    <h4 class="name" id=".elim"><span class="type-signature">&lt;static> </span>elim(matches, players, thirdPlace)</h4>
     
     
 </dt>
@@ -686,6 +890,30 @@
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>matches</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The matches for the tournament.</p></td>
+        </tr>
+
     
 
         <tr>
@@ -791,26 +1019,6 @@
     
 
     
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array.&lt;<a href="Pairings.html">Pairings</a>></span>
-
-
-
-    </dd>
-</dl>
-
-
-        
 
     
 </dd>
@@ -1348,7 +1556,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array.&lt;<a href="Pairings.html">Pairings</a>></span>
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
 
 
 
@@ -1365,7 +1573,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".swiss"><span class="type-signature">&lt;static> </span>swiss(players, round, maxPoints, sort)</h4>
+    <h4 class="name" id=".swiss"><span class="type-signature">&lt;static> </span>swiss(matches, players, round, maxPoints, sort)</h4>
     
     
 </dt>
@@ -1404,6 +1612,30 @@
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>matches</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The matches for the tournament.</p></td>
+        </tr>
+
     
 
         <tr>
@@ -1568,7 +1800,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Pairings.html">Pairings</a></span>
+<span class="param-type">Array.&lt;<a href="Match.html">Match</a>></span>
 
 
 
@@ -1635,7 +1867,7 @@
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a>
 	
-		on 2021-01-11T23:51:28-05:00
+		on 2021-01-16T17:39:14-05:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

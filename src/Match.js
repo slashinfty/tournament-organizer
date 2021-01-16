@@ -4,11 +4,18 @@
 class Match {
     /**
      * Create a new match.
+     * @param {String} id The unique ID for the match.
      * @param {Number} round The round number for the match.
      * @param {Number} matchNumber The match number.
      * @param {?Player[]} players Array of players for the match.
      */
-    constructor(round, matchNumber, players = null) {
+    constructor(id, round, matchNumber, players = null) {
+        /**
+         * Unique ID for the match.
+         * @type {String}
+         */
+        this.id = id;
+        
         /**
          * Round number for the match.
          * @type {Number}
@@ -99,26 +106,28 @@ class Match {
         this.playerTwo.gamePoints += this.playerTwoWins * wv + this.draws * dv;
         this.playerOne.games += this.playerOneWins + this.playerTwoWins + this.draws;
         this.playerTwo.games += this.playerOneWins + this.playerTwoWins + this.draws;
+        let playerOneResult = {match: this.id, opponent: this.playerTwo};
+        let playerTwoResult = {match: this.id, opponent: this.playerOne};
         if (this.playerOneWins > this.playerTwoWins) {
             this.playerOne.matchPoints += wv;
-            this.playerOne.results.push('w');
+            playerOneResult.result = 'w';
             this.playerTwo.matchPoints += lv;
-            this.playerTwo.results.push('l');
+            playerTwoResult.result = 'l';
         } else if (this.playerOneWins < this.playerTwoWins) {
             this.playerOne.matchPoints += lv;
-            this.playerOne.results.push('l');
+            playerOneResult.result = 'l';
             this.playerTwo.matchPoints += wv;
-            this.playerTwo.results.push('w');
+            playerTwoResult.result = 'w';
         } else {
             this.playerOne.matchPoints += dv;
-            this.playerOne.results.push('d');
+            playerOneResult.result = 'd';
             this.playerTwo.matchPoints += dv;
-            this.playerTwo.results.push('d');
+            playerTwoResult.result = 'd';
         }
         this.playerOne.matches++;
         this.playerTwo.matches++;
-        this.playerOne.opponents.push(this.playerTwo);
-        this.playerTwo.opponents.push(this.playerOne);
+        this.playerOne.results.push(playerOneResult);
+        this.playerTwo.results.push(playerTwoResult);
     }
 
     /**
@@ -144,12 +153,8 @@ class Match {
         }
         this.playerOne.matches--;
         this.playerTwo.matches--;
-        const i = this.playerOne.opponents.find(o => o.id === this.playerTwo.id);
-        this.playerOne.opponents.splice(i, 1);
-        this.playerOne.results.splice(i, 1);
-        const j = this.playerTwo.opponents.find(o => o.id === this.playerOne.id);
-        this.playerTwo.opponents.splice(j, 1);
-        this.playerTwo.results.splice(j, 1);
+        this.playerOne.results.splice(this.playerOne.results.findIndex(a => a.match === this.id), 1);
+        this.playerTwo.results.splice(this.playerTwo.results.findIndex(a => a.match === this.id), 1);
     }
 
     /**
