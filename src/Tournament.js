@@ -49,6 +49,14 @@ class Tournament {
         this.format = options.hasOwnProperty('format') && ['elim', 'robin', 'swiss'].includes(options.format) ? options.format : 'elim';
 
         /**
+         * If there is a third place consolation match.
+         * Only used if single elimination is the format (or playoffs format).
+         * @type {Boolean}
+         * @default false
+         */
+        this.thirdPlaceMatch = (options.format === 'elim' || options.playoffs === 'elim') && options.hasOwnProperty('thirdPlaceMatch') && options.thirdPlaceMatch ? true : false;
+
+        /**
          * Maximum number of players allowed to register for the tournament (minimum 4).
          * If null, there is no maximum.
          * @type {?Number}
@@ -319,12 +327,22 @@ class Swiss extends Tournament {
         match.active = false;
         match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
         const active = this.activeMatches();
-        if (active.length === 0) { // check to see if moving to playoffs
-            this.currentRound++;
-            if (this.dutch) this.rounds.push(Algorithms.dutch(this.players, this.currentRound, this.winValue * this.currentRound));
-            else if (this.format === 'swiss') this.rounds.push(Algorithms.swiss(this.players, this.currentRound, this.winValue * this.currentRound, this.seededPlayers));
-            const bye = this.rounds.find(r => r.round === this.currentRound).matches.find(m => m.playerTwo === null);
-            if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
+        if (active.length === 0) {
+            if (this.currentRound === this.numberOfRounds && this.playoffs !== null) {
+                if (this.cutType === 'rank' && this.cutLimit > 0) {
+                    const rankedPlayers = this.standings();
+                    for (let i = this.cutLimit; i < rankedPlayers.length; i++) rankedPlayers[i].active = false;
+                } else if (this.cutType === 'points' && this.cutLimit > 0) this.players.filter(p => p.matchPoints < this.cutLimit).forEach(p => p.active = false);
+                this.currentRound++;
+                if (this.playoffs === 'elim') Algorithms.elim(this.matches, this.players.filter(p => p.active), this.thirdPlaceMatch, this.currentRound);
+                else Algorithms.doubleElim(this.matches, this.players.filter(p => p.active), this.currentRound);
+            } else {
+                this.currentRound++;
+                if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players, this.currentRound, this.winValue * this.currentRound));
+                else this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, this.winValue * this.currentRound, this.seededPlayers));
+                const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
+                if (bye !== undefined) this.result(bye, this.bestOf, 0);
+            }
         }
         this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
     }
@@ -491,14 +509,24 @@ class RoundRobin extends Tournament {
         match.active = false;
         match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
         const active = this.activeMatches();
-        if (active.length === 0) { // check to see if moving to playoffs
-            this.currentRound++;
-            const nextRound = this.matches.filter(p => p.round === this.currentRound);
-            nextRound.forEach(m => {
-                if (m.playerOne !== null && m.playerTwo !== null) m.active === true;
-            });
-            const byes = nextRound.filter(m => m.playerOne === null || m.playerTwo === null);
-            byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
+        if (active.length === 0) {
+            if (this.currentRound === this.matches.reduce((x, y) => Math.max(x, y.round), 0) && this.playoffs !== null) {
+                if (this.cutType === 'rank' && this.cutLimit > 0) {
+                    const rankedPlayers = this.standings();
+                    for (let i = this.cutLimit; i < rankedPlayers.length; i++) rankedPlayers[i].active = false;
+                } else if (this.cutType === 'points' && this.cutLimit > 0) this.players.filter(p => p.matchPoints < this.cutLimit).forEach(p => p.active = false);
+                this.currentRound++;
+                if (this.playoffs === 'elim') Algorithms.elim(this.matches, this.players.filter(p => p.active), this.thirdPlaceMatch, this.currentRound);
+                else Algorithms.doubleElim(this.matches, this.players.filter(p => p.active), this.currentRound);
+            } else {
+                this.currentRound++;
+                const nextRound = this.matches.filter(p => p.round === this.currentRound);
+                nextRound.forEach(m => {
+                    if (m.playerOne !== null && m.playerTwo !== null) m.active === true;
+                });
+                const byes = nextRound.filter(m => m.playerOne === null || m.playerTwo === null);
+                byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
+            }
         }
         this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
     }
@@ -516,13 +544,6 @@ class Elimination extends Tournament {
      */
     constructor(id, options = {}) {
         super(id, options);
-    
-        /**
-         * If there is a third place consolation match.
-         * @type {Boolean}
-         * @default false
-         */
-        this.thirdPlaceMatch = options.format === 'elim' && options.hasOwnProperty('thirdPlaceMatch') && options.thirdPlaceMatch ? true : false;
         
         /**
          * If the format is double elimination.
