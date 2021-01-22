@@ -58,7 +58,7 @@ class Player {
         this.byes = 0;
 
         /**
-         * Array of results. Options are w (win), l (loss), and d (draw).
+         * Array of results. Objects include match ID, opponent, and result ('w', 'l', or 'd').
          * @type {Object[]}
          */
         this.results = [];
