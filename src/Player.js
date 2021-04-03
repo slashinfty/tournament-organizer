@@ -52,6 +52,12 @@ class Player {
         this.games = 0;
 
         /**
+         * Number of initial byes assigned.
+         * @type {Number}
+         */
+        this.initialByes = 0;
+
+        /**
          * Number of byes assigned.
          * @type {Number}
          */
