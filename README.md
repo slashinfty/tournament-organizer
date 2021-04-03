@@ -25,6 +25,13 @@ For Swiss, Dutch, and round-robin tournaments, the following tiebreakers systems
     * Opponent's match win percentage
     * Opponent's opponent's match win percentage
 
+### A Couple Details
+For double elimination, the method in which players move to the loser's bracket follows the same four alternating orders as explained [here](https://blog.smash.gg/changes-in-the-world-of-brackets-695ecb777a4c).
+
+For round-robin (and double round-robin), players are paired via [Berger Tables](https://en.wikipedia.org/wiki/Round-robin_tournament#Berger_tables).
+
+For Swiss and Dutch, the pairing algorithms are created to be fast and efficient, but not perfect. Both formats guarantee that players can not play each other multiple times. The Dutch algorithm ensures players can not have a color preference of +/- 3 or play as the same color 3 times in a row (under the assumption that Dutch tournaments are chess tournaments).
+
 ## Installation
 ```shell
 npm install tournament-organizer
