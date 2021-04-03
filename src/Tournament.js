@@ -159,7 +159,14 @@ class Tournament {
                     player.active = false;
                     if (this.format.includes('elim') || this.currentRound > this.numberOfRounds) {
                         const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                        if (m !== undefined) m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
+                        if (m !== undefined) {
+                            if (this.doubleElim) {
+                                m.playerOne.id === player.id ? this.result(m, 0, 2, 0, false) : this.result(m, 2, 0, 0, false);
+                                m.loserPath.playerTwo = undefined;
+                                if (m.loserPath.playerOne !== null) this.result(m.loserPath, 2, 0);
+                            }
+                            else m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
+                        }
                     } else if (this.format === 'robin') {
                         const now = this.activeMatches(this.currentRound).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
                         if (now !== undefined && now.active) now.playerOne.id === player.id ? this.result(now, 0, 2) : this.result(now, 2, 0);
@@ -649,25 +656,33 @@ class Elimination extends Tournament {
      * @param {Number} playerOneWins Number of wins for player one.
      * @param {Number} playerTwoWins Number of wins for player two.
      * @param {Number} [draws=0] Number of draws.
+     * @param {Boolean} [dropdown=true] Whether or not to drop the player into loser's bracket in double elimination.
      */
-    result(match, playerOneWins, playerTwoWins, draws = 0) {
+    result(match, playerOneWins, playerTwoWins, draws = 0, dropdown = true) {
         if (!this.active) return;
-        match.playerOneWins = playerOneWins;
-        match.playerTwoWins = playerTwoWins;
-        match.draws = draws;
-        match.active = false;
-        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
+        if (match.playerTwo === undefined) match.assignBye(1, this.winValue);
+        else {
+            match.playerOneWins = playerOneWins;
+            match.playerTwoWins = playerTwoWins;
+            match.draws = draws;
+            match.active = false;
+            match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
+        }
         if (match.winnerPath !== null) {
             if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
             else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
             if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
         }
-        if (match.loserPath !== null) {
+        if (match.loserPath !== null && dropdown) {
             if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
             else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
+            if (match.loserPath.playerTwo === undefined) {
+                this.result(match.loserPath, 2, 0);
+                return;
+            }
             if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
         }
-        if (match.loserPath === null) {
+        if (match.loserPath === null && match.playerTwo !== undefined) {
             if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
             else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
         }
