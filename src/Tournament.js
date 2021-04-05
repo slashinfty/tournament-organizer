@@ -317,9 +317,10 @@ class Swiss extends Tournament {
      * @param {Number} playerOneWins Number of wins for player one.
      * @param {Number} playerTwoWins Number of wins for player two.
      * @param {Number} [draws=0] Number of draws.
+     * @returns {?Match[]} Array of new matches, or null if result failed.
      */
     result(match, playerOneWins, playerTwoWins, draws = 0) {
-        if (!this.active) return;
+        if (!this.active) return null;
         if (!match.active && match.playerOne !== null && match.playerTwo !== null) {
             match.resetResults(this.winValue, this.lossValue, this.drawValue);
             match.playerOneWins = 0;
@@ -329,7 +330,7 @@ class Swiss extends Tournament {
         match.playerOneWins = playerOneWins;
         if (match.playerTwo === null) {
             match.assignBye(1, this.winValue);
-            return;
+            return null;
         }
         match.playerTwoWins = playerTwoWins;
         match.draws = draws;
@@ -354,6 +355,7 @@ class Swiss extends Tournament {
             active = this.activeMatches();
             this.currentRound = active.length === 0 ? -1 : active.reduce((x, y) => Math.min(x, y.round), active[0].round);
         }
+        let newMatches = [];
         if (active.length === 0) {
             if (this.currentRound === this.numberOfRounds) {
                 if (this.playoffs !== null) {
@@ -364,6 +366,7 @@ class Swiss extends Tournament {
                     } else if (this.cutType === 'points' && this.cutLimit > 0) this.players.filter(p => p.matchPoints < this.cutLimit).forEach(p => this.removePlayer(p));
                     if (this.playoffs === 'elim') Algorithms.elim(this.matches, this.players.filter(p => p.active), this.thirdPlaceMatch, this.currentRound);
                     else Algorithms.doubleElim(this.matches, this.players.filter(p => p.active), this.currentRound);
+                    newMatches = this.activeMatches();
                 } else this.active = false;
             } else if (this.currentRound > this.numberOfRounds || this.currentRound === -1) this.active = false;
             else {
@@ -372,9 +375,11 @@ class Swiss extends Tournament {
                 else this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, this.winValue * (this.currentRound - 1), this.seededPlayers));
                 const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
                 if (bye !== undefined) this.result(bye, this.bestOf, 0);
+                newMatches = this.activeMatches();
             }
         }
         this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
+        return newMatches;
     }
 }
 
@@ -520,9 +525,10 @@ class RoundRobin extends Tournament {
      * @param {Number} playerOneWins Number of wins for player one.
      * @param {Number} playerTwoWins Number of wins for player two.
      * @param {Number} [draws=0] Number of draws.
+     * @returns {?Match[]} Array of new matches, or null if result failed.
      */
     result(match, playerOneWins, playerTwoWins, draws = 0) {
-        if (!this.active) return;
+        if (!this.active) return null;
         if (!match.active && match.playerOne !== null && match.playerTwo !== null) {
             match.resetResults(this.winValue, this.lossValue, this.drawValue);
             match.playerOneWins = 0;
@@ -531,28 +537,35 @@ class RoundRobin extends Tournament {
         }
         if (match.playerOne === null) {
             match.assignBye(2, this.winValue);
-            return;
+            return null;
         }
         match.playerOneWins = playerOneWins;
         if (match.playerTwo === null) {
             match.assignBye(1, this.winValue);
-            return;
+            return null;
         }
         match.playerTwoWins = playerTwoWins;
         match.draws = draws;
         match.active = false;
         match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
         let active = this.activeMatches();
+        let newMatches = [];
         if (this.currentRound > this.numberOfRounds) {
             if (match.winnerPath !== null) {
                 if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
                 else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
+                if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) {
+                    match.winnerPath.active = true;
+                    newMatches.push(match.winnerPath);
+                }
             }
             if (match.loserPath !== null) {
                 if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
                 else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
+                if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) {
+                    match.loserPath.active = true;
+                    newMatches.push(match.loserPath);
+                }
             }
             if (match.loserPath === null) {
                 if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
@@ -578,6 +591,7 @@ class RoundRobin extends Tournament {
                     } else if (this.cutType === 'points' && this.cutLimit > 0) this.players.filter(p => p.matchPoints < this.cutLimit).forEach(p => this.removePlayer(p));
                     if (this.playoffs === 'elim') Algorithms.elim(this.matches, this.standings(), this.thirdPlaceMatch, this.currentRound);
                     else Algorithms.doubleElim(this.matches, this.standings(), this.currentRound);
+                    newMatches = this.activeMatches();
                 } else this.active = false;
             } else if (this.currentRound > this.numberOfRounds || this.currentRound === -1) this.active = false;
             else {
@@ -588,9 +602,11 @@ class RoundRobin extends Tournament {
                 });
                 const byes = nextRound.filter(m => m.playerOne === null || m.playerTwo === null);
                 byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
+                newMatches = this.activeMatches();
             }
         }
         this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
+        return newMatches;
     }
 
     /**
@@ -657,9 +673,10 @@ class Elimination extends Tournament {
      * @param {Number} playerTwoWins Number of wins for player two.
      * @param {Number} [draws=0] Number of draws.
      * @param {Boolean} [dropdown=true] Whether or not to drop the player into loser's bracket in double elimination.
+     * @returns {?Match[]} Array of new matches, or null if result failed.
      */
     result(match, playerOneWins, playerTwoWins, draws = 0, dropdown = true) {
-        if (!this.active) return;
+        if (!this.active) return null;
         if (match.playerTwo === undefined) match.assignBye(1, this.winValue);
         else {
             match.playerOneWins = playerOneWins;
@@ -668,25 +685,33 @@ class Elimination extends Tournament {
             match.active = false;
             match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
         }
+        let newMatches = [];
         if (match.winnerPath !== null) {
             if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
             else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-            if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
+            if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) {
+                match.winnerPath.active = true;
+                newMatches.push(match.winnerPath);
+            }
         }
         if (match.loserPath !== null && dropdown) {
             if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
             else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
             if (match.loserPath.playerTwo === undefined) {
-                this.result(match.loserPath, 2, 0);
-                return;
+                let matchesFromDrop = this.result(match.loserPath, 2, 0);
+                matchesFromDrop.forEach(m => newMatches.push(m));
             }
-            if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
+            if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null && match.loserPath.playerTwo !== undefined) {
+                match.loserPath.active = true;
+                newMatches.push(match.loserPath);
+            }
         }
         if (match.loserPath === null && match.playerTwo !== undefined) {
             if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
             else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
         }
         if (this.activeMatches().length === 0) this.active = false;
+        return newMatches;
     }
 }
 
