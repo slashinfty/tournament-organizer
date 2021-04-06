@@ -337,16 +337,23 @@ class Swiss extends Tournament {
         match.active = false;
         match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
         let active = this.activeMatches();
+        let newMatches = [];
         if (this.currentRound > this.numberOfRounds) {
             if (match.winnerPath !== null) {
                 if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
                 else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) match.winnerPath.active = true;
+                if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) {
+                    match.winnerPath.active = true;
+                    newMatches.push(match.winnerPath);
+                }
             }
             if (match.loserPath !== null) {
                 if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
                 else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) match.loserPath.active = true;
+                if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) {
+                    match.loserPath.active = true;
+                    newMatches.push(match.loserPath);
+                }
             }
             if (match.loserPath === null) {
                 if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
@@ -355,7 +362,6 @@ class Swiss extends Tournament {
             active = this.activeMatches();
             this.currentRound = active.length === 0 ? -1 : active.reduce((x, y) => Math.min(x, y.round), active[0].round);
         }
-        let newMatches = [];
         if (active.length === 0) {
             if (this.currentRound === this.numberOfRounds) {
                 if (this.playoffs !== null) {
