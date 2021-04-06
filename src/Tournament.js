@@ -145,7 +145,7 @@ class Tournament {
      * If the tournament hasn't started, they are removed entirely.
      * If the tournament has started, they are dropped and marked inactive.
      * @param {Player} player The player to be removed.
-     * @returns {Boolean} If the player was removed or dropped.
+     * @returns {?Match[]|Boolean} True, null, or array of new matches if player is removed, else false.
      */
     removePlayer(player) {
         const playerIndex = this.players.findIndex(p => p.id === player.id);
@@ -155,29 +155,31 @@ class Tournament {
                 return true;
             } else {
                 if (!player.active) return false;
-                else {
-                    player.active = false;
-                    if (this.format.includes('elim') || this.currentRound > this.numberOfRounds) {
-                        const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                        if (m !== undefined) {
-                            if (this.doubleElim) {
-                                m.playerOne.id === player.id ? this.result(m, 0, 2, 0, false) : this.result(m, 2, 0, 0, false);
-                                m.loserPath.playerTwo = undefined;
-                                if (m.loserPath.playerOne !== null) this.result(m.loserPath, 2, 0);
-                            }
-                            else m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
+                player.active = false;
+                let newMatches = null;
+                if (this.format.includes('elim') || this.currentRound > this.numberOfRounds) {
+                    const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
+                    if (m !== undefined) {
+                        if (this.doubleElim) {
+                            newMatches = m.playerOne.id === player.id ? this.result(m, 0, 2, 0, false) : this.result(m, 2, 0, 0, false);
+                            m.loserPath.playerTwo = undefined;
+                            if (m.loserPath.playerOne !== null) newMatches = newMatches.concat(this.result(m.loserPath, 2, 0));
                         }
-                    } else if (this.format === 'robin') {
-                        const now = this.activeMatches(this.currentRound).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                        if (now !== undefined && now.active) now.playerOne.id === player.id ? this.result(now, 0, 2) : this.result(now, 2, 0);
-                        for (let i = this.currentRound + 1; i < this.matches.reduce((x, y) => Math.max(x, y.round), 0); i++) {
-                            const curr = this.matches.filter(r => r.round === i).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                            if (curr.playerOne.id === player.id) curr.playerOne = null;
-                            else curr.playerTwo = null;
-                        }
+                        else newMatches = m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
                     }
-                    return true;
+                } else if (this.format === 'robin') {
+                    const now = this.activeMatches(this.currentRound).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
+                    if (now !== undefined && now.active) newMatches = now.playerOne.id === player.id ? this.result(now, 0, 2) : this.result(now, 2, 0);
+                    for (let i = this.currentRound + 1; i < this.matches.reduce((x, y) => Math.max(x, y.round), 0); i++) {
+                        const curr = this.matches.filter(r => r.round === i).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
+                        if (curr.playerOne.id === player.id) curr.playerOne = null;
+                        else curr.playerTwo = null;
+                    }
+                } else if (this.format === 'swiss') {
+                    const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
+                    if (m !== undefined && m.active) newMatches = m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
                 }
+                return newMatches;
             }
         } else return false;
     }
