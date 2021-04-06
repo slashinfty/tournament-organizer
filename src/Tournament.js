@@ -200,7 +200,7 @@ class Tournament {
      * @return {Player[]}
      */
     standings(active = true) {
-        this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
+        this.players.forEach(p => Tiebreakers.compute(p, this));
         let thesePlayers = active ? this.players.filter(p => p.active) : [...this.players];
         thesePlayers.sort((a, b) => {
             for (let i = 0; i < this.tiebreakers.length; i++) {
@@ -386,7 +386,7 @@ class Swiss extends Tournament {
                 newMatches = this.activeMatches();
             }
         }
-        this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
+        this.players.forEach(p => Tiebreakers.compute(p, this));
         return newMatches;
     }
 }
@@ -613,7 +613,7 @@ class RoundRobin extends Tournament {
                 newMatches = this.activeMatches();
             }
         }
-        this.players.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
+        this.players.forEach(p => Tiebreakers.compute(p, this));
         return newMatches;
     }
 
@@ -624,7 +624,7 @@ class RoundRobin extends Tournament {
      * @return {Player[]}
      */
     groupStandings(group, active = true) {
-        group.forEach(p => Tiebreakers.compute(p, this.winValue, this.lossValue, this.drawValue));
+        group.forEach(p => Tiebreakers.compute(p, this));
         let thesePlayers = active ? group.filter(p => p.active) : [...group];
         thesePlayers.sort((a, b) => {
             for (let i = 0; i < this.tiebreakers.length; i++) {

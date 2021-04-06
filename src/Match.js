@@ -106,8 +106,8 @@ class Match {
         this.playerTwo.gamePoints += this.playerTwoWins * wv + this.draws * dv;
         this.playerOne.games += this.playerOneWins + this.playerTwoWins + this.draws;
         this.playerTwo.games += this.playerOneWins + this.playerTwoWins + this.draws;
-        let playerOneResult = {match: this.id, opponent: this.playerTwo};
-        let playerTwoResult = {match: this.id, opponent: this.playerOne};
+        let playerOneResult = {match: this.id, opponent: this.playerTwo.id};
+        let playerTwoResult = {match: this.id, opponent: this.playerOne.id};
         if (this.playerOneWins > this.playerTwoWins) {
             this.playerOne.matchPoints += wv;
             playerOneResult.result = 'w';
