@@ -124,8 +124,7 @@ class Tournament {
      * @returns {Boolean} If the player was created and added.
      */
     addPlayer(alias, id = null, seed = null) {
-        if (this.players.length === this.maxPlayers) return false;
-        if (typeof alias !== 'string' || alias.length === 0) return false;
+        if (this.players.length === this.maxPlayers || this.active || typeof alias !== 'string' || alias.length === 0) return false;
         let playerID;
         if (id === null) {
             do {
@@ -182,6 +181,22 @@ class Tournament {
                 return newMatches;
             }
         } else return false;
+    }
+
+    /**
+     * Deletes the results from a match.
+     * If the player was dropped as a result (elimination format), they are made active again.
+     * @param {Match} match Match to have results undone.
+     */
+    undoResults(match) {
+        if(match.playerOne === null || match.playerTwo === null) return;
+        match.resetResults(this.winValue, this.lossValue, this.drawValue);
+        match.playerOneWins = 0;
+        match.playerTwoWins = 0;
+        match.draws = 0;
+        match.playerOne.active = true;
+        match.playerTwo.active = true;
+        match.active = true;
     }
 
     /**
@@ -304,6 +319,7 @@ class Swiss extends Tournament {
      * Starts the tournament.
      */
     startEvent() {
+        if (this.players.length < 2) return;
         this.active = true;
         if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
         this.currentRound++;
@@ -493,6 +509,7 @@ class RoundRobin extends Tournament {
      * Starts the tournament.
      */
     startEvent() {
+        if (this.players.length < 2) return;
         this.active = true;
         if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
         else Utilities.shuffle(this.players);
@@ -668,6 +685,7 @@ class Elimination extends Tournament {
      * Starts the tournament.
      */
     startEvent() {
+        if (this.players.length < 2) return;
         this.active = true;
         if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
         else Utilities.shuffle(this.players);
