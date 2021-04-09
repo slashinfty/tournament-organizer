@@ -107,6 +107,13 @@ class Player {
             cumulative: 0,
             oppCumulative: 0
         }
+
+        /**
+         * An object to store any additional information.
+         * @type {Object}
+         * @default {}
+         */
+         this.etc = {};
     }
 }
 

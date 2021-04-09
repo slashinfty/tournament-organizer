@@ -114,6 +114,13 @@ class Tournament {
          * @default false
          */
         this.active = false;
+
+        /**
+         * An object to store any additional information.
+         * @type {Object}
+         * @default {}
+         */
+        this.etc = {};
     }
 
     /**
