@@ -4,95 +4,100 @@
 class Match {
     /**
      * Create a new match.
-     * @param {String} id The unique ID for the match.
+     * @param {String|Object} id The unique ID for the match. If an object, it is a match being reclassed.
      * @param {Number} round The round number for the match.
      * @param {Number} matchNumber The match number.
      * @param {?Player[]} players Array of players for the match.
      */
     constructor(id, round, matchNumber, players = null) {
-        /**
-         * Unique ID for the match.
-         * @type {String}
-         */
-        this.id = id;
-        
-        /**
-         * Round number for the match.
-         * @type {Number}
-         */
-        this.round = round;
+        if (arguments.length === 1) {
+            Object.assign(this, arguments[0]);
+        } else {
 
-        /**
-         * Match number.
-         * @type {Number}
-         */
-        this.matchNumber = matchNumber;
+            /**
+             * Unique ID for the match.
+             * @type {String}
+             */
+            this.id = id;
+            
+            /**
+             * Round number for the match.
+             * @type {Number}
+             */
+            this.round = round;
 
-        /**
-         * Player number one in the match.
-         * If null, the player has not been determined.
-         * @type {?Player}
-         * @default null
-         */
-        this.playerOne = null;
+            /**
+             * Match number.
+             * @type {Number}
+             */
+            this.matchNumber = matchNumber;
 
-        /**
-         * Player number two in the match.
-         * If null, the player has not been determined.
-         * @type {?Player}
-         * @default null
-         */
-        this.playerTwo = null;
+            /**
+             * Player number one in the match.
+             * If null, the player has not been determined.
+             * @type {?Player}
+             * @default null
+             */
+            this.playerOne = null;
 
-        // Setting players if in the constructor.
-        if (players !== null && players.length === 2) {
-            this.playerOne = players[0];
-            this.playerTwo = players[1];
+            /**
+             * Player number two in the match.
+             * If null, the player has not been determined.
+             * @type {?Player}
+             * @default null
+             */
+            this.playerTwo = null;
+
+            // Setting players if in the constructor.
+            if (players !== null && players.length === 2) {
+                this.playerOne = players[0];
+                this.playerTwo = players[1];
+            }
+
+            /**
+             * The status of the match.
+             * @type {Boolean}
+             * @default false
+             */
+            this.active = false;
+
+            /**
+             * Number of wins for player one.
+             * @type {Number}
+             * @default 0
+             */
+            this.playerOneWins = 0;
+
+            /**
+             * Number of wins for player two.
+             * @type {Number}
+             * @default 0
+             */
+            this.playerTwoWins = 0;
+
+            /**
+             * Number of draws.
+             * @type {Number}
+             * @default 0
+             */
+            this.draws = 0;
+
+            /**
+             * Next match for the winner.
+             * Used in elimination formats.
+             * @type {?Match}
+             * @default null
+             */
+            this.winnerPath = null;
+
+            /**
+             * Next match for the loser.
+             * Used in elimination formats.
+             * @type {?Match}
+             * @default null
+             */
+            this.loserPath = null;
         }
-
-        /**
-         * The status of the match.
-         * @type {Boolean}
-         * @default false
-         */
-        this.active = false;
-
-        /**
-         * Number of wins for player one.
-         * @type {Number}
-         * @default 0
-         */
-        this.playerOneWins = 0;
-
-        /**
-         * Number of wins for player two.
-         * @type {Number}
-         * @default 0
-         */
-        this.playerTwoWins = 0;
-
-        /**
-         * Number of draws.
-         * @type {Number}
-         * @default 0
-         */
-        this.draws = 0;
-
-        /**
-         * Next match for the winner.
-         * Used in elimination formats.
-         * @type {?Match}
-         * @default null
-         */
-        this.winnerPath = null;
-
-        /**
-         * Next match for the loser.
-         * Used in elimination formats.
-         * @type {?Match}
-         * @default null
-         */
-        this.loserPath = null;
     }
 
     /**

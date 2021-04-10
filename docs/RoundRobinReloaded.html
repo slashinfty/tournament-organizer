@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Tournament Organizer Class: Swiss</title>
+	<title>Tournament Organizer Class: RoundRobinReloaded</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,16 +72,16 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Swiss</h1>
+	<h1 class="page-title">Class: RoundRobinReloaded</h1>
 <section>
 
 <header>
     
         <h2>
-        Swiss
+        RoundRobinReloaded
         </h2>
         
-            <div class="class-description"><p>Class representing a Swiss pairing tournament.</p></div>
+            <div class="class-description"><p>Class recreating a round-robin pairing tournament from an existing object.</p></div>
         
     
 </header>
@@ -93,129 +93,19 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="Swiss"><span class="type-signature"></span>new Swiss(id [, options])</h4>
+    <h4 class="name" id="RoundRobinReloaded"><span class="type-signature"></span>new RoundRobinReloaded()</h4>
     
     
 </dt>
 <dd>
 
     
-    <div class="description">
-        <p>Create a new Swiss pairing tournament.</p>
-    </div>
-    
 
     
 
     
 
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>String to be the event ID.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    {}
-                
-                </td>
-            
-
-            <td class="description last"><p>Options that can be defined for a tournament.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
     
 
     
@@ -283,7 +173,7 @@
 
 
     <ul>
-        <li><a href="Tournament.html">Tournament</a></li>
+        <li><a href="RoundRobin.html">RoundRobin</a></li>
     </ul>
 
 
@@ -350,7 +240,7 @@
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#active">Tournament#active</a>
+        <a href="RoundRobin.html#active">RoundRobin#active</a>
     </li></ul></dd>
     
 
@@ -429,7 +319,21 @@
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#bestOf">RoundRobin#bestOf</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#bestOf">RoundRobin#bestOf</a>
+    </li></ul></dd>
     
 
     
@@ -508,7 +412,21 @@
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#currentRound">RoundRobin#currentRound</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#currentRound">RoundRobin#currentRound</a>
+    </li></ul></dd>
     
 
     
@@ -530,6 +448,99 @@
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>0</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="cutEachGroup">
+    <h4 id="cutEachGroup"><span class="type-signature"></span>cutEachGroup<span class="type-signature"> :Boolean</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Whether to institute the cut limit for each group.<br>
+Only applies if cutType is rank.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Boolean</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#cutEachGroup">RoundRobin#cutEachGroup</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#cutEachGroup">RoundRobin#cutEachGroup</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>false</li>
 		</ul>
 	</dd>
 	
@@ -588,7 +599,21 @@ If -1, all players will advance.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#cutLimit">RoundRobin#cutLimit</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#cutLimit">RoundRobin#cutLimit</a>
+    </li></ul></dd>
     
 
     
@@ -669,7 +694,21 @@ If -1, all players will advance.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#cutType">RoundRobin#cutType</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#cutType">RoundRobin#cutType</a>
+    </li></ul></dd>
     
 
     
@@ -691,6 +730,98 @@ If -1, all players will advance.</p>
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>'rank'</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="doubleRR">
+    <h4 id="doubleRR"><span class="type-signature"></span>doubleRR<span class="type-signature"> :Boolean</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>If the format is double round-robin.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Boolean</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#doubleRR">RoundRobin#doubleRR</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#doubleRR">RoundRobin#doubleRR</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>false</li>
 		</ul>
 	</dd>
 	
@@ -761,7 +892,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#drawValue">Tournament#drawValue</a>
+        <a href="RoundRobin.html#drawValue">RoundRobin#drawValue</a>
     </li></ul></dd>
     
 
@@ -784,84 +915,6 @@ Must be 0 or greater.</p>
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>0.5</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="dutch">
-    <h4 id="dutch"><span class="type-signature"></span>dutch<span class="type-signature"> :Boolean</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>If the Dutch variant of Swiss pairings should be used.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Boolean</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>false</li>
 		</ul>
 	</dd>
 	
@@ -931,7 +984,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#etc">Tournament#etc</a>
+        <a href="RoundRobin.html#etc">RoundRobin#etc</a>
     </li></ul></dd>
     
 
@@ -1023,7 +1076,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#eventID">Tournament#eventID</a>
+        <a href="RoundRobin.html#eventID">RoundRobin#eventID</a>
     </li></ul></dd>
     
 
@@ -1114,7 +1167,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#format">Tournament#format</a>
+        <a href="RoundRobin.html#format">RoundRobin#format</a>
     </li></ul></dd>
     
 
@@ -1137,6 +1190,191 @@ Must be 0 or greater.</p>
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>'elim'</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="groupNumber">
+    <h4 id="groupNumber"><span class="type-signature">&lt;nullable> </span>groupNumber<span class="type-signature"> :Number</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Either the maximum size of each group, or the number of groups (minimum 2).<br>
+If null, there are no groups.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Number</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#groupNumber">RoundRobin#groupNumber</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#groupNumber">RoundRobin#groupNumber</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>null</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="groups">
+    <h4 id="groups"><span class="type-signature"></span>groups<span class="type-signature"> :Array.&lt;Array></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Array of groups of players.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Array.&lt;Array></span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#groups">RoundRobin#groups</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#groups">RoundRobin#groups</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>[]</li>
 		</ul>
 	</dd>
 	
@@ -1207,7 +1445,7 @@ Must be an integer.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#lossValue">Tournament#lossValue</a>
+        <a href="RoundRobin.html#lossValue">RoundRobin#lossValue</a>
     </li></ul></dd>
     
 
@@ -1299,7 +1537,7 @@ Must be an integer.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#matches">Tournament#matches</a>
+        <a href="RoundRobin.html#matches">RoundRobin#matches</a>
     </li></ul></dd>
     
 
@@ -1392,7 +1630,7 @@ If null, there is no maximum.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#maxPlayers">Tournament#maxPlayers</a>
+        <a href="RoundRobin.html#maxPlayers">RoundRobin#maxPlayers</a>
     </li></ul></dd>
     
 
@@ -1484,87 +1722,8 @@ If null, there is no maximum.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#name">Tournament#name</a>
+        <a href="RoundRobin.html#name">RoundRobin#name</a>
     </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>null</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="numberOfRounds">
-    <h4 id="numberOfRounds"><span class="type-signature">&lt;nullable> </span>numberOfRounds<span class="type-signature"> :Number</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Number of rounds for the first phase of the tournament.<br>
-If null, the value is determined by the number of players and the format.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Number</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
     
 
     
@@ -1655,7 +1814,7 @@ If null, the value is determined by the number of players and the format.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#players">Tournament#players</a>
+        <a href="RoundRobin.html#players">RoundRobin#players</a>
     </li></ul></dd>
     
 
@@ -1738,7 +1897,21 @@ If null, there is only one stage.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#playoffs">RoundRobin#playoffs</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#playoffs">RoundRobin#playoffs</a>
+    </li></ul></dd>
     
 
     
@@ -1829,7 +2002,7 @@ If null, there is only one stage.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#seededPlayers">Tournament#seededPlayers</a>
+        <a href="RoundRobin.html#seededPlayers">RoundRobin#seededPlayers</a>
     </li></ul></dd>
     
 
@@ -1924,7 +2097,7 @@ If null, there is only one stage.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#seedOrder">Tournament#seedOrder</a>
+        <a href="RoundRobin.html#seedOrder">RoundRobin#seedOrder</a>
     </li></ul></dd>
     
 
@@ -2016,7 +2189,7 @@ If null, there is only one stage.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#startTime">Tournament#startTime</a>
+        <a href="RoundRobin.html#startTime">RoundRobin#startTime</a>
     </li></ul></dd>
     
 
@@ -2102,7 +2275,7 @@ Only used if single elimination is the format (or playoffs format).</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#thirdPlaceMatch">Tournament#thirdPlaceMatch</a>
+        <a href="RoundRobin.html#thirdPlaceMatch">RoundRobin#thirdPlaceMatch</a>
     </li></ul></dd>
     
 
@@ -2157,7 +2330,7 @@ Only used if single elimination is the format (or playoffs format).</p>
     <div class="description">
         <p>Array of tiebreakers to use, in order of precedence.<br>
 Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, cumulative, versus, magic-tcg, pokemon-tcg.<br>
-Defaults for Swiss and Dutch are solkoff and cumulative.</p>
+Defaults for round-robin are sonneborn-berger and versus.</p>
     </div>
     
 
@@ -2183,7 +2356,21 @@ Defaults for Swiss and Dutch are solkoff and cumulative.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#tiebreakers">RoundRobin#tiebreakers</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#tiebreakers">RoundRobin#tiebreakers</a>
+    </li></ul></dd>
     
 
     
@@ -2275,7 +2462,7 @@ Must be a positive integer.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#winValue">Tournament#winValue</a>
+        <a href="RoundRobin.html#winValue">RoundRobin#winValue</a>
     </li></ul></dd>
     
 
@@ -2439,7 +2626,7 @@ If no round is specified, it returns all active matches for all rounds.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#activeMatches">Tournament#activeMatches</a>
+        <a href="RoundRobin.html#activeMatches">RoundRobin#activeMatches</a>
     </li></ul></dd>
     
 
@@ -2667,7 +2854,7 @@ If no round is specified, it returns all active matches for all rounds.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#addPlayer">Tournament#addPlayer</a>
+        <a href="RoundRobin.html#addPlayer">RoundRobin#addPlayer</a>
     </li></ul></dd>
     
 
@@ -2726,6 +2913,224 @@ If no round is specified, it returns all active matches for all rounds.</p>
     <dd>
         
 <span class="param-type">Boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="groupStandings"><span class="type-signature"></span>groupStandings(group [, active])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Get the current standings for a group of players in the tournament.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>group</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Player.html">Player</a>></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>A group of players.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>active</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last"><p>Filtering only active players.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#groupStandings">RoundRobin#groupStandings</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#groupStandings">RoundRobin#groupStandings</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="Player.html">Player</a>></span>
 
 
 
@@ -2835,7 +3240,7 @@ If the tournament has started, they are dropped and marked inactive.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#removePlayer">Tournament#removePlayer</a>
+        <a href="RoundRobin.html#removePlayer">RoundRobin#removePlayer</a>
     </li></ul></dd>
     
 
@@ -3119,7 +3524,21 @@ If the tournament has started, they are dropped and marked inactive.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#result">RoundRobin#result</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#result">RoundRobin#result</a>
+    </li></ul></dd>
     
 
     
@@ -3304,7 +3723,7 @@ If the tournament has started, they are dropped and marked inactive.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#standings">Tournament#standings</a>
+        <a href="RoundRobin.html#standings">RoundRobin#standings</a>
     </li></ul></dd>
     
 
@@ -3403,7 +3822,21 @@ If the tournament has started, they are dropped and marked inactive.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="RoundRobin.html#startEvent">RoundRobin#startEvent</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="RoundRobin.html#startEvent">RoundRobin#startEvent</a>
+    </li></ul></dd>
     
 
     
@@ -3545,7 +3978,7 @@ If the player was dropped as a result (elimination format), they are made active
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#undoResults">Tournament#undoResults</a>
+        <a href="RoundRobin.html#undoResults">RoundRobin#undoResults</a>
     </li></ul></dd>
     
 

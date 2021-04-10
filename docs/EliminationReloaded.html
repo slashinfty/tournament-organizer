@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Tournament Organizer Class: Swiss</title>
+	<title>Tournament Organizer Class: EliminationReloaded</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,16 +72,16 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Swiss</h1>
+	<h1 class="page-title">Class: EliminationReloaded</h1>
 <section>
 
 <header>
     
         <h2>
-        Swiss
+        EliminationReloaded
         </h2>
         
-            <div class="class-description"><p>Class representing a Swiss pairing tournament.</p></div>
+            <div class="class-description"><p>Class recreating an elimination tournament from an existing object.</p></div>
         
     
 </header>
@@ -93,129 +93,19 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="Swiss"><span class="type-signature"></span>new Swiss(id [, options])</h4>
+    <h4 class="name" id="EliminationReloaded"><span class="type-signature"></span>new EliminationReloaded()</h4>
     
     
 </dt>
 <dd>
 
     
-    <div class="description">
-        <p>Create a new Swiss pairing tournament.</p>
-    </div>
-    
 
     
 
     
 
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>String to be the event ID.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    {}
-                
-                </td>
-            
-
-            <td class="description last"><p>Options that can be defined for a tournament.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
     
 
     
@@ -283,7 +173,7 @@
 
 
     <ul>
-        <li><a href="Tournament.html">Tournament</a></li>
+        <li><a href="Elimination.html">Elimination</a></li>
     </ul>
 
 
@@ -350,7 +240,7 @@
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#active">Tournament#active</a>
+        <a href="Elimination.html#active">Elimination#active</a>
     </li></ul></dd>
     
 
@@ -395,15 +285,15 @@
         
             
 <hr>
-<dt class="name" id="bestOf">
-    <h4 id="bestOf"><span class="type-signature"></span>bestOf<span class="type-signature"> :Number</span></h4>
+<dt class="name" id="doubleElim">
+    <h4 id="doubleElim"><span class="type-signature"></span>doubleElim<span class="type-signature"> :Boolean</span></h4>
 
     
 </dt>
 <dd>
     
     <div class="description">
-        <p>Number of possible games for a match, where the winner must win the majority of games up to 1 + x/2 (used for byes).</p>
+        <p>If the format is double elimination.</p>
     </div>
     
 
@@ -412,7 +302,7 @@
         <ul>
             <li>
                 
-<span class="param-type">Number</span>
+<span class="param-type">Boolean</span>
 
 
 
@@ -429,86 +319,21 @@
 	
 
 	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
 		<ul class="dummy">
-			<li>1</li>
+			<li>
+				<a href="Elimination.html#doubleElim">Elimination#doubleElim</a>
+			</li>
 		</ul>
 	</dd>
 	
 
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
     
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="currentRound">
-    <h4 id="currentRound"><span class="type-signature"></span>currentRound<span class="type-signature"> :Number</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Current round number.<br>
-0 if the tournament has not started, -1 if the tournament is finished.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Number</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Elimination.html#doubleElim">Elimination#doubleElim</a>
+    </li></ul></dd>
     
 
     
@@ -529,168 +354,7 @@
 	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
 	<dd class="tag-default">
 		<ul class="dummy">
-			<li>0</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="cutLimit">
-    <h4 id="cutLimit"><span class="type-signature"></span>cutLimit<span class="type-signature"> :Number</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Breakpoint for determining how many players advance to the second stage of the tournament.<br>
-If 0, it will override the playoff format to null.<br>
-If -1, all players will advance.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Number</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>0</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="cutType">
-    <h4 id="cutType"><span class="type-signature"></span>cutType<span class="type-signature"> :'rank'|'points'</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Method to determine which players advance to the second stage of the tournament.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">'rank'</span>
-|
-
-<span class="param-type">'points'</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>'rank'</li>
+			<li>false</li>
 		</ul>
 	</dd>
 	
@@ -761,7 +425,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#drawValue">Tournament#drawValue</a>
+        <a href="Elimination.html#drawValue">Elimination#drawValue</a>
     </li></ul></dd>
     
 
@@ -784,84 +448,6 @@ Must be 0 or greater.</p>
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>0.5</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="dutch">
-    <h4 id="dutch"><span class="type-signature"></span>dutch<span class="type-signature"> :Boolean</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>If the Dutch variant of Swiss pairings should be used.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Boolean</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>false</li>
 		</ul>
 	</dd>
 	
@@ -931,7 +517,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#etc">Tournament#etc</a>
+        <a href="Elimination.html#etc">Elimination#etc</a>
     </li></ul></dd>
     
 
@@ -1023,7 +609,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#eventID">Tournament#eventID</a>
+        <a href="Elimination.html#eventID">Elimination#eventID</a>
     </li></ul></dd>
     
 
@@ -1114,7 +700,7 @@ Must be 0 or greater.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#format">Tournament#format</a>
+        <a href="Elimination.html#format">Elimination#format</a>
     </li></ul></dd>
     
 
@@ -1207,7 +793,7 @@ Must be an integer.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#lossValue">Tournament#lossValue</a>
+        <a href="Elimination.html#lossValue">Elimination#lossValue</a>
     </li></ul></dd>
     
 
@@ -1299,7 +885,7 @@ Must be an integer.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#matches">Tournament#matches</a>
+        <a href="Elimination.html#matches">Elimination#matches</a>
     </li></ul></dd>
     
 
@@ -1392,7 +978,7 @@ If null, there is no maximum.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#maxPlayers">Tournament#maxPlayers</a>
+        <a href="Elimination.html#maxPlayers">Elimination#maxPlayers</a>
     </li></ul></dd>
     
 
@@ -1484,87 +1070,8 @@ If null, there is no maximum.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#name">Tournament#name</a>
+        <a href="Elimination.html#name">Elimination#name</a>
     </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>null</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="numberOfRounds">
-    <h4 id="numberOfRounds"><span class="type-signature">&lt;nullable> </span>numberOfRounds<span class="type-signature"> :Number</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Number of rounds for the first phase of the tournament.<br>
-If null, the value is determined by the number of players and the format.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Number</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
     
 
     
@@ -1655,7 +1162,7 @@ If null, the value is determined by the number of players and the format.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#players">Tournament#players</a>
+        <a href="Elimination.html#players">Elimination#players</a>
     </li></ul></dd>
     
 
@@ -1678,88 +1185,6 @@ If null, the value is determined by the number of players and the format.</p>
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>[]</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="playoffs">
-    <h4 id="playoffs"><span class="type-signature">&lt;nullable> </span>playoffs<span class="type-signature"> :'elim'|'2xelim'</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Format for the second stage of the tournament.<br>
-If null, there is only one stage.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">'elim'</span>
-|
-
-<span class="param-type">'2xelim'</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>null</li>
 		</ul>
 	</dd>
 	
@@ -1829,7 +1254,7 @@ If null, there is only one stage.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#seededPlayers">Tournament#seededPlayers</a>
+        <a href="Elimination.html#seededPlayers">Elimination#seededPlayers</a>
     </li></ul></dd>
     
 
@@ -1924,7 +1349,7 @@ If null, there is only one stage.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#seedOrder">Tournament#seedOrder</a>
+        <a href="Elimination.html#seedOrder">Elimination#seedOrder</a>
     </li></ul></dd>
     
 
@@ -2016,7 +1441,7 @@ If null, there is only one stage.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#startTime">Tournament#startTime</a>
+        <a href="Elimination.html#startTime">Elimination#startTime</a>
     </li></ul></dd>
     
 
@@ -2102,7 +1527,7 @@ Only used if single elimination is the format (or playoffs format).</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#thirdPlaceMatch">Tournament#thirdPlaceMatch</a>
+        <a href="Elimination.html#thirdPlaceMatch">Elimination#thirdPlaceMatch</a>
     </li></ul></dd>
     
 
@@ -2125,86 +1550,6 @@ Only used if single elimination is the format (or playoffs format).</p>
 	<dd class="tag-default">
 		<ul class="dummy">
 			<li>false</li>
-		</ul>
-	</dd>
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id="tiebreakers">
-    <h4 id="tiebreakers"><span class="type-signature"></span>tiebreakers<span class="type-signature"> :Array.&lt;String></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Array of tiebreakers to use, in order of precedence.<br>
-Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, cumulative, versus, magic-tcg, pokemon-tcg.<br>
-Defaults for Swiss and Dutch are solkoff and cumulative.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array.&lt;String></span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-default method-doc-label method-doc-details-label">Default Value:</dt>
-	<dd class="tag-default">
-		<ul class="dummy">
-			<li>null</li>
 		</ul>
 	</dd>
 	
@@ -2275,7 +1620,7 @@ Must be a positive integer.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#winValue">Tournament#winValue</a>
+        <a href="Elimination.html#winValue">Elimination#winValue</a>
     </li></ul></dd>
     
 
@@ -2439,7 +1784,7 @@ If no round is specified, it returns all active matches for all rounds.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#activeMatches">Tournament#activeMatches</a>
+        <a href="Elimination.html#activeMatches">Elimination#activeMatches</a>
     </li></ul></dd>
     
 
@@ -2667,7 +2012,7 @@ If no round is specified, it returns all active matches for all rounds.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#addPlayer">Tournament#addPlayer</a>
+        <a href="Elimination.html#addPlayer">Elimination#addPlayer</a>
     </li></ul></dd>
     
 
@@ -2835,7 +2180,7 @@ If the tournament has started, they are dropped and marked inactive.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#removePlayer">Tournament#removePlayer</a>
+        <a href="Elimination.html#removePlayer">Elimination#removePlayer</a>
     </li></ul></dd>
     
 
@@ -2913,7 +2258,7 @@ If the tournament has started, they are dropped and marked inactive.</p>
             
 <hr>
 <dt>
-    <h4 class="name" id="result"><span class="type-signature"></span>result(match, playerOneWins, playerTwoWins [, draws])</h4>
+    <h4 class="name" id="result"><span class="type-signature"></span>result(match, playerOneWins, playerTwoWins [, draws] [, dropdown])</h4>
     
     
 </dt>
@@ -3105,6 +2450,46 @@ If the tournament has started, they are dropped and marked inactive.</p>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>dropdown</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not to drop the player into loser's bracket in double elimination.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -3119,7 +2504,21 @@ If the tournament has started, they are dropped and marked inactive.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Elimination.html#result">Elimination#result</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Elimination.html#result">Elimination#result</a>
+    </li></ul></dd>
     
 
     
@@ -3304,7 +2703,7 @@ If the tournament has started, they are dropped and marked inactive.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#standings">Tournament#standings</a>
+        <a href="Elimination.html#standings">Elimination#standings</a>
     </li></ul></dd>
     
 
@@ -3403,7 +2802,21 @@ If the tournament has started, they are dropped and marked inactive.</p>
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Elimination.html#startEvent">Elimination#startEvent</a>
+			</li>
+		</ul>
+	</dd>
+	
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Elimination.html#startEvent">Elimination#startEvent</a>
+    </li></ul></dd>
     
 
     
@@ -3545,7 +2958,7 @@ If the player was dropped as a result (elimination format), they are made active
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="Tournament.html#undoResults">Tournament#undoResults</a>
+        <a href="Elimination.html#undoResults">Elimination#undoResults</a>
     </li></ul></dd>
     
 

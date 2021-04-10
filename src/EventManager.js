@@ -42,6 +42,11 @@ class EventManager {
         return tournament;
     }
 
+    reloadTournament(tournament) {
+        const reloadedTournament = new Tournament.SwissReloaded(tournament);
+        return reloadedTournament;
+    }
+
     /**
      * Remove an existing tournament from the manager.
      * @param {Tournament} tournament The tournament to be removed.

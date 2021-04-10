@@ -415,6 +415,19 @@ class Swiss extends Tournament {
 }
 
 /** 
+ * Class recreating a Swiss pairing tournament from an existing object. 
+ * @extends Swiss
+ */
+ class SwissReloaded extends Swiss {
+    constructor(tournament) {
+        super(tournament.id);
+        Object.assign(this, tournament);
+        this.players = this.players.map(p => new Player(p));
+        this.matches = this.matches.map(m => new Match(m));
+    }
+ }
+
+/** 
  * Class representing a round-robin pairing tournament. 
  * @extends Tournament
  */
@@ -666,6 +679,19 @@ class RoundRobin extends Tournament {
 }
 
 /** 
+ * Class recreating a round-robin pairing tournament from an existing object. 
+ * @extends RoundRobin
+ */
+ class RoundRobinReloaded extends RoundRobin {
+    constructor(tournament) {
+        super(tournament.id);
+        Object.assign(this, tournament);
+        this.players = this.players.map(p => new Player(p));
+        this.matches = this.matches.map(m => new Match(m));
+    }
+ }
+
+/** 
  * Class representing an elimination tournament. 
  * @extends Tournament
  */
@@ -748,9 +774,25 @@ class Elimination extends Tournament {
     }
 }
 
+/** 
+ * Class recreating an elimination tournament from an existing object. 
+ * @extends Elimination
+ */
+ class EliminationReloaded extends Elimination {
+    constructor(tournament) {
+        super(tournament.id);
+        Object.assign(this, tournament);
+        this.players = this.players.map(p => new Player(p));
+        this.matches = this.matches.map(m => new Match(m));
+    }
+ }
+
 module.exports = {
     Tournament,
     Swiss,
+    SwissReloaded,
     RoundRobin,
-    Elimination
+    RoundRobinReloaded,
+    Elimination,
+    EliminationReloaded
 }
