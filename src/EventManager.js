@@ -43,7 +43,10 @@ class EventManager {
     }
 
     reloadTournament(tournament) {
-        const reloadedTournament = new Tournament.SwissReloaded(tournament);
+        let reloadedTournament;
+        if (tournament.format === 'swiss') reloadedTournament = new Tournament.SwissReloaded(tournament);
+        else if (tournament.format === 'robin') reloadedTournament = new Tournament.RoundRobinReloaded(tournament);
+        else reloadedTournament = new Tournament.EliminationReloaded(tournament);
         return reloadedTournament;
     }
 
