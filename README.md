@@ -86,7 +86,7 @@ const standings = tourney.standings();
 ```
 
 ## Implementations
-N/A
+* [Bracketeer](https://slashinfty.github.io/bracketeer) - A Discord bot that runs tournaments
 
 ## Contributing
 Please submit an issue if you encounter a bug or have a feature suggestion.
