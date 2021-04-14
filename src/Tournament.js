@@ -423,7 +423,13 @@ class Swiss extends Tournament {
         super(tournament.id);
         Object.assign(this, tournament);
         this.players = this.players.map(p => new Player(p));
-        this.matches = this.matches.map(m => new Match(m));
+        this.matches = this.matches.map(m => new Match(m))
+        this.matches.forEach(m => {
+            const p1 = this.players.find(p => m.playerOne.id === p.id);
+            if (p1 !== undefined) m.playerOne = p1;
+            const p2 = this.players.find(p => m.playerTwo.id === p.id);
+            if (p2 !== undefined) m.playerTwo = p2;
+        });
     }
  }
 
@@ -688,6 +694,12 @@ class RoundRobin extends Tournament {
         Object.assign(this, tournament);
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m));
+        this.matches.forEach(m => {
+            const p1 = this.players.find(p => m.playerOne.id === p.id);
+            if (p1 !== undefined) m.playerOne = p1;
+            const p2 = this.players.find(p => m.playerTwo.id === p.id);
+            if (p2 !== undefined) m.playerTwo = p2;
+        });
     }
  }
 
@@ -784,6 +796,12 @@ class Elimination extends Tournament {
         Object.assign(this, tournament);
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m));
+        this.matches.forEach(m => {
+            const p1 = this.players.find(p => m.playerOne.id === p.id);
+            if (p1 !== undefined) m.playerOne = p1;
+            const p2 = this.players.find(p => m.playerTwo.id === p.id);
+            if (p2 !== undefined) m.playerTwo = p2;
+        });
     }
  }
 
