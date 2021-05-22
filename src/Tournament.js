@@ -154,6 +154,7 @@ class Tournament {
      * @returns {?Match[]|Boolean} True, null, or array of new matches if player is removed, else false.
      */
     removePlayer(player) {
+        if (player.id === undefined) return false;
         const playerIndex = this.players.findIndex(p => p.id === player.id);
         if (playerIndex > -1) {
             if (!this.active) {
