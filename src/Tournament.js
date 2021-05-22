@@ -328,6 +328,7 @@ class Swiss extends Tournament {
     startEvent() {
         if (this.players.length < 2) return;
         this.active = true;
+        if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
         if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
         this.currentRound++;
         if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players, this.currentRound, 0));
