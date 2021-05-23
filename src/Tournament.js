@@ -337,7 +337,7 @@ class Swiss extends Tournament {
             this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, 0, seedPref));
         }
         const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
-        if (bye !== undefined) this.result(bye, this.bestOf, 0);
+        if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
     }
 
     /**
@@ -412,7 +412,7 @@ class Swiss extends Tournament {
                     this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, this.winValue * (this.currentRound - 1), seedPref));
                 }
                 const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
-                if (bye !== undefined) this.result(bye, this.bestOf, 0);
+                if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
                 newMatches = this.activeMatches();
             }
         }
