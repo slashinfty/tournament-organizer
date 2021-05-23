@@ -332,7 +332,10 @@ class Swiss extends Tournament {
         if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
         this.currentRound++;
         if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players, this.currentRound, 0));
-        else this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, 0, this.seededPlayers));
+        else {
+            const seedPref = this.seededPlayers ? this.seedOrder : null;
+            this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, 0, seedPref));
+        }
         const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
         if (bye !== undefined) this.result(bye, this.bestOf, 0);
     }
@@ -404,7 +407,10 @@ class Swiss extends Tournament {
             else {
                 this.currentRound++;
                 if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players, this.currentRound, this.winValue * (this.currentRound - 1)));
-                else this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, this.winValue * (this.currentRound - 1), this.seededPlayers));
+                else {
+                    const seedPref = this.seededPlayers ? this.seedOrder : null;
+                    this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, this.winValue * (this.currentRound - 1), seedPref));
+                }
                 const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
                 if (bye !== undefined) this.result(bye, this.bestOf, 0);
                 newMatches = this.activeMatches();
