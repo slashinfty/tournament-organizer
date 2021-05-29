@@ -406,10 +406,10 @@ class Swiss extends Tournament {
             } else if (this.currentRound > this.numberOfRounds || this.currentRound === -1) this.active = false;
             else {
                 this.currentRound++;
-                if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players, this.currentRound, this.winValue * (this.currentRound - 1)));
+                if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players.filter(p => p.active), this.currentRound, this.winValue * (this.currentRound - 1)));
                 else {
                     const seedPref = this.seededPlayers ? this.seedOrder : null;
-                    this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, this.winValue * (this.currentRound - 1), seedPref));
+                    this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players.filter(p => p.active), this.currentRound, this.winValue * (this.currentRound - 1), seedPref));
                 }
                 const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
                 if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
