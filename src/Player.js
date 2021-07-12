@@ -10,7 +10,9 @@ class Player {
      */
     constructor(alias, id, seed) {
         if (arguments.length === 1) {
-            Object.assign(this, arguments[0]);
+            const oldPlayer = arguments[0];
+            ['results', 'colors'].forEach(prop => oldPlayer[prop] = oldPlayer.hasOwnProperty(prop) ? oldPlayer[prop] : []);
+            Object.assign(this, oldPlayer);
         } else {
         
             /**

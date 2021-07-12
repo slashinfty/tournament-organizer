@@ -445,6 +445,7 @@ class Swiss extends Tournament {
  class SwissReloaded extends Swiss {
     constructor(tournament) {
         super(tournament.id);
+        ['players', 'matches'].forEach(prop => tournament[prop] = tournament.hasOwnProperty(prop) ? tournament[prop] : []);
         Object.assign(this, tournament);
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m))
@@ -732,6 +733,7 @@ class RoundRobin extends Tournament {
  class RoundRobinReloaded extends RoundRobin {
     constructor(tournament) {
         super(tournament.id);
+        ['players', 'matches', 'groups'].forEach(prop => tournament[prop] = tournament.hasOwnProperty(prop) ? tournament[prop] : []);
         Object.assign(this, tournament);
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m));

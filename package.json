@@ -1,6 +1,6 @@
 {
   "name": "tournament-organizer",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "description": "JavaScript library for running tournaments",
   "main": "./src/index",
   "scripts": {
