@@ -168,15 +168,15 @@ class Tournament {
                     const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
                     if (m !== undefined) {
                         if (this.doubleElim) {
-                            newMatches = m.playerOne.id === player.id ? this.result(m, 0, 2, 0, false) : this.result(m, 2, 0, 0, false);
+                            newMatches = m.playerOne.id === player.id ? this.result(m, 0, Math.ceil(this.bestOf / 2), 0, false) : this.result(m, Math.ceil(this.bestOf / 2), 0, 0, false);
                             m.loserPath.playerTwo = undefined;
-                            if (m.loserPath.playerOne !== null) newMatches = newMatches.concat(this.result(m.loserPath, 2, 0));
+                            if (m.loserPath.playerOne !== null) newMatches = newMatches.concat(this.result(m.loserPath, Math.ceil(this.bestOf / 2), 0));
                         }
-                        else newMatches = m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
+                        else newMatches = m.playerOne.id === player.id ? this.result(m, 0, Math.ceil(this.bestOf / 2)) : this.result(m, Math.ceil(this.bestOf / 2), 0);
                     }
                 } else if (this.format === 'robin') {
                     const now = this.activeMatches(this.currentRound).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                    if (now !== undefined && now.active) newMatches = now.playerOne.id === player.id ? this.result(now, 0, 2) : this.result(now, 2, 0);
+                    if (now !== undefined && now.active) newMatches = now.playerOne.id === player.id ? this.result(now, 0, Math.ceil(this.bestOf / 2)) : this.result(now, Math.ceil(this.bestOf / 2), 0);
                     for (let i = this.currentRound + 1; i < this.matches.reduce((x, y) => Math.max(x, y.round), 0); i++) {
                         const curr = this.matches.filter(r => r.round === i).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
                         if (curr.playerOne.id === player.id) curr.playerOne = null;
@@ -184,7 +184,7 @@ class Tournament {
                     }
                 } else if (this.format === 'swiss') {
                     const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                    if (m !== undefined && m.active) newMatches = m.playerOne.id === player.id ? this.result(m, 0, 2) : this.result(m, 2, 0);
+                    if (m !== undefined && m.active) newMatches = m.playerOne.id === player.id ? this.result(m, 0, Math.ceil(this.bestOf / 2)) : this.result(m, Math.ceil(this.bestOf / 2), 0);
                 }
                 return newMatches;
             }
