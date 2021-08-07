@@ -197,7 +197,7 @@ class Tournament {
      * @param {Match} match Match to have results undone.
      */
     undoResults(match) {
-        if(match.playerOne === null || match.playerTwo === null) return;
+        if (match.playerOne === null || match.playerTwo === null || match.active) return;
         match.resetResults(this.winValue, this.lossValue, this.drawValue);
         match.playerOneWins = 0;
         match.playerTwoWins = 0;
