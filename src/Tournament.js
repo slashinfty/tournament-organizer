@@ -450,10 +450,14 @@ class Swiss extends Tournament {
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m))
         this.matches.forEach(m => {
-            const p1 = this.players.find(p => m.playerOne.id === p.id);
-            if (p1 !== undefined) m.playerOne = p1;
-            const p2 = this.players.find(p => m.playerTwo.id === p.id);
-            if (p2 !== undefined) m.playerTwo = p2;
+            if (m.playerOne !== undefined) {
+                const p1 = this.players.find(p => m.playerOne.id === p.id);
+                if (p1 !== undefined) m.playerOne = p1;
+            }
+            if (m.playerTwo !== undefined) {
+                const p2 = this.players.find(p => m.playerTwo.id === p.id);
+                if (p2 !== undefined) m.playerTwo = p2;
+            }
         });
     }
  }
@@ -738,10 +742,14 @@ class RoundRobin extends Tournament {
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m));
         this.matches.forEach(m => {
-            const p1 = this.players.find(p => m.playerOne.id === p.id);
-            if (p1 !== undefined) m.playerOne = p1;
-            const p2 = this.players.find(p => m.playerTwo.id === p.id);
-            if (p2 !== undefined) m.playerTwo = p2;
+            if (m.playerOne !== undefined) {
+                const p1 = this.players.find(p => m.playerOne.id === p.id);
+                if (p1 !== undefined) m.playerOne = p1;
+            }
+            if (m.playerTwo !== undefined) {
+                const p2 = this.players.find(p => m.playerTwo.id === p.id);
+                if (p2 !== undefined) m.playerTwo = p2;
+            }
         });
     }
  }
@@ -840,10 +848,14 @@ class Elimination extends Tournament {
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m));
         this.matches.forEach(m => {
-            const p1 = this.players.find(p => m.playerOne.id === p.id);
-            if (p1 !== undefined) m.playerOne = p1;
-            const p2 = this.players.find(p => m.playerTwo.id === p.id);
-            if (p2 !== undefined) m.playerTwo = p2;
+            if (m.playerOne !== undefined) {
+                const p1 = this.players.find(p => m.playerOne.id === p.id);
+                if (p1 !== undefined) m.playerOne = p1;
+            }
+            if (m.playerTwo !== undefined) {
+                const p2 = this.players.find(p => m.playerTwo.id === p.id);
+                if (p2 !== undefined) m.playerTwo = p2;
+            }
         });
     }
  }
