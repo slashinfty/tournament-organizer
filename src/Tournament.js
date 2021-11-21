@@ -205,6 +205,7 @@ class Tournament {
         match.playerOne.active = true;
         match.playerTwo.active = true;
         match.active = true;
+        if (this.hasOwnProperty('nextRoundReady') && this.nextRoundReady === true) this.nextRoundReady = false;
     }
 
     /**
@@ -240,8 +241,8 @@ class Tournament {
     }
 }
 
-/** 
- * Class representing a Swiss pairing tournament. 
+/**
+ * Class representing a Swiss pairing tournament.
  * @extends Tournament
  */
 class Swiss extends Tournament {
@@ -329,7 +330,7 @@ class Swiss extends Tournament {
          */
         this.nextRoundReady = false;
     }
-    
+
     /**
      * Starts the tournament.
      */
@@ -438,8 +439,8 @@ class Swiss extends Tournament {
     }
 }
 
-/** 
- * Class recreating a Swiss pairing tournament from an existing object. 
+/**
+ * Class recreating a Swiss pairing tournament from an existing object.
  * @extends Swiss
  */
  class SwissReloaded extends Swiss {
@@ -450,11 +451,11 @@ class Swiss extends Tournament {
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m))
         this.matches.forEach(m => {
-            if (m.playerOne !== undefined) {
+            if (m.playerOne !== undefined && m.playerOne !== null) {
                 const p1 = this.players.find(p => m.playerOne.id === p.id);
                 if (p1 !== undefined) m.playerOne = p1;
             }
-            if (m.playerTwo !== undefined) {
+            if (m.playerTwo !== undefined && m.playerTwo !== null) {
                 const p2 = this.players.find(p => m.playerTwo.id === p.id);
                 if (p2 !== undefined) m.playerTwo = p2;
             }
@@ -462,8 +463,8 @@ class Swiss extends Tournament {
     }
  }
 
-/** 
- * Class representing a round-robin pairing tournament. 
+/**
+ * Class representing a round-robin pairing tournament.
  * @extends Tournament
  */
 class RoundRobin extends Tournament {
@@ -730,8 +731,8 @@ class RoundRobin extends Tournament {
     }
 }
 
-/** 
- * Class recreating a round-robin pairing tournament from an existing object. 
+/**
+ * Class recreating a round-robin pairing tournament from an existing object.
  * @extends RoundRobin
  */
  class RoundRobinReloaded extends RoundRobin {
@@ -742,11 +743,11 @@ class RoundRobin extends Tournament {
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m));
         this.matches.forEach(m => {
-            if (m.playerOne !== undefined) {
+            if (m.playerOne !== undefined && m.playerOne !== null) {
                 const p1 = this.players.find(p => m.playerOne.id === p.id);
                 if (p1 !== undefined) m.playerOne = p1;
             }
-            if (m.playerTwo !== undefined) {
+            if (m.playerTwo !== undefined && m.playerTwo !== null) {
                 const p2 = this.players.find(p => m.playerTwo.id === p.id);
                 if (p2 !== undefined) m.playerTwo = p2;
             }
@@ -754,8 +755,8 @@ class RoundRobin extends Tournament {
     }
  }
 
-/** 
- * Class representing an elimination tournament. 
+/**
+ * Class representing an elimination tournament.
  * @extends Tournament
  */
 class Elimination extends Tournament {
@@ -766,7 +767,7 @@ class Elimination extends Tournament {
      */
     constructor(id, options = {}) {
         super(id, options);
-        
+
         /**
          * If the format is double elimination.
          * @type {Boolean}
@@ -837,8 +838,8 @@ class Elimination extends Tournament {
     }
 }
 
-/** 
- * Class recreating an elimination tournament from an existing object. 
+/**
+ * Class recreating an elimination tournament from an existing object.
  * @extends Elimination
  */
  class EliminationReloaded extends Elimination {
@@ -848,11 +849,11 @@ class Elimination extends Tournament {
         this.players = this.players.map(p => new Player(p));
         this.matches = this.matches.map(m => new Match(m));
         this.matches.forEach(m => {
-            if (m.playerOne !== undefined) {
+            if (m.playerOne !== undefined && m.playerOne !== null) {
                 const p1 = this.players.find(p => m.playerOne.id === p.id);
                 if (p1 !== undefined) m.playerOne = p1;
             }
-            if (m.playerTwo !== undefined) {
+            if (m.playerTwo !== undefined && m.playerTwo !== null) {
                 const p2 = this.players.find(p => m.playerTwo.id === p.id);
                 if (p2 !== undefined) m.playerTwo = p2;
             }
