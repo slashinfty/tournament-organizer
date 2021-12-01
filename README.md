@@ -87,6 +87,7 @@ const standings = tourney.standings();
 
 ## Implementations
 * [Bracketeer](https://slashinfty.github.io/bracketeer) - A Discord bot that runs tournaments
+* [Song Tournament](https://songtournament.netlify.app/) - Create elimination brackets for your Spotify playlists
 
 ## Contributing
 Please submit an issue if you encounter a bug or have a feature suggestion.
