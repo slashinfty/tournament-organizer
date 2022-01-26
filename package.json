@@ -2,11 +2,13 @@
   "name": "tournament-organizer",
   "version": "2.0.0",
   "description": "JavaScript library for running tournaments",
-  "main": "./src/index",
-  "files": ["lib/**/*"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.js",
+  "files": ["dist/**/*"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "docs": "./node_modules/.bin/jsdoc ./src/index.js ./README.md -c ./.jsdoc.conf.json -t ./node_modules/ink-docstrap/template --verbose"
+    "build": "tsc",
+    "docs": "",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
