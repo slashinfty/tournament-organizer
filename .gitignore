@@ -1,5 +1,8 @@
+# Personal
 todo
 test*.js
+package-lock.json
+
 # Logs
 logs
 *.log
