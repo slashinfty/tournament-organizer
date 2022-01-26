@@ -1,10 +1,8 @@
-'use strict';
-
-const Tournament = require('./Tournament');
-const Utilities = require('../lib/Utilities');
+import cryptoRandomString from 'crypto-random-string';
+import { Tournament } from './Tournament';
 
 /** Class representing an event manager. */
-class EventManager {
+export class EventManager {
     /**
      * Create an event manager.
      */
@@ -22,23 +20,27 @@ class EventManager {
      * @param {Object} [options={}] Options a user can define for a tournament.
      * @return {Tournament} The newly created tournament.
      */
-    createTournament(id = null, options = {}) {
-        let thisid;
-        if (id === null) {
-            do {
-                thisid = Utilities.randomString(16);
-            } while (this.tournaments.findIndex(i => i.eventID === thisid) > -1);
-        } else {
-            thisid = id;
-            while (this.tournaments.findIndex(i => i.eventID === thisid) > -1) {
-                thisid = Utilities.randomString(16);
-            }
+    createTournament(options?: object) {
+        
+        // Default values
+        let opt = Object.assign({
+            id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
+            name: 'New Tournament',
+            format: 'Single Elimination'
+        }, options === undefined ? {} : options);
+        
+        // No duplicate IDs
+        while (this.tournaments.some(tournament => tournament.id === opt.id) {
+            opt.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
         }
+        
+        // Create tournament
         let tournament;
-        if (options.format === 'swiss') tournament = new Tournament.Swiss(thisid, options);
-        else if (options.format === 'robin') tournament = new Tournament.RoundRobin(thisid, options);
-        else tournament = new Tournament.Elimination(thisid, options);
+        // TODO
+        
+        // Add tournament to list
         this.tournaments.push(tournament);
+        
         return tournament;
     }
 

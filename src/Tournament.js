@@ -1,5 +1,3 @@
-'use strict';
-
 const Match = require("./Match");
 const Player = require("./Player");
 const Utilities = require("../lib/Utilities");
