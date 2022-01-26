@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "JavaScript library for running tournaments",
   "main": "./src/index",
+  "files": ["lib/**/*"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "./node_modules/.bin/jsdoc ./src/index.js ./README.md -c ./.jsdoc.conf.json -t ./node_modules/ink-docstrap/template --verbose"
@@ -27,9 +28,12 @@
   },
   "homepage": "https://slashinfty.github.io/tournament-organizer",
   "dependencies": {
-    "combinatorial-generators": "^1.0.1"
+    "array-shuffle": "^3.0.0",
+    "combinatorial-generators": "^1.0.1",
+    "crypto-random-string": "^4.0.0"
   },
   "devDependencies": {
-    "typedoc": "^0.22.11"
+    "typedoc": "^0.22.11",
+    "typescript": "^4.5.5"
   }
 }
