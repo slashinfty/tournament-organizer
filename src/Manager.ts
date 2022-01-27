@@ -3,24 +3,18 @@ import { Tournament } from './Tournament';
 
 /** Class representing an event manager. */
 export class EventManager {
-    /**
-     * Create an event manager.
-     */
+    tournaments: Array<Tournament>;
+    
     constructor() {
-        /**
-         * Array of all tournaments being managed.
-         * @type {Array.<Tournament>}
-         */
         this.tournaments = [];
     }
 
     /**
      * Create a new tournament.
-     * @param {?String} [id=null] User-defined ID.
-     * @param {Object} [options={}] Options a user can define for a tournament.
-     * @return {Tournament} The newly created tournament.
+     * @param options User-defined options for a new tournament.
+     * @returns New tournament.
      */
-    createTournament(options?: object) {
+    newTournament(options?: object): Tournament {
         
         // Default values
         let opt = Object.assign({
@@ -44,7 +38,8 @@ export class EventManager {
         return tournament;
     }
 
-    reloadTournament(tournament) {
+    // TODO
+    loadTournament(tournament) {
         let reloadedTournament;
         if (tournament.format === 'swiss') reloadedTournament = new Tournament.SwissReloaded(tournament);
         else if (tournament.format === 'robin') reloadedTournament = new Tournament.RoundRobinReloaded(tournament);
@@ -53,17 +48,25 @@ export class EventManager {
     }
 
     /**
-     * Remove an existing tournament from the manager.
+     * Remove a tournament from the manager.
      * @param {Tournament} tournament The tournament to be removed.
      * @return {Boolean} If the tournament was removed.
      */
-    removeTournament(tournament) {
-        const index = this.tournaments.findIndex(t => t.eventID === tournament.eventID);
+    deleteTournament(string: id): Tournament | undefined {
+        
+        // Find tournament
+        const index = this.tournaments.findIndex(t => t.eventID === id);
+        
+        // Delete tournament (if found)
         if (index > -1) {
+            const tournament = this.tournaments[index];
+            
+            // If active, end the tournament
+            // TODO
+            
+            // Remove the tournament from the list
             this.tournaments.splice(index, 1);
-            return true;
-        } else return false;
+            return tournament;
+        } else return undefined;
     }
 }
-
-module.exports = EventManager;

@@ -1,124 +1,67 @@
-const Match = require("./Match");
-const Player = require("./Player");
-const Utilities = require("../lib/Utilities");
+import { Match } from './Match';
+import { Player } from './Player';
+/*const Utilities = require("../lib/Utilities");
 const Algorithms = require("../lib/Algorithms");
-const Tiebreakers = require("../lib/Tiebreakers");
+const Tiebreakers = require("../lib/Tiebreakers");*/
 
 /** Class representing a tournament. */
 class Tournament {
-    /**
-     * Create a new tournament.
-     * @param {String} id String to be the event ID.
-     * @param {Object} options Options that can be defined for a tournament.
-     */
-    constructor(id, options) {
-        /**
-         * Alphanumeric string ID.
-         * @type {String}
-         */
-        this.eventID = id;
+    id: string;
+    name: string;
+    format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
+    sorting: 'none' | 'ascending' | 'descending';
+    consolation: boolean;
+    playerLimit: number;
+    pointsForWin: number;
+    pointsForLoss: number;
+    pointsForDraw: number;
+    startTime: Date;
+    players: Array<Player>;
+    matches: Array<Match>;
+    status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
+    
+    constructor(options: object) {
+        
+        // Default values
+        let opt = Object.assign({
+            sorting: 'none',
+            consolation: false,
+            playerLimit: 0,
+            points: [1, 0.5, 0]
+        }, options);
+        
+        /** Unique ID of the tournament. */
+        this.id = options.id;
 
-        /**
-         * Name of the tournament.
-         * @type {?String}
-         * @default null
-         */
-        this.name = options.hasOwnProperty('name') && typeof options.name === 'string' ? options.name : null;
+        /** Name of the tournament. */
+        this.name = options.name;
+        
+        /** Format for the first stage of the tournament. */
+        this.format = options.format;
 
-        /**
-         * Whether or not to organize players by seed when pairing.
-         * @type {Boolean}
-         * @default false
-         */
-        this.seededPlayers = options.hasOwnProperty('seededPlayers') && typeof options.seededPlayers === 'boolean' ? options.seededPlayers : false;
+        /** If players are sorted by a seed value, and the direction in which to sort them. */
+        this.sorting = options.sorting;
 
-        /**
-         * If the seeding should be sorted in ascending or descending order.
-         * @type {('asc'|'des')}
-         * @default 'asc'
-         */
-        this.seedOrder = options.hasOwnProperty('seedOrder') && options.seedOrder === 'des' ? 'des' : 'asc';
+        /** If there is a third place consolation match. Only used in elimination formats/playoffs. */
+        this.consolation = options.consolation;
 
-        /**
-         * Format for the first stage of the tournament.
-         * @type {('elim'|'robin'|'swiss')}
-         * @default 'elim'
-         */
-        this.format = options.hasOwnProperty('format') && ['elim', 'robin', 'swiss'].includes(options.format) ? options.format : 'elim';
+        /** Maximum number of players allowed to register for the tournament. If equal to 0, then there is no maximum. */
+        this.playerLimit = options.playerLimit;
 
-        /**
-         * If there is a third place consolation match.
-         * Only used if single elimination is the format (or playoffs format).
-         * @type {Boolean}
-         * @default false
-         */
-        this.thirdPlaceMatch = (options.format === 'elim' || options.playoffs === 'elim') && options.hasOwnProperty('thirdPlaceMatch') && options.thirdPlaceMatch ? true : false;
+        /** The number of points assigned to each possible result. */
+        [this.pointsForWin, this.pointsForDraw, this.pointsForLoss] = options.points;
 
-        /**
-         * Maximum number of players allowed to register for the tournament (minimum 4).
-         * If null, there is no maximum.
-         * @type {?Number}
-         * @default null
-         */
-        this.maxPlayers = options.hasOwnProperty('maxPlayers') && Number.isInteger(options.maxPlayers) && options.maxPlayers >= 4 ? options.maxPlayers : null;
-
-        /**
-         * The value of a win.
-         * Must be a positive integer.
-         * @type {Number}
-         * @default 1
-         */
-        this.winValue = options.hasOwnProperty('winValue') && Number.isInteger(options.winValue) && options.winValue > 0 ? options.winValue : 1;
-
-        /**
-         * The value of a draw/tie.
-         * Must be 0 or greater.
-         * @type {Number}
-         * @default 0.5
-         */
-        this.drawValue = options.hasOwnProperty('drawValue') && typeof options.drawValue === 'number' && options.drawValue >= 0 ? options.drawValue : 0.5;
-
-        /**
-         * The value of a loss.
-         * Must be an integer.
-         * @type {Number}
-         * @default 0
-         */
-        this.lossValue = options.hasOwnProperty('lossValue') && Number.isInteger(options.lossValue) ? options.lossValue : 0;
-
-        /**
-         * Creation date and time of the tournament.
-         * @type {Date}
-         */
+        /** Creation date and time of the tournament. */
         this.startTime = new Date(Date.now());
 
-        /**
-         * Array of all players in the tournament.
-         * @type {Player[]}
-         * @default []
-         */
+        /** Array of all players in the tournament. */
         this.players = [];
 
-        /**
-         * Array of all matches in the tournament.
-         * @type {Match[]}
-         * @default []
-         */
+        /** Array of all matches in the tournament. */
         this.matches = [];
 
-        /**
-         * If the tournament is active.
-         * @type {Boolean}
-         * @default false
-         */
-        this.active = false;
-
-        /**
-         * An object to store any additional information.
-         * @type {Object}
-         * @default {}
-         */
-        this.etc = {};
+        /** The current status of the tournament. */
+        this.status = 'Registration';
     }
 
     /**
@@ -859,12 +802,4 @@ class Elimination extends Tournament {
     }
  }
 
-module.exports = {
-    Tournament,
-    Swiss,
-    SwissReloaded,
-    RoundRobin,
-    RoundRobinReloaded,
-    Elimination,
-    EliminationReloaded
-}
+export { Tournament };
