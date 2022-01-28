@@ -1,7 +1,5 @@
-'use strict';
-
 /** Class representing a player. */
-class Player {
+export class Player {
     /**
      * Create a new player.
      * @param {String|Object} alias String to be the player's name. If an object, it is a player being reclassed.
@@ -123,5 +121,3 @@ class Player {
         }
     }
 }
-
-module.exports = Player;

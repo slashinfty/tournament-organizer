@@ -1,9 +1,9 @@
 import cryptoRandomString from 'crypto-random-string';
-import { Tournament } from './Tournament';
+import * as Tournament from './Tournament';
 
 /** Class representing an event manager. */
 export class EventManager {
-    tournaments: Array<Tournament>;
+    tournaments: Array<Tournament.Structure>;
     
     constructor() {
         this.tournaments = [];
@@ -14,18 +14,18 @@ export class EventManager {
      * @param options User-defined options for a new tournament.
      * @returns New tournament.
      */
-    newTournament(options?: object): Tournament {
+    newTournament(opt?: object): Tournament.Structure {
         
         // Default values
-        let opt = Object.assign({
+        let options = Object.assign({
             id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
             name: 'New Tournament',
             format: 'Single Elimination'
-        }, options === undefined ? {} : options);
+        }, opt === undefined ? {} : opt);
         
         // No duplicate IDs
-        while (this.tournaments.some(tournament => tournament.id === opt.id) {
-            opt.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
+        while (this.tournaments.some(tournament => tournament.id === options.id)) {
+            options.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
         }
         
         // Create tournament
@@ -38,24 +38,24 @@ export class EventManager {
         return tournament;
     }
 
-    // TODO
-    loadTournament(tournament) {
-        let reloadedTournament;
-        if (tournament.format === 'swiss') reloadedTournament = new Tournament.SwissReloaded(tournament);
-        else if (tournament.format === 'robin') reloadedTournament = new Tournament.RoundRobinReloaded(tournament);
-        else reloadedTournament = new Tournament.EliminationReloaded(tournament);
-        return reloadedTournament;
+    /**
+     * Reload a saved tournament.
+     * @param tournament The tournament to be reloaded.
+     * @returns The reloaded tournament.
+     */
+    loadTournament(tournament: Object): Tournament.Structure {
+        //TODO
     }
 
     /**
      * Remove a tournament from the manager.
-     * @param {Tournament} tournament The tournament to be removed.
-     * @return {Boolean} If the tournament was removed.
+     * @param id ID of the tournament to be removed.
+     * @returns The tournament if it is removed, else undefined.
      */
-    deleteTournament(string: id): Tournament | undefined {
+    deleteTournament(id: string): Tournament.Structure | undefined {
         
         // Find tournament
-        const index = this.tournaments.findIndex(t => t.eventID === id);
+        const index = this.tournaments.findIndex(t => t.id === id);
         
         // Delete tournament (if found)
         if (index > -1) {

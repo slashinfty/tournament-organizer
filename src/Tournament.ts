@@ -1,11 +1,11 @@
+import cryptoRandomString from 'crypto-random-string';
 import { Match } from './Match';
 import { Player } from './Player';
 /*const Utilities = require("../lib/Utilities");
 const Algorithms = require("../lib/Algorithms");
 const Tiebreakers = require("../lib/Tiebreakers");*/
 
-/** Class representing a tournament. */
-class Tournament {
+interface Structure {
     id: string;
     name: string;
     format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
@@ -19,16 +19,45 @@ class Tournament {
     players: Array<Player>;
     matches: Array<Match>;
     status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
-    
-    constructor(options: object) {
+}
+
+/** Class representing a tournament. */
+class Tournament implements Structure {
+    id: string;
+    name: string;
+    format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
+    sorting: 'none' | 'ascending' | 'descending';
+    consolation: boolean;
+    playerLimit: number;
+    pointsForWin: number;
+    pointsForLoss: number;
+    pointsForDraw: number;
+    startTime: Date;
+    players: Array<Player>;
+    matches: Array<Match>;
+    status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
+
+    constructor(opt: {
+        id: string,
+        name: string,
+        format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin',
+        sorting?: 'none' | 'ascending' | 'descending',
+        consolation?: boolean,
+        playerLimit?: number,
+        pointsForWin?: number,
+        pointsForLoss?: number,
+        pointsForDraw?: number
+    }) {
         
         // Default values
-        let opt = Object.assign({
+        let options = Object.assign({
             sorting: 'none',
             consolation: false,
             playerLimit: 0,
-            points: [1, 0.5, 0]
-        }, options);
+            pointsForWin: 1,
+            pointsForLoss: 0,
+            pointsForDraw: 0
+        }, opt);
         
         /** Unique ID of the tournament. */
         this.id = options.id;
@@ -48,8 +77,14 @@ class Tournament {
         /** Maximum number of players allowed to register for the tournament. If equal to 0, then there is no maximum. */
         this.playerLimit = options.playerLimit;
 
-        /** The number of points assigned to each possible result. */
-        [this.pointsForWin, this.pointsForDraw, this.pointsForLoss] = options.points;
+        /** Number of points assigned to a match win. */
+        this.pointsForWin = options.pointsForWin;
+
+        /** Number of points assigned to a match loss. */
+        this.pointsForLoss = options.pointsForLoss;
+
+        /** Number of points assigned to a drawn match. */
+        this.pointsForDraw = options.pointsForDraw;
 
         /** Creation date and time of the tournament. */
         this.startTime = new Date(Date.now());
@@ -66,24 +101,45 @@ class Tournament {
 
     /**
      * Create a new player and add them to the tournament.
-     * @param {String} alias The name of the new player.
-     * @param {String} id The ID of the new player. If null, one will be randomly generated.
-     * @param {Number} seed The seed value of the player. Mandatory if seededPlayers is true.
-     * @returns {Boolean} If the player was created and added.
+     * @param options User-defined options for a new tournament.
+     * @returns If the player was created and added.
      */
-    addPlayer(alias, id = null, seed = null) {
-        if (this.players.length === this.maxPlayers || this.active || typeof alias !== 'string' || alias.length === 0) return false;
-        let playerID;
-        if (id === null) {
-            do {
-                playerID = Utilities.randomString(8);
-            } while (this.players.findIndex(p => p.id === playerID) > -1);
-        } else {
-            if (this.players.findIndex(p => p.id === id) > -1) return false;
-            else playerID = id;
+    addPlayer(opt: {
+        alias: string,
+        id?: string,
+        seed?: number,
+        initialByes?: number,
+        missingResults?: 'Byes' | 'Losses'
+    }): boolean {
+
+        // Times when players can not be added to the tournament
+        if ((this.playerLimit > 0 && this.players.length === this.playerLimit) || 
+            ['Playoffs', 'Aborted', 'Finished'].some(str => str === this.status)) {
+            return false;
         }
-        if (seed === null && this.seededPlayers) return false;
-        this.players.push(new Player(alias, playerID, seed));
+
+        // Default values
+        let options = Object.assign({
+            id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
+            seed: 0,
+            initialByes: 0,
+            missingResults: 'Losses'
+        }, opt);
+
+        // No duplicate IDs
+        while (this.players.some(player => player.id === opt.id)) {
+            opt.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
+        }
+
+        // Create new player
+        const newPlayer = new Player(options);
+        this.players.push(newPlayer);
+
+        // Handling missed rounds due to tardiness
+        if (this.status === 'Active') {
+            //TODO
+        }
+
         return true;
     }
 
@@ -802,4 +858,4 @@ class Elimination extends Tournament {
     }
  }
 
-export { Tournament };
+export { Structure, Tournament };
