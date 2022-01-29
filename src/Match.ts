@@ -59,10 +59,10 @@ export class Match {
             draws: 0
         };
 
-        /** The next match for the winner in an elimination tournament. */
+        /** ID of the next match for the winner in an elimination tournament. */
         this.winnersPath = options.winnersPath;
 
-        /** The next match for the loser (if it exists) in an elimination tournament. */
+        /** ID of the next match for the loser (if it exists) in an elimination tournament. */
         this.losersPath = options.losersPath;
     }
 }

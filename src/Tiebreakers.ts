@@ -1,5 +1,96 @@
-// export 'compute' and 'sort'
-'use strict';
+import { Player } from "./Player";
+import { Structure } from "./Tournament";
+
+/** Computes tiebreakers for all players in a tournament. */
+const compute = (tournament: Structure): void => {
+    
+    // Compute game win percentage, match win percentage, and cumulative score for each player
+    for (let i = 0; i < tournament.players.length; i++) {
+
+        // If the current player has played no matches, set tiebreakers to zero
+        const player = tournament.players[i];
+        if (player.matchCount === 0) {
+            for (const tiebreak in player.tiebreakers) {
+                player.tiebreakers[tiebreak] = 0;
+            }
+            continue;
+        }
+
+        // Calculate game win percentage
+        player.tiebreakers.gameWinPct = player.gamePoints / player.gameCount;
+
+        // Calculate match win percentage
+        player.tiebreakers.matchWinPct = player.matchPoints / (player.matchCount * tournament.pointsForWin);
+
+        // Calculate cumulative score
+        let cumulativeScore = 0;
+        let matchPointsAfterEachRound = 0;
+        for (let i = 1; i <= player.results.length; i++) {
+            const currentMatch = player.results.find(result => result.round === i);
+            if (currentMatch === undefined) continue;
+            matchPointsAfterEachRound += currentMatch.matchPoints;
+            cumulativeScore += matchPointsAfterEachRound;
+        }
+        player.tiebreakers.cumulative = cumulativeScore;
+    }
+
+    // Calculate all remaining tiebreakers except for opponent's opponent match win percentage
+    for (let i = 0; i < tournament.players.length; i++) {
+        
+        // If the current player has played no matches, contine
+        const player = tournament.players[i];
+        if (player.matchCount === 0) continue;
+
+        // Get the current player's opponents
+        const opponents = tournament.players.filter(opp => player.results.some(result => result.opponent === opp.id));
+
+        // Calculate opponent match win percentage
+        player.tiebreakers.oppMatchWinPct = opponents.reduce((sum, opponent) => sum + opponent.tiebreakers.matchWinPct, 0) / opponents.length;
+
+        // Calculate opponent game win percentage
+        player.tiebreakers.oppGameWinPct = opponents.reduce((sum, opponent) => sum + opponent.tiebreakers.gameWinPct, 0) / opponents.length;
+
+        // Calculate Buchholz tiebreaks
+        const buchholzScores = opponents.map(opp => opp.matchPoints);
+        player.tiebreakers.solkoff = buchholzScores.reduce((sum, score) => sum + score, 0);
+        if (buchholzScores.length > 2) {
+            const maximum = buchholzScores.reduce((currentMax, currentScore) => Math.max(currentMax, currentScore), 0);
+            const minimum = buchholzScores.reduce((currentMin, currentScore) => Math.min(currentMin, currentScore), maximum);
+            buchholzScores.splice(buchholzScores.findIndex(score => score === maximum), 1);
+            buchholzScores.splice(buchholzScores.findIndex(score => score === minimum), 1);
+            player.tiebreakers.medianBuchholz = buchholzScores.reduce((sum, score) => sum + score, 0);
+        }
+
+        // Calculate Sonneborn-Berger tiebreak
+        player.tiebreakers.sonnebornBerger = opponents.reduce((sum, opponent) => {
+            const result = player.results.find(res => res.opponent === opponent.id);
+            if (result === undefined) return sum;
+            if (result.outcome === 'Win') return sum + opponent.matchPoints;
+            if (result.outcome === 'Draw') return sum + (0.5 * opponent.matchPoints);
+            return sum;
+        }, 0);
+
+        // Calculate opponent cumulative score
+        player.tiebreakers.oppCumulative = opponents.reduce((sum, opponent) => sum + opponent.tiebreakers.cumulative, 0);
+    }
+
+    // Calculate opponent's opponent's match win percentage
+    for (let i = 0; i < tournament.players.length; i++) {
+        
+        // If the current player has played no matches, contine
+        const player = tournament.players[i];
+        if (player.matchCount === 0) continue;
+
+        // Get the current player's opponents
+        const opponents = tournament.players.filter(opp => player.results.some(result => result.opponent === opp.id));
+
+        player.tiebreakers.oppOppMatchWinPct = opponents.reduce((sum, opponent) => sum + opponent.tiebreakers.oppMatchWinPct, 0) / opponents.length;
+    }
+}
+
+const sort = (tournament: Structure): Player[] => {
+    
+}
 
 /**
  * Work for tiebreakers.
@@ -176,4 +267,4 @@ const Tiebreakers = {
     }
 };
 
-module.exports = Tiebreakers;
+export { compute, sort };

@@ -2,7 +2,7 @@ import cryptoRandomString from 'crypto-random-string';
 import { Match } from './Match';
 import { Player } from './Player';
 // import * as Pairings from './Pairings';
-// import * as Tiebreakers from './Tiebreakers';
+import * as Tiebreakers from './Tiebreakers';
 
 interface Structure {
     id: string;
@@ -109,17 +109,19 @@ class Tournament implements Structure {
         seed?: number,
         initialByes?: number,
         missingResults?: 'Byes' | 'Losses'
-    }): boolean {
+    }): Player {
 
-        // Times when players can not be added to the tournament
-        if ((this.playerLimit > 0 && this.players.length === this.playerLimit) || 
-            ['Playoffs', 'Aborted', 'Finished'].some(str => str === this.status)) {
-            return false;
+        // Times when a player can not be added
+        if (this.playerLimit > 0 && this.players.length === this.playerLimit) {
+            throw `Player maximum of ${this.playerLimit} has been reached. Player can not be added.`
         }
 
-        // Disallow duplicate players as determined by user-defined ID
+        if (['Playoffs', 'Aborted', 'Finished'].some(str => str === this.status)) {
+            throw `Current tournament status is ${this.status}. Player can not be added.`;
+        }
+
         if (opt.hasOwnProperty('id') && this.players.some(player => player.id === opt.id)) {
-            return false;
+            throw `A player with ID ${opt.id} is already enrolled in the tournament. Duplicate player can not be added.`;
         }
 
         // Default values
@@ -142,7 +144,7 @@ class Tournament implements Structure {
             //TODO
         }
 
-        return true;
+        return newPlayer;
     }
 
     /**

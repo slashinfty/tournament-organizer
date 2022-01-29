@@ -12,17 +12,20 @@ export class Player {
     active: boolean;
     results: {
         match: string,
+        round: number,
         opponent: string,
+        outcome: 'Win' | 'Loss' | 'Draw' | 'Bye',
         matchPoints: number,
         gamePoints: number,
         games: number
     }[];
     tiebreakers: {
-        buchholz: number,
+        medianBuchholz: number,
         solkoff: number,
         sonnebornBerger: number,
         cumulative: number,
         oppCumulative: number,
+        matchWinPct: number,
         oppMatchWinPct: number,
         oppOppMatchWinPct: number,
         gameWinPct: number,
@@ -77,11 +80,12 @@ export class Player {
 
         /** Tiebreaker values for Swiss and round-robin tournaments. */
         this.tiebreakers = {
-            buchholz: 0,
+            medianBuchholz: 0,
             solkoff: 0,
             sonnebornBerger: 0,
             cumulative: 0,
             oppCumulative: 0,
+            matchWinPct: 0,
             oppMatchWinPct: 0,
             oppOppMatchWinPct: 0,
             gameWinPct: 0,
