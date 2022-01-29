@@ -1,3 +1,4 @@
+// export 'swiss', 'singleElimination', 'doubleElimination', 'roundRobin', 'doubleRoundRobin'
 'use strict';
 
 const Match = require("../src/Match");

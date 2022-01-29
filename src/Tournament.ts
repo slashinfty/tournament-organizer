@@ -1,9 +1,8 @@
 import cryptoRandomString from 'crypto-random-string';
 import { Match } from './Match';
 import { Player } from './Player';
-/*const Utilities = require("../lib/Utilities");
-const Algorithms = require("../lib/Algorithms");
-const Tiebreakers = require("../lib/Tiebreakers");*/
+// import * as Pairings from './Pairings';
+// import * as Tiebreakers from './Tiebreakers';
 
 interface Structure {
     id: string;
@@ -33,8 +32,8 @@ class Tournament implements Structure {
     pointsForLoss: number;
     pointsForDraw: number;
     startTime: Date;
-    players: Array<Player>;
-    matches: Array<Match>;
+    players: Player[];
+    matches: Match[];
     status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
 
     constructor(opt: {

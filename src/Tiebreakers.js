@@ -1,3 +1,4 @@
+// export 'compute' and 'sort'
 'use strict';
 
 /**

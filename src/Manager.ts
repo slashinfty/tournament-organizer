@@ -2,7 +2,7 @@ import cryptoRandomString from 'crypto-random-string';
 import * as Tournament from './Tournament';
 
 /** Class representing an event manager. */
-export class EventManager {
+export class Manager {
     tournaments: Array<Tournament.Structure>;
     
     constructor() {

@@ -1,123 +1,85 @@
 /** Class representing a player. */
 export class Player {
-    /**
-     * Create a new player.
-     * @param {String|Object} alias String to be the player's name. If an object, it is a player being reclassed.
-     * @param {String} id String to be the player ID.
-     * @param {?Number} seed Number to be used as the seed.
-     */
-    constructor(alias, id, seed) {
-        if (arguments.length === 1) {
-            const oldPlayer = arguments[0];
-            ['results', 'colors'].forEach(prop => oldPlayer[prop] = oldPlayer.hasOwnProperty(prop) ? oldPlayer[prop] : []);
-            Object.assign(this, oldPlayer);
-        } else {
+    id: string;
+    alias: string;
+    seed: number;
+    initialByes: number;
+    pairingBye: boolean;
+    matchCount: number;
+    matchPoints: number;
+    gameCount: number;
+    gamePoints: number;
+    active: boolean;
+    results: {
+        match: string,
+        opponent: string,
+        matchPoints: number,
+        gamePoints: number,
+        games: number
+    }[];
+    tiebreakers: {
+        buchholz: number,
+        solkoff: number,
+        sonnebornBerger: number,
+        cumulative: number,
+        oppCumulative: number,
+        oppMatchWinPct: number,
+        oppOppMatchWinPct: number,
+        gameWinPct: number,
+        oppGameWinPct: number
+    };
+
+    constructor(options: {
+        id: string,
+        alias: string,
+        seed: number,
+        initialByes: number
+    }) {       
         
-            /**
-             * Name of the player.
-             * @type {String}
-             */
-            this.alias = alias.toString();
+        /** Unique ID of the player. */
+        this.id = options.id;
 
-            /**
-             * Alphanumeric string ID.
-             * @type {String}
-             */
-            this.id = id.toString();
+        /** Name of the player. */
+        this.alias = options.alias;
 
-            /**
-             * Value to sort players.
-             * @type {?Number}
-             */
-            this.seed = typeof seed === 'number' ? seed : null;
+        /** Seed value for the player, if players are to be sorted. */
+        this.seed = options.seed;
 
-            /**
-             * Number of match points the player has.
-             * @type {Number}
-             */
-            this.matchPoints = 0;
+        /** Number of initial byes for a player in a Swiss tournament. */
+        this.initialByes = options.initialByes;
 
-            /**
-             * Number of matches played.
-             * @type {Number}
-             */
-            this.matches = 0;
-            
-            /**
-             * Number of game points the player has.
-             * @type {Number}
-             */
-            this.gamePoints = 0;
+        /** If the player has received a pairing bye. */
+        this.pairingBye = false;
 
-            /**
-             * Number of games played.
-             * @type {Number}
-             */
-            this.games = 0;
+        /** Number of matches played. */
+        this.matchCount = 0;
 
-            /**
-             * Number of initial byes assigned.
-             * @type {Number}
-             */
-            this.initialByes = 0;
+        /** Number of match points. */
+        this.matchPoints = 0;
+        
+        /** Number of games played. */
+        this.gameCount = 0;
 
-            /**
-             * Number of byes assigned.
-             * @type {Number}
-             */
-            this.byes = 0;
+        /** Number of game points. */
+        this.gamePoints = 0;
 
-            /**
-             * Array of results. Objects include match ID, opponent ID, and result ('w', 'l', or 'd').
-             * @type {Object[]}
-             */
-            this.results = [];
+        /** If the player is actively in the tournament. */
+        this.active = true;
 
-            /**
-             * Color preference for chess tournaments.
-             * Add 1 for white (player one) and subtract 1 for black (player two).
-             * @type {Number}
-             */
-            this.colorPref = 0;
+        /** Results from each match. */
+        this.results = [];
 
-            /**
-             * Array of colors that player has played in a chess tournament.
-             * @type {String[]}
-             */
-            this.colors = [];
-
-            /**
-             * If the player is still in the tournament.
-             * @type {Boolean}
-             */
-            this.active = true;
-
-            /**
-             * Tiebreaker values.
-             * @type {Object}
-             */
-            this.tiebreakers = {
-                matchWinPctM: 0,
-                matchWinPctP: 0,
-                oppMatchWinPctM: 0,
-                oppMatchWinPctP: 0,
-                gameWinPct: 0,
-                oppGameWinPct: 0,
-                oppOppMatchWinPct: 0,
-                solkoff: 0,
-                cutOne: 0,
-                median: 0,
-                neustadtl: 0,
-                cumulative: 0,
-                oppCumulative: 0
-            }
-
-            /**
-             * An object to store any additional information.
-             * @type {Object}
-             * @default {}
-             */
-            this.etc = {};
+        /** Tiebreaker values for Swiss and round-robin tournaments. */
+        this.tiebreakers = {
+            buchholz: 0,
+            solkoff: 0,
+            sonnebornBerger: 0,
+            cumulative: 0,
+            oppCumulative: 0,
+            oppMatchWinPct: 0,
+            oppOppMatchWinPct: 0,
+            gameWinPct: 0,
+            oppGameWinPct: 0
         }
     }
 }
