@@ -29,13 +29,19 @@ export class Player {
         oppGameWinPct: number
     };
 
-    constructor(options: {
+    constructor(opt: {
         id: string,
         alias: string,
-        seed: number,
-        initialByes: number
+        seed?: number,
+        initialByes?: number
     }) {       
         
+        // Default values
+        let options = Object.assign({
+            seed: 0,
+            initialByes: 0
+        }, opt);
+
         /** Unique ID of the player. */
         this.id = options.id;
 

@@ -117,11 +117,14 @@ class Tournament implements Structure {
             return false;
         }
 
+        // Disallow duplicate players as determined by user-defined ID
+        if (opt.hasOwnProperty('id') && this.players.some(player => player.id === opt.id)) {
+            return false;
+        }
+
         // Default values
         let options = Object.assign({
             id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
-            seed: 0,
-            initialByes: 0,
             missingResults: 'Losses'
         }, opt);
 
