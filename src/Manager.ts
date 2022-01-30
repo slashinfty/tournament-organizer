@@ -3,6 +3,7 @@ import * as Tournament from './Tournament';
 
 /** Class representing an event manager. */
 export class Manager {
+    /** Array of tournaments being managed. */
     tournaments: Array<Tournament.Structure>;
     
     constructor() {

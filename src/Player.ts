@@ -1,15 +1,37 @@
 /** Class representing a player. */
 export class Player {
+
+    /** Unique ID of the player. */
     id: string;
+
+    /** Name of the player. */
     alias: string;
+
+    /** Seed value for the player, if players are to be sorted. */
     seed: number;
+
+    /** Number of initial byes for a player in a Swiss tournament. */
     initialByes: number;
+
+    /** If the player has received a pairing bye. */
     pairingBye: boolean;
+
+    /** Number of matches played. */
     matchCount: number;
+
+    /** Number of match points. */
     matchPoints: number;
+
+    /** Number of games played. */
     gameCount: number;
+
+    /** Number of game points. */
     gamePoints: number;
+
+    /** If the player is actively in the tournament. */
     active: boolean;
+
+    /** Results from each match. */
     results: {
         match: string,
         round: number,
@@ -19,6 +41,8 @@ export class Player {
         gamePoints: number,
         games: number
     }[];
+
+    /** Tiebreaker values for Swiss and round-robin tournaments. */
     tiebreakers: {
         medianBuchholz: number,
         solkoff: number,
@@ -45,40 +69,17 @@ export class Player {
             initialByes: 0
         }, opt);
 
-        /** Unique ID of the player. */
         this.id = options.id;
-
-        /** Name of the player. */
         this.alias = options.alias;
-
-        /** Seed value for the player, if players are to be sorted. */
         this.seed = options.seed;
-
-        /** Number of initial byes for a player in a Swiss tournament. */
         this.initialByes = options.initialByes;
-
-        /** If the player has received a pairing bye. */
         this.pairingBye = false;
-
-        /** Number of matches played. */
         this.matchCount = 0;
-
-        /** Number of match points. */
         this.matchPoints = 0;
-        
-        /** Number of games played. */
         this.gameCount = 0;
-
-        /** Number of game points. */
         this.gamePoints = 0;
-
-        /** If the player is actively in the tournament. */
         this.active = true;
-
-        /** Results from each match. */
         this.results = [];
-
-        /** Tiebreaker values for Swiss and round-robin tournaments. */
         this.tiebreakers = {
             medianBuchholz: 0,
             solkoff: 0,

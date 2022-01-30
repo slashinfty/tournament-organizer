@@ -1,17 +1,35 @@
 /** Class representing a match. */
 export class Match {
+
+    /** Unique ID of the match. */
     id: string;
+
+    /** Round number for the match. */
     round: number;
+
+    /** Match number for the round. */
     match: number;
+
+    /** ID of player one. */
     playerOne: string | null;
+
+    /** ID of player two. */
     playerTwo: string | null;
+
+    /** If the match is currently active and awaiting a result. */
     active: boolean;
+
+    /** Result of the match. */
     result: {
         playerOneWins: number,
         playerTwoWins: number,
         draws: number
     };
+
+    /** ID of the next match for the winner in an elimination tournament. */
     winnersPath: string | null;
+
+    /** ID of the next match for the loser (if it exists) in an elimination tournament. */
     losersPath: string | null;
 
     constructor(opt: {
@@ -34,35 +52,18 @@ export class Match {
             losersPath: null 
         }, opt);
 
-        /** Unique ID of the match. */
         this.id = options.id;
-        
-        /** Round number for the match. */
         this.round = options.round;
-
-        /** Match number for the round. */
         this.match = options.match;
-
-        /** ID of player one. */
         this.playerOne = options.playerOne;
-
-        /** ID of player two. */
         this.playerTwo = options.playerTwo;
-
-        /** If the match is currently active and awaiting a result. */
         this.active = options.active;
-
-        /** Result of the match. */
         this.result = {
             playerOneWins: 0,
             playerTwoWins: 0,
             draws: 0
         };
-
-        /** ID of the next match for the winner in an elimination tournament. */
         this.winnersPath = options.winnersPath;
-
-        /** ID of the next match for the loser (if it exists) in an elimination tournament. */
         this.losersPath = options.losersPath;
     }
 }

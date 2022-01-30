@@ -53,18 +53,44 @@ type BasicTournamentProperties = {
 
 /** Class representing a tournament. */
 class Tournament implements Structure {
+
+    /** Unique ID of the tournament. */
     id: string;
+
+    /** Name of the tournament. */
     name: string;
+
+    /** Format for the first stage of the tournament. */
     format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
+
+    /** If players are sorted by a seed value, and the direction in which to sort them. */
     sorting: 'none' | 'ascending' | 'descending';
+
+    /** If there is a third place consolation match. Only used in elimination formats/playoffs. */
     consolation: boolean;
+
+    /** Maximum number of players allowed to register for the tournament. If equal to 0, then there is no maximum. */
     playerLimit: number;
+    
+    /** Number of points assigned to a match win. */
     pointsForWin: number;
+
+    /** Number of points assigned to a match loss. */
     pointsForLoss: number;
+
+    /** Number of points assigned to a drawn match. */
     pointsForDraw: number;
+
+    /** Creation date and time of the tournament. */
     startTime: Date;
+
+    /** Array of all players in the tournament. */
     players: Player[];
+
+    /** Array of all matches in the tournament. */
     matches: Match[];
+
+    /** The current status of the tournament. */
     status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
 
     constructor(opt: BasicTournamentProperties) {
@@ -79,43 +105,18 @@ class Tournament implements Structure {
             pointsForDraw: 0
         }, opt);
         
-        /** Unique ID of the tournament. */
         this.id = options.id;
-
-        /** Name of the tournament. */
         this.name = options.name;
-        
-        /** Format for the first stage of the tournament. */
         this.format = options.format;
-
-        /** If players are sorted by a seed value, and the direction in which to sort them. */
         this.sorting = options.sorting;
-
-        /** If there is a third place consolation match. Only used in elimination formats/playoffs. */
         this.consolation = options.consolation;
-
-        /** Maximum number of players allowed to register for the tournament. If equal to 0, then there is no maximum. */
         this.playerLimit = options.playerLimit;
-
-        /** Number of points assigned to a match win. */
         this.pointsForWin = options.pointsForWin;
-
-        /** Number of points assigned to a match loss. */
         this.pointsForLoss = options.pointsForLoss;
-
-        /** Number of points assigned to a drawn match. */
         this.pointsForDraw = options.pointsForDraw;
-
-        /** Creation date and time of the tournament. */
         this.startTime = new Date(Date.now());
-
-        /** Array of all players in the tournament. */
         this.players = [];
-
-        /** Array of all matches in the tournament. */
         this.matches = [];
-
-        /** The current status of the tournament. */
         this.status = 'Registration';
     }
 
@@ -257,26 +258,38 @@ class Tournament implements Structure {
         const playersToSort = activeOnly ? this.players.filter(player => player.active) : [...this.players];
 
         // Sort players
-        const sortedPlayers = Tiebreakers.sort(playersToSort, this);
-        return sortedPlayers;
+        return Tiebreakers.sort(playersToSort, this);
     }
 }
 
 /** Class representing a Swiss pairing tournament. */
 class Swiss extends Tournament {
+    
+    /** Number of rounds in the tournament. If 0, it will be determined by the number of players (base 2 logarithm of the number of players, rounded up). */
     rounds: number;
+
+    /** Current round of the tournament. */
     currentRound: number;
+
+    /** Format for the playoffs. */
     playoffs: 'None' | 'Single Elimination' | 'Double Elimination';
+
+    /** Number of possible games for a match. */
     bestOf: number;
+
+    /** How to cut for playoffs. */
     cut: {
         type: 'None' | 'Rank' | 'Points',
         limit: number
     };
+
+    /** Tiebreakers that will be used for the tournament in order of precedence.  */
     tiebreakers: [
         'Median-Buchholz' |
         'Solkoff' |
         'Sonneborn-Berger' |
         'Cumulative' |
+        'Versus' |
         'Game Win Percentage' |
         'Opponent Game Win Percentage' |
         'Opponent Match Win Percentage' |
@@ -296,6 +309,7 @@ class Swiss extends Tournament {
             'Solkoff' |
             'Sonneborn-Berger' |
             'Cumulative' |
+            'Versus' |
             'Game Win Percentage' |
             'Opponent Game Win Percentage' |
             'Opponent Match Win Percentage' |
@@ -317,22 +331,11 @@ class Swiss extends Tournament {
             tiebreakers: ['Solkoff', 'Cumulative']
         }, opt);
 
-        /** Number of rounds in the tournament. If 0, it will be determined by the number of players (base 2 logarithm of the number of players, rounded up). */
         this.rounds = options.rounds;
-
-        /** Format for the playoffs. */
         this.playoffs = options.playoffs;
-
-        /** Number of possible games for a match. */
         this.bestOf = options.bestOf;
-
-        /** How to cut for playoffs. */
         this.cut = options.cut;
-
-        /** Tiebreakers that will be used for the tournament in order of precedence.  */
         this.tiebreakers = options.tiebreakers;
-
-        /** Current round of the tournament. */
         this.currentRound = 0;
     }
 
