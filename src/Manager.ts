@@ -50,9 +50,9 @@ export class Manager {
     /**
      * Remove a tournament from the manager.
      * @param id ID of the tournament to be removed.
-     * @returns The tournament if it is removed, else undefined.
+     * @returns The deleted tournament.
      */
-    deleteTournament(id: string): Tournament.Structure | undefined {
+    deleteTournament(id: string): Tournament.Structure {
         
         // Find tournament
         const index = this.tournaments.findIndex(t => t.id === id);
@@ -67,6 +67,8 @@ export class Manager {
             // Remove the tournament from the list
             this.tournaments.splice(index, 1);
             return tournament;
-        } else return undefined;
+        } else {
+            throw `Tournament with ID ${id} was not found.`;
+        }
     }
 }

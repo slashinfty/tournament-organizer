@@ -18,6 +18,37 @@ interface Structure {
     players: Array<Player>;
     matches: Array<Match>;
     status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
+    rounds?: number;
+    currentRound?: number;
+    playoffs?: 'None' | 'Single Elimination' | 'Double Elimination';
+    bestOf?: number;
+    cut?: {
+        type: 'None' | 'Rank' | 'Points',
+        limit: number
+    };
+    tiebreakers?: [
+        'Median-Buchholz' |
+        'Solkoff' |
+        'Sonneborn-Berger' |
+        'Cumulative' |
+        'Versus' |
+        'Game Win Percentage' |
+        'Opponent Game Win Percentage' |
+        'Opponent Match Win Percentage' |
+        'Opponent Opponent Match Win Percentage'
+    ];
+}
+
+type BasicTournamentProperties = {
+    id: string,
+    name: string,
+    format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin',
+    sorting?: 'none' | 'ascending' | 'descending',
+    consolation?: boolean,
+    playerLimit?: number,
+    pointsForWin?: number,
+    pointsForLoss?: number,
+    pointsForDraw?: number
 }
 
 /** Class representing a tournament. */
@@ -36,17 +67,7 @@ class Tournament implements Structure {
     matches: Match[];
     status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
 
-    constructor(opt: {
-        id: string,
-        name: string,
-        format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin',
-        sorting?: 'none' | 'ascending' | 'descending',
-        consolation?: boolean,
-        playerLimit?: number,
-        pointsForWin?: number,
-        pointsForLoss?: number,
-        pointsForDraw?: number
-    }) {
+    constructor(opt: BasicTournamentProperties) {
         
         // Default values
         let options = Object.assign({
@@ -221,115 +242,98 @@ class Tournament implements Structure {
 
     /**
      * Get the current standings of the tournament.
-     * @param {Boolean} [active=true] Filtering only active players.
-     * @return {Player[]}
+     * @param active If only active players are included in standings (default is true).
+     * @returns Sorted array of players
      */
-    standings(active = true) {
-        this.players.forEach(p => Tiebreakers.compute(p, this));
-        let thesePlayers = active ? this.players.filter(p => p.active) : [...this.players];
-        thesePlayers.sort((a, b) => {
-            for (let i = 0; i < this.tiebreakers.length; i++) {
-                const prop = this.tiebreakers[i].replace('-', '');
-                const eqCheck = Tiebreakers[prop].equal(a, b);
-                if (eqCheck === true) {
-                    if (i === this.tiebreakers.length - 1) return Math.random() * 2 - 1;
-                    else continue;
-                } else if (typeof eqCheck === 'number') return Tiebreakers[prop].diff(a, b, eqCheck);
-                else return Tiebreakers[prop].diff(a, b);
-            }
-        });
-        return thesePlayers;
+    standings(active?: boolean) : Player[] {
+        
+        // Default value
+        const activeOnly = arguments.length === 1 ? active : true;
+
+        // Compute tiebreakers
+        Tiebreakers.compute(this);
+
+        // Get players to sort
+        const playersToSort = activeOnly ? this.players.filter(player => player.active) : [...this.players];
+
+        // Sort players
+        const sortedPlayers = Tiebreakers.sort(playersToSort, this);
+        return sortedPlayers;
     }
 }
 
-/**
- * Class representing a Swiss pairing tournament.
- * @extends Tournament
- */
+/** Class representing a Swiss pairing tournament. */
 class Swiss extends Tournament {
-    /**
-     * Create a new Swiss pairing tournament.
-     * @param {String} id String to be the event ID.
-     * @param {Object} [options={}] Options that can be defined for a tournament.
-     */
-    constructor(id, options = {}) {
-        super(id, options);
+    rounds: number;
+    currentRound: number;
+    playoffs: 'None' | 'Single Elimination' | 'Double Elimination';
+    bestOf: number;
+    cut: {
+        type: 'None' | 'Rank' | 'Points',
+        limit: number
+    };
+    tiebreakers: [
+        'Median-Buchholz' |
+        'Solkoff' |
+        'Sonneborn-Berger' |
+        'Cumulative' |
+        'Game Win Percentage' |
+        'Opponent Game Win Percentage' |
+        'Opponent Match Win Percentage' |
+        'Opponent Opponent Match Win Percentage'
+    ];
 
-        /**
-         * Number of rounds for the first phase of the tournament.
-         * If null, the value is determined by the number of players and the format.
-         * @type {?Number}
-         * @default null
-         */
-        this.numberOfRounds = options.hasOwnProperty('numberOfRounds') && Number.isInteger(options.numberOfRounds) && options.numberOfRounds > 0 ? options.numberOfRounds : null;
+    constructor(opt: {
+        rounds?: number,
+        playoffs?: 'None' | 'Single Elimination' | 'Double Elimination',
+        bestOf?: number,
+        cut?: {
+            type: 'None' | 'Rank' | 'Points',
+            limit: number
+        },
+        tiebreakers?: [
+            'Median-Buchholz' |
+            'Solkoff' |
+            'Sonneborn-Berger' |
+            'Cumulative' |
+            'Game Win Percentage' |
+            'Opponent Game Win Percentage' |
+            'Opponent Match Win Percentage' |
+            'Opponent Opponent Match Win Percentage'
+        ]
+    } & BasicTournamentProperties) {
+        super(opt);
 
-        /**
-         * Format for the second stage of the tournament.
-         * If null, there is only one stage.
-         * @type {?('elim'|'2xelim')}
-         * @default null
-         */
-        this.playoffs = options.hasOwnProperty('playoffs') && ['elim', '2xelim'].includes(options.playoffs) ? options.playoffs : null;
+        // Default values
+        let options = Object.assign({
+            rounds: 0,
+            currentRound: 0,
+            playoffs: 'None',
+            bestOf: 1,
+            cut: {
+                type: 'None',
+                limit: 0
+            },
+            tiebreakers: ['Solkoff', 'Cumulative']
+        }, opt);
 
-        /**
-         * Number of possible games for a match, where the winner must win the majority of games up to 1 + x/2 (used for byes).
-         * @type {Number}
-         * @default 1
-         */
-        this.bestOf = options.hasOwnProperty('bestOf') && Number.isInteger(options.bestOf) && options.bestOf % 2 === 1 ? options.bestOf : 1;
+        /** Number of rounds in the tournament. If 0, it will be determined by the number of players (base 2 logarithm of the number of players, rounded up). */
+        this.rounds = options.rounds;
 
-        /**
-         * Method to determine which players advance to the second stage of the tournament.
-         * @type {('rank'|'points')}
-         * @default 'rank'
-         */
-        this.cutType = options.hasOwnProperty('cutType') && options.cutType === 'points' ? 'points' : 'rank';
+        /** Format for the playoffs. */
+        this.playoffs = options.playoffs;
 
-        /**
-         * Breakpoint for determining how many players advance to the second stage of the tournament.
-         * If 0, it will override the playoff format to null.
-         * If -1, all players will advance.
-         * @type {Number}
-         * @default 0
-         */
-        this.cutLimit = options.hasOwnProperty('cutLimit') && Number.isInteger(options.cutLimit) && options.cutLimit >= -1 ? options.cutLimit : 0;
-        if (this.cutLimit === 0) this.playoffs = null;
+        /** Number of possible games for a match. */
+        this.bestOf = options.bestOf;
 
-        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
-        /**
-         * Array of tiebreakers to use, in order of precedence.
-         * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, cumulative, versus, magic-tcg, pokemon-tcg.
-         * Defaults for Swiss and Dutch are solkoff and cumulative.
-         * @type {String[]}
-         * @default null
-         */
-        this.tiebreakers = options.hasOwnProperty('tiebreakers') && Array.isArray(options.tiebreakers) ? options.tiebreakers.filter(t => tiebreakerOptions.includes(t)) : null;
+        /** How to cut for playoffs. */
+        this.cut = options.cut;
 
-        // Validating tiebreakers.
-        if (this.tiebreakers === null || this.tiebreakers.length === 0) this.tiebreakers = ['solkoff', 'cumulative'];
-        this.tiebreakers.unshift('match-points');
+        /** Tiebreakers that will be used for the tournament in order of precedence.  */
+        this.tiebreakers = options.tiebreakers;
 
-        /**
-         * If the Dutch variant of Swiss pairings should be used.
-         * @type {Boolean}
-         * @default false
-         */
-        this.dutch = options.hasOwnProperty('dutch') && typeof options.dutch === 'boolean' ? options.dutch : false;
-
-        /**
-         * Current round number.
-         * 0 if the tournament has not started, -1 if the tournament is finished.
-         * @type {Number}
-         * @default 0
-         */
+        /** Current round of the tournament. */
         this.currentRound = 0;
-
-        /**
-         * If the event is ready to proceed to the next round.
-         * @type {Boolean}
-         * @default false
-         */
-        this.nextRoundReady = false;
     }
 
     /**
