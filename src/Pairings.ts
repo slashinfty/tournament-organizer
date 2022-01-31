@@ -2,7 +2,7 @@
 import cryptoRandomString from 'crypto-random-string';
 import arrayShuffle from 'array-shuffle';
 import { permutations, powerSet } from 'combinatorial-generators';
-import { Structure } from './Tournament';
+import { Structure, Tournament } from './Tournament';
 import { Match } from './Match';
 
 /**
@@ -344,7 +344,7 @@ const doubleElimination = (tournament: Structure): void => {
         fillCount++;
         let counterA = 0;
         let counterB = 0;
-        let matchNumbersToRoute = tournament.matches.filter(match => match.round === startRound + 1 && (match.playerOne === null || match.playerTwo === null)).map(match => Math.ceil(match.match / 2));
+        let matchNumbersToRoute = tournament.matches.filter(match => match.round === startingRound + 1 && (match.playerOne === null || match.playerTwo === null)).map(match => Math.ceil(match.match / 2));
         loserRound.forEach(match => {
             for (let i = 0; i < 2; i++) {
                 const winnerMatch = winnerRound.find(m => m.match === fill[counterA]);
@@ -360,26 +360,98 @@ const doubleElimination = (tournament: Structure): void => {
         });
         winnerRoundCount++;
         loserRoundCount++;
+        const lastRoundToRoute = tournament.matches.filter(match => match.round === roundDifference + 1);
+        lastRoundToRoute.forEach((match, i) => {
+            match.winnersPath = tournament.matches.filter(m => m.round === match.round + 1).find(m => m.match === matchNumbersToRoute[i]).id;
+        });
     } else {
-        //CONTINUE HERE
+        const winnerRound = tournament.matches.filter(match => match.round === winnerRound);
+        const firstLoserRound = tournament.matches.filter(match => match.round === loserRoundCount);
+        loserRoundCount++;
+        const secondLoserRound = tournament.matches.filter(match => match.round === loserRoundCount);
+        const fill = fillPattern(winnerRound.length, fillCount);
+        fillCount++;
+        let counterA = 0;
+        let counterB = 0;
+        let matchNumbersToRoute = tournament.matches.filter(match => match.round === startingRound + 1 && match.playerOne === null && match.playerTwo === null).map(match => match.match);
+        secondLoserRound.forEach(match => {
+            const firstWinnerMatch = winnerRound.find(m => m.match === fill[counterA]);
+            if (matchNumbersToRoute.some(num => num === match.match)) {
+                const loserMatch = firstLoserRound[counterB];
+                firstWinnerMatch.losersPath = loserMatch.id;
+                counterA++;
+                counterB++;
+                const secondWinnerMatch = winnerRound.find(m => m.match === fill[counterA]);
+                secondWinnerMatch.losersPath = loserMatch.id;
+            } else firstWinnerMatch.losersPath = match.id;
+            counterA++;
+        });
+        winnerRoundCount++;
+        const lastRoundToRoute = tournament.matches.filter(match => match.round === roundDifference + 1);
+        lastRoundToRoute.forEach((match, i) => {
+            match.winnersPath = tournament.matches.filter(m => m.round === match.round + 1).find(m => m.match === matchNumbersToRoute[i]).id;
+        });
     }
 
-    // Create the consolation match, if necessary
-    if (tournament.consolation === true) {
-        const lastRound = tournament.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0);
-        const lastMatch = tournament.matches.filter(match => match.round === lastRound).reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.match), 0);
-        let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
-        while (tournament.matches.some(match => match.id === matchID)) {
-            matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
-        }
-        tournament.matches.push(new Match({
-            id: matchID,
-            round: lastRound,
-            match: lastMatch + 1
-        }));
-        tournament.matches.filter(match => match.round === lastRound - 1).forEach(match => {
-            match.losersPath = matchID;
+    // Route all remaining winner's bracket matches
+    for (let i = winnerRoundCount; i < roundDifference; i++) {
+        const winnerRound = tournament.matches.filter(match => match.round === i);
+        const loserRound = tournament.matches.filter(match => match.round === loserRoundCount - winnerRoundCount + i);
+        const fill = fillPattern(winnerRound.length, fillCount);
+        fillCount++;
+        loserRound.forEach((match, index) => {
+            const winnerMatch = winnerRound.find(m => m.match === fill[index]);
+            winnerMatch.losersPath = match.id;
         });
+    }
+
+    // Route winners in the loser's bracket
+    const loserStart = remainder === 0 ? roundDifference + 1 : roundDifference + 2;
+    for (let i = loserStart; i < tournament.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0); i++) {
+        const current = tournament.matches.filter(match => match.round === i);
+        const next = tournament.matches.filter(match => match.round === i + 1);
+        if (current.length === next.length) {
+            current.forEach((match, index) => match.winnersPath = next[index].id);
+        } else {
+            current.forEach((match, index) => match.winnersPath = next[Math.floor(index / 2)].id);
+        }
+    }
+
+    // Connect the two brackets
+    const lastMatch = tournament.matches.filter(match => match.round === tournament.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0))[0];
+    lastMatch.winnersPath = tournament.matches.filter(match => match.round === roundDifference)[0].id;
+}
+
+/**
+ * Creates Swiss pairings for a single round
+ * @param tournament The tournament for which matches are being created.
+ */
+const swiss = (tournament: Structure): void => {
+
+    // Get active players
+    let players = tournament.players.filter(player => player.active === true);
+
+    // Get all score groups
+    const scoreGroups = [...new Set(players.map(player => player.matchPoints))].sort((a, b) => b - a);
+
+    // Go through all score groups
+    const pairings = [];
+    let downfloats = [];
+    for (let i = 0; i < scoreGroups.length; i++) {
+
+        // Split the current score group
+        let scoreGroupPlayers = players.filter(player => player.matchPoints === scoreGroups[i]);
+
+        // Sort players if necessary, otherwise shuffle them
+        if (tournament.sorting === 'ascending') {
+            scoreGroupPlayers.sort((a, b) => a.seed - b.seed);
+        } else if (tournament.sorting === 'descending') {
+            scoreGroupPlayers.sort((a, b) => b.seed - a.seed);
+        } else {
+            scoreGroupPlayers = arrayShuffle(scoreGroupPlayers);
+        }
+
+        // Pair downfloats with the start of the scoregroup
     }
 }
 
