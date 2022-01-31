@@ -15,7 +15,12 @@ export class Manager {
      * @param options User-defined options for a new tournament.
      * @returns New tournament.
      */
-    newTournament(opt?: object): Tournament.Structure {
+    newTournament(opt?: Tournament.Structure): Tournament.Structure {
+
+        // No duplicate tournaments with user-defined IDs
+        if (opt.hasOwnProperty('id') && this.tournaments.some(tournament => tournament.id === opt.id)) {
+            throw `A tournament with ID ${opt.id} is already in the event manager. Duplicate tournament can not be added.`;
+        }
         
         // Default values
         let options = Object.assign({

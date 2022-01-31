@@ -1,8 +1,47 @@
 // export 'swiss', 'singleElimination', 'doubleElimination', 'roundRobin', 'doubleRoundRobin'
-'use strict';
+import cryptoRandomString from 'crypto-random-string';
+import arrayShuffle from 'array-shuffle';
+import { permutations, powerSet } from 'combinatorial-generators';
+import { Structure } from './Tournament';
+import { Match } from './Match';
 
-const Match = require("../src/Match");
-const Utilities = require("./Utilities");
+/**
+ * Creates matches for a single elimination tournament/playoffs.
+ * @param tournament The tournament for which matches are being created.
+ */
+const singleElimination = (tournament: Structure): void => {
+
+    // Get active players
+    const players = tournament.players.filter(player => player.active === true);
+
+    // Important values
+    const exponent = Math.log2(players.length);
+    const remainder = Math.round(2 ** exponent) % (2 ** Math.floor(exponent));
+
+    // Create bracket
+    const bracket = [1, 4, 2, 3];
+    for (let i = 3; i <= Math.floor(exponent); i++) {
+        for (let j = 0; j < bracket.length; j += 2) {
+            bracket.splice(j + 1, 0, 2 ** i + 1 - bracket[j]);
+        }
+    }
+
+    // Create first round, if players.length != power of 2
+    let round = tournament.currentRound;
+    if (remainder !== 0) {
+        for (let i = 0; i < remainder; i++) {
+            let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+            while (tournament.matches.some(match => match.id === matchID)) {
+                matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+            }
+            tournament.matches.push(new Match({
+                id: matchID,
+                round: round,
+                match: i + 1
+            }));
+        }
+    }
+}
 
 /**
  * Pairing algorithms.
@@ -745,4 +784,4 @@ const Algorithms = {
     }
 };
 
-module.exports = Algorithms;
+export { singleElimination, doubleElimination, swiss, roundRobin }
