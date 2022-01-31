@@ -8,7 +8,7 @@ interface Structure {
     id: string;
     name: string;
     format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
-    sorting: 'none' | 'ascending' | 'descending';
+    sorting: 'None' | 'Ascending' | 'Descending';
     consolation: boolean;
     playerLimit: number;
     pointsForWin: number;
@@ -43,7 +43,7 @@ type BasicTournamentProperties = {
     id: string,
     name: string,
     format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin',
-    sorting?: 'none' | 'ascending' | 'descending',
+    sorting?: 'None' | 'Ascending' | 'Descending',
     consolation?: boolean,
     playerLimit?: number,
     pointsForWin?: number,
@@ -64,7 +64,7 @@ class Tournament implements Structure {
     format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
 
     /** If players are sorted by a seed value, and the direction in which to sort them. */
-    sorting: 'none' | 'ascending' | 'descending';
+    sorting: 'None' | 'Ascending' | 'Descending';
 
     /** If there is a third place consolation match. Only used in elimination formats/playoffs. */
     consolation: boolean;
@@ -97,7 +97,7 @@ class Tournament implements Structure {
         
         // Default values
         let options = Object.assign({
-            sorting: 'none',
+            sorting: 'None',
             consolation: false,
             playerLimit: 0,
             pointsForWin: 1,

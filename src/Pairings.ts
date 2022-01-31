@@ -14,7 +14,14 @@ const singleElimination = (tournament: Structure): void => {
     // Get active players
     const players = tournament.players.filter(player => player.active === true);
 
-    // Important values
+    // Sort players if necessary
+    if (tournament.status === 'Playoffs' || tournament.sorting === 'Ascending') {
+        players.sort((a, b) => a.seed - b.seed); 
+    } else if (tournament.sorting === 'Descending') {
+        players.sort((a, b) => b.seed - a.seed);
+    }
+
+    // Important values (determines bracket sizing)
     const exponent = Math.log2(players.length);
     const remainder = Math.round(2 ** exponent) % (2 ** Math.floor(exponent));
 
@@ -27,7 +34,8 @@ const singleElimination = (tournament: Structure): void => {
     }
 
     // Create first round, if players.length != power of 2
-    let round = tournament.currentRound;
+    const startingRound = tournament.currentRound;
+    let round = startingRound;
     if (remainder !== 0) {
         for (let i = 0; i < remainder; i++) {
             let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
@@ -40,6 +48,50 @@ const singleElimination = (tournament: Structure): void => {
                 match: i + 1
             }));
         }
+        round++;
+    }
+
+    // Create all other rounds
+    let matchExponent = Math.floor(exponent) - 1;
+    let firstIterationComplete = false;
+    do {
+        for (let i = 0; i < 2 ** matchExponent; i++) {
+            let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+            while (tournament.matches.some(match => match.id === matchID)) {
+                matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+            }
+            tournament.matches.push(new Match({
+                id: matchID,
+                round: round,
+                match: i + 1
+            }));
+        }
+        if (firstIterationComplete === false) firstIterationComplete = true;
+        else {
+            tournament.matches.filter(match => match.round === round - 1).forEach(match => {
+                match.winnersPath = tournament.matches.find(m => m.round === round && m.match === Math.ceil(match.match / 2)).id;
+            });
+        }
+        round++;
+        matchExponent--;
+    } while (round < startingRound + Math.ceil(exponent));
+
+    // Assign players to starting matches
+    let roundToAssign = remainder === 0 ? startingRound : startingRound + 1;
+    tournament.matches.filter(match => match.round === roundToAssign).forEach((match, i) => {
+        match.playerOne = players[bracket[2 * i] - 1].id;
+        match.playerTwo = players[bracket[2 * i + 1] - 1].id;
+        match.active = true;
+    });
+
+    // Assign players to the first round, if players.length != power of 2
+    if (remainder !== 0) {
+
+    }
+
+    // Create the consolation match, if necessary
+    if (tournament.consolation === true) {
+
     }
 }
 
