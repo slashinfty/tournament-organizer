@@ -12,13 +12,15 @@ import { Match } from './Match';
 const singleElimination = (tournament: Structure): void => {
 
     // Get active players
-    const players = tournament.players.filter(player => player.active === true);
+    let players = tournament.players.filter(player => player.active === true);
 
-    // Sort players if necessary
-    if (tournament.status === 'Playoffs' || tournament.sorting === 'Ascending') {
+    // Sort players if necessary, otherwise shuffle them
+    if (tournament.status === 'playoffs' || tournament.sorting === 'ascending') {
         players.sort((a, b) => a.seed - b.seed); 
-    } else if (tournament.sorting === 'Descending') {
+    } else if (tournament.sorting === 'descending') {
         players.sort((a, b) => b.seed - a.seed);
+    } else {
+        players = arrayShuffle(players);
     }
 
     // Important values (determines bracket sizing)
@@ -86,13 +88,46 @@ const singleElimination = (tournament: Structure): void => {
 
     // Assign players to the first round, if players.length != power of 2
     if (remainder !== 0) {
-
+        const firstRound = tournament.matches.filter(match => match.round === startingRound);
+        firstRound.forEach((match, i) => {
+            match.playerOne = players[2 ** Math.floor(exponent) + i].id;
+            const playerTwo = players[2 ** Math.floor(exponent) - i - 1].id;
+            const nextMatch = tournament.matches.find(match => match.round === startingRound + 1 &&
+                ((match.playerOne !== null && match.playerOne === playerTwo) || (match.playerTwo !== null && match.playerTwo === playerTwo)));
+            if (nextMatch.playerOne === playerTwo) nextMatch.playerOne = null;
+            else if (nextMatch.playerTwo === playerTwo) nextMatch.playerTwo = null;
+            match.playerTwo = playerTwo;
+            match.winnersPath = nextMatch.id;
+            match.active = true;
+            nextMatch.active = false;
+        });
     }
 
     // Create the consolation match, if necessary
     if (tournament.consolation === true) {
-
+        const lastRound = tournament.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0);
+        const lastMatch = tournament.matches.filter(match => match.round === lastRound).reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.match), 0);
+        let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+        while (tournament.matches.some(match => match.id === matchID)) {
+            matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+        }
+        tournament.matches.push(new Match({
+            id: matchID,
+            round: lastRound,
+            match: lastMatch + 1
+        }));
+        tournament.matches.filter(match => match.round === lastRound - 1).forEach(match => {
+            match.losersPath = matchID;
+        });
     }
+}
+
+/**
+ * Creates matches for a double elimination tournament/playoffs.
+ * @param tournament The tournament for which matches are being created.
+ */
+const doubleElimination = (tournament: Structure): void => {
+
 }
 
 /**

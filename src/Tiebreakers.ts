@@ -68,8 +68,8 @@ const compute = (tournament: Structure): void => {
         player.tiebreakers.sonnebornBerger = opponents.reduce((sum, opponent) => {
             const result = player.results.find(res => res.opponent === opponent.id);
             if (result === undefined) return sum;
-            if (result.outcome === 'Win') return sum + opponent.matchPoints;
-            if (result.outcome === 'Draw') return sum + (0.5 * opponent.matchPoints);
+            if (result.outcome === 'win') return sum + opponent.matchPoints;
+            if (result.outcome === 'draw') return sum + (0.5 * opponent.matchPoints);
             return sum;
         }, 0);
 
@@ -107,37 +107,37 @@ const sort = (players: Player[], tournament: Structure): Player[] => {
         if (tournament.tiebreakers !== undefined) {
             for (let i = 0; i < tournament.tiebreakers.length; i++) {
                 switch (tournament.tiebreakers[i]) {
-                    case 'Median-Buchholz':
+                    case 'median buchholz':
                         if (playerA.tiebreakers.medianBuchholz === playerB.tiebreakers.medianBuchholz) continue;
                         else return playerB.tiebreakers.medianBuchholz - playerA.tiebreakers.medianBuchholz;
-                    case 'Solkoff':
+                    case 'solkoff':
                         if (playerA.tiebreakers.solkoff === playerB.tiebreakers.solkoff) continue;
                         else return playerB.tiebreakers.solkoff - playerA.tiebreakers.solkoff;
-                    case 'Sonneborn-Berger':
+                    case 'sonneborn berger':
                         if (playerA.tiebreakers.sonnebornBerger === playerB.tiebreakers.sonnebornBerger) continue;
                         else return playerB.tiebreakers.sonnebornBerger - playerA.tiebreakers.sonnebornBerger;
-                    case 'Cumulative':
+                    case 'cumulative':
                         if (playerA.tiebreakers.cumulative === playerB.tiebreakers.cumulative) {
                             if (playerA.tiebreakers.oppCumulative === playerB.tiebreakers.oppCumulative) continue;
                             else return playerB.tiebreakers.oppCumulative - playerA.tiebreakers.oppCumulative;
                         } else return playerB.tiebreakers.cumulative - playerA.tiebreakers.cumulative;
-                    case 'Versus':
+                    case 'versus':
                         const commonMatches = playerA.results.filter(result => result.opponent === playerB.id).map(result => result.match);
                         if (commonMatches.length === 0) continue;
-                        const pointsForPlayerA = playerA.results.filter(result => commonMatches.some(id => id === result.match)).reduce((sum, result) => result.outcome === 'Win' ? sum + 1 : result.outcome === 'Draw' ? sum + 0.5 : sum, 0);
-                        const pointsForPlayerB = playerB.results.filter(result => commonMatches.some(id => id === result.match)).reduce((sum, result) => result.outcome === 'Win' ? sum + 1 : result.outcome === 'Draw' ? sum + 0.5 : sum, 0);
+                        const pointsForPlayerA = playerA.results.filter(result => commonMatches.some(id => id === result.match)).reduce((sum, result) => result.outcome === 'win' ? sum + 1 : result.outcome === 'draw' ? sum + 0.5 : sum, 0);
+                        const pointsForPlayerB = playerB.results.filter(result => commonMatches.some(id => id === result.match)).reduce((sum, result) => result.outcome === 'win' ? sum + 1 : result.outcome === 'draw' ? sum + 0.5 : sum, 0);
                         if (pointsForPlayerA === pointsForPlayerB) continue;
                         else return pointsForPlayerB - pointsForPlayerA;
-                    case 'Game Win Percentage':
+                    case 'game win percentage':
                         if (playerA.tiebreakers.gameWinPct === playerB.tiebreakers.gameWinPct) continue;
                         else return playerB.tiebreakers.gameWinPct - playerA.tiebreakers.gameWinPct;
-                    case 'Opponent Game Win Percentage':
+                    case 'opponent game win percentage':
                         if (playerA.tiebreakers.oppGameWinPct === playerB.tiebreakers.oppGameWinPct) continue;
                         else return playerB.tiebreakers.oppGameWinPct - playerA.tiebreakers.oppGameWinPct;
-                    case 'Opponent Match Win Percentage':
+                    case 'opponent match win percentage':
                         if (playerA.tiebreakers.oppMatchWinPct === playerB.tiebreakers.oppMatchWinPct) continue;
                         else return playerB.tiebreakers.oppMatchWinPct - playerA.tiebreakers.oppMatchWinPct;
-                    case 'Opponent Opponent Match Win Percentage':
+                    case 'opponent opponent match win percentage':
                         if (playerA.tiebreakers.oppOppMatchWinPct === playerB.tiebreakers.oppOppMatchWinPct) continue;
                         else return playerB.tiebreakers.oppOppMatchWinPct - playerB.tiebreakers.oppOppMatchWinPct;
                 }

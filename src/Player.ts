@@ -36,7 +36,7 @@ export class Player {
         match: string,
         round: number,
         opponent: string,
-        outcome: 'Win' | 'Loss' | 'Draw' | 'Bye',
+        outcome: 'win' | 'loss' | 'draw' | 'bye',
         matchPoints: number,
         gamePoints: number,
         games: number

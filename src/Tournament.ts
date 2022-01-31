@@ -7,8 +7,8 @@ import * as Tiebreakers from './Tiebreakers';
 interface Structure {
     id: string;
     name: string;
-    format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
-    sorting: 'None' | 'Ascending' | 'Descending';
+    format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin';
+    sorting: 'none' | 'ascending' | 'descending';
     consolation: boolean;
     playerLimit: number;
     pointsForWin: number;
@@ -17,33 +17,34 @@ interface Structure {
     startTime: Date;
     players: Array<Player>;
     matches: Array<Match>;
-    status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
+    status: 'registration' | 'active' | 'playoffs' | 'aborted' | 'finished';
     rounds?: number;
     currentRound?: number;
-    playoffs?: 'None' | 'Single Elimination' | 'Double Elimination';
+    playoffs?: 'none' | 'single elimination' | 'double elimination';
     bestOf?: number;
     cut?: {
-        type: 'None' | 'Rank' | 'Points',
+        type: 'none' | 'rank' | 'points',
         limit: number
     };
     tiebreakers?: [
-        'Median-Buchholz' |
-        'Solkoff' |
-        'Sonneborn-Berger' |
-        'Cumulative' |
-        'Versus' |
-        'Game Win Percentage' |
-        'Opponent Game Win Percentage' |
-        'Opponent Match Win Percentage' |
-        'Opponent Opponent Match Win Percentage'
+        'median buchholz' |
+        'solkoff' |
+        'sonneborn berger' |
+        'cumulative' |
+        'versus' |
+        'game win percentage' |
+        'opponent game win percentage' |
+        'opponent match win percentage' |
+        'opponent opponent match win percentage'
     ];
+    addPlayer: (opt: object) => Player;
 }
 
 type BasicTournamentProperties = {
     id: string,
     name: string,
-    format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin',
-    sorting?: 'None' | 'Ascending' | 'Descending',
+    format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+    sorting?: 'none' | 'ascending' | 'descending',
     consolation?: boolean,
     playerLimit?: number,
     pointsForWin?: number,
@@ -61,10 +62,10 @@ class Tournament implements Structure {
     name: string;
 
     /** Format for the first stage of the tournament. */
-    format: 'Single Elimination' | 'Double Elimination' | 'Swiss' | 'Round-Robin' | 'Double Round-Robin';
+    format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin';
 
     /** If players are sorted by a seed value, and the direction in which to sort them. */
-    sorting: 'None' | 'Ascending' | 'Descending';
+    sorting: 'none' | 'ascending' | 'descending';
 
     /** If there is a third place consolation match. Only used in elimination formats/playoffs. */
     consolation: boolean;
@@ -91,13 +92,13 @@ class Tournament implements Structure {
     matches: Match[];
 
     /** The current status of the tournament. */
-    status: 'Registration' | 'Active' | 'Playoffs' | 'Aborted' | 'Finished';
+    status: 'registration' | 'active' | 'playoffs' | 'aborted' | 'finished';
 
     constructor(opt: BasicTournamentProperties) {
         
         // Default values
         let options = Object.assign({
-            sorting: 'None',
+            sorting: 'none',
             consolation: false,
             playerLimit: 0,
             pointsForWin: 1,
@@ -117,7 +118,7 @@ class Tournament implements Structure {
         this.startTime = new Date(Date.now());
         this.players = [];
         this.matches = [];
-        this.status = 'Registration';
+        this.status = 'registration';
     }
 
     /**
@@ -130,7 +131,7 @@ class Tournament implements Structure {
         id?: string,
         seed?: number,
         initialByes?: number,
-        missingResults?: 'Byes' | 'Losses'
+        missingResults?: 'byes' | 'losses'
     }): Player {
 
         // Times when a player can not be added
@@ -149,7 +150,7 @@ class Tournament implements Structure {
         // Default values
         let options = Object.assign({
             id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
-            missingResults: 'Losses'
+            missingResults: 'losses'
         }, opt);
 
         // No duplicate IDs
@@ -162,7 +163,7 @@ class Tournament implements Structure {
         this.players.push(newPlayer);
 
         // Handling missed rounds due to tardiness
-        if (this.status === 'Active') {
+        if (this.status === 'active') {
             //TODO
         }
 
@@ -272,48 +273,48 @@ class Swiss extends Tournament {
     currentRound: number;
 
     /** Format for the playoffs. */
-    playoffs: 'None' | 'Single Elimination' | 'Double Elimination';
+    playoffs: 'none' | 'single elimination' | 'double elimination';
 
     /** Number of possible games for a match. */
     bestOf: number;
 
     /** How to cut for playoffs. */
     cut: {
-        type: 'None' | 'Rank' | 'Points',
+        type: 'none' | 'rank' | 'points',
         limit: number
     };
 
     /** Tiebreakers that will be used for the tournament in order of precedence.  */
     tiebreakers: [
-        'Median-Buchholz' |
-        'Solkoff' |
-        'Sonneborn-Berger' |
-        'Cumulative' |
-        'Versus' |
-        'Game Win Percentage' |
-        'Opponent Game Win Percentage' |
-        'Opponent Match Win Percentage' |
-        'Opponent Opponent Match Win Percentage'
+        'median buchholz' |
+        'solkoff' |
+        'sonneborn berger' |
+        'cumulative' |
+        'versus' |
+        'game win percentage' |
+        'opponent game win percentage' |
+        'opponent match win percentage' |
+        'opponent opponent match win percentage'
     ];
 
     constructor(opt: {
         rounds?: number,
-        playoffs?: 'None' | 'Single Elimination' | 'Double Elimination',
+        playoffs?: 'none' | 'single elimination' | 'double elimination',
         bestOf?: number,
         cut?: {
-            type: 'None' | 'Rank' | 'Points',
+            type: 'none' | 'rank' | 'points',
             limit: number
         },
         tiebreakers?: [
-            'Median-Buchholz' |
-            'Solkoff' |
-            'Sonneborn-Berger' |
-            'Cumulative' |
-            'Versus' |
-            'Game Win Percentage' |
-            'Opponent Game Win Percentage' |
-            'Opponent Match Win Percentage' |
-            'Opponent Opponent Match Win Percentage'
+            'median buchholz' |
+            'solkoff' |
+            'sonneborn berger' |
+            'cumulative' |
+            'versus' |
+            'game win percentage' |
+            'opponent game win percentage' |
+            'opponent match win percentage' |
+            'opponent opponent match win percentage'
         ]
     } & BasicTournamentProperties) {
         super(opt);
@@ -322,13 +323,13 @@ class Swiss extends Tournament {
         let options = Object.assign({
             rounds: 0,
             currentRound: 0,
-            playoffs: 'None',
+            playoffs: 'none',
             bestOf: 1,
             cut: {
-                type: 'None',
+                type: 'none',
                 limit: 0
             },
-            tiebreakers: ['Solkoff', 'Cumulative']
+            tiebreakers: ['solkoff', 'cumulative']
         }, opt);
 
         this.rounds = options.rounds;
