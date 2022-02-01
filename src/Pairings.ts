@@ -1,9 +1,10 @@
 // export 'swiss', 'singleElimination', 'doubleElimination', 'roundRobin', 'doubleRoundRobin'
 import cryptoRandomString from 'crypto-random-string';
 import arrayShuffle from 'array-shuffle';
-import { permutations, powerSet } from 'combinatorial-generators';
+import { powerSet } from 'combinatorial-generators';
 import { Structure, Tournament } from './Tournament';
 import { Match } from './Match';
+import { Player } from './Player';
 
 /**
  * Creates matches for a single elimination tournament/playoffs.
@@ -434,12 +435,36 @@ const swiss = (tournament: Structure): void => {
     // Get all score groups
     const scoreGroups = [...new Set(players.map(player => player.matchPoints))].sort((a, b) => b - a);
 
+    // Function to determine exchanges
+    const exchangeGenerator = (s1, s2) => {
+        let set1 = [...powerSet(s1.map(s => s.bsn))];
+        let set2 = [...powerSet(s2.map(s => s.bsn))];
+        let exchanges = [];
+        for (let i = 1; i <= Math.min(s1.length, s2.length); i++) {
+            let z1 = set1.filter(s => s.length === i);
+            let z2 = set2.filter(s => s.length === i);
+            let sums1 = [...new Set(z1.map(z => z.reduce((a, b) => a + b, 0)))];
+            let sums2 = [...new Set(z2.map(z => z.reduce((a, b) => a + b, 0)))];
+            let current = [];
+            for (let diff = Math.min(...sums2) - Math.max(...sums1); diff <= Math.max(...sums2) - Math.min(...sums1); diff++) {
+                let validSum1s = sums1.filter(a => sums2.some(b => b - a === diff)).reverse();
+                for (let j = 0; j < validSum1s.length; j++) {
+                    let z1s = z1.filter(z => z.reduce((a, b) => a + b, 0) === validSum1s[j]);
+                    let z2s = z2.filter(z => z.reduce((a, b) => a + b, 0) === validSum1s[j] + diff);
+                    z1s.forEach(z => { z2s.forEach(zz => current.push([z, zz])); });
+                }
+            }
+            exchanges = [...exchanges, ...current];
+        }
+        return exchanges;
+    }
+
     // Go through all score groups
-    const pairings = [];
-    let downfloats = [];
+    let pairings: Match[] = [];
+    let downfloats: Player[] = [];
     for (let i = 0; i < scoreGroups.length; i++) {
 
-        // Split the current score group
+        // Get the current score group
         let scoreGroupPlayers = players.filter(player => player.matchPoints === scoreGroups[i]);
 
         // Sort players if necessary, otherwise shuffle them
@@ -451,8 +476,150 @@ const swiss = (tournament: Structure): void => {
             scoreGroupPlayers = arrayShuffle(scoreGroupPlayers);
         }
 
-        // Pair downfloats with the start of the scoregroup
+        // Split players and get possible exchanges
+        let candidate = {
+            pairings: [],
+            downfloats: []
+        };
+        scoreGroupPlayers.forEach((player, index) => player.bsn = index);
+        let topHalf = scoreGroupPlayers.slice(0, Math.floor(scoreGroupPlayers.length / 2));
+        let bottomHalf = scoreGroupPlayers.slice(Math.floor(scoreGroupPlayers.length / 2));
+        let exchanges = exchangeGenerator(topHalf, bottomHalf);
+
+        // Attempt to find best pairing
+        for (let j = -1; j < exchanges.length; j++) {
+            
+            // To store the current pairings and downfloaters
+            const currentPairings = [];
+            const newDownfloats = [];
+
+            // Match number counter
+            let matchNumber = 0;
+
+            // Make a copy of two halves
+            let top = [...topHalf];
+            let bottom = [...bottomHalf];
+
+            // Perform exchanges
+            if (j > -1) {
+                const [topArray, bottomArray] = exchanges[j];
+                for (let k = 0; k < topArray.length; k++) {
+                    const topPlayerIndex = top.findIndex(player => player.bsn === topArray[k]);
+                    bottom.push(top.splice(topPlayerIndex, 1)[0]);
+                    const bottomPlayerIndex = bottom.findIndex(player => player.bsn === bottomArray[k]);
+                    top.push(bottom.splice(bottomPlayerIndex, 1)[0]);
+                }
+                top.sort((a, b) => a.bsn - b.bsn);
+                bottom.sort((a, b) => a.bsn - b.bsn);
+            }
+            
+            // Pair downfloats with the start of the scoregroup
+            for (let k = 0; k < downfloats.length; k++) {
+                const downfloat = downfloats[k];
+                let opponent;
+                for (let l = 0; l < top.length; l++) {
+                    if (downfloat.results.some(result => result.opponent === top[l].id)) continue;
+                    else {
+                        opponent = top[l];
+                        top.splice(l, 1);
+                        break;
+                    }
+                }
+                if (opponent === undefined) {
+                    for (let l = 0; l < bottom.length; l++) {
+                        if (downfloat.results.some(result => result.opponent === bottom[l].id)) continue;
+                        else {
+                            opponent = bottom[l];
+                            bottom.splice(l, 1);
+                            break;
+                        }
+                    }
+                }
+                if (opponent === undefined) {
+                    newDownfloats.push(downfloat);
+                    continue;
+                }
+                let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+                while (tournament.matches.some(match => match.id === matchID)) {
+                    matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+                }
+                currentPairings.push(new Match({
+                    id: matchID,
+                    round: tournament.currentRound,
+                    match: matchNumber++,
+                    playerOne: downfloat.id,
+                    playerTwo: opponent.id,
+                    active: true
+                }));
+            }
+
+            // Equalize halves, if downfloats were paired
+            if (top.length !== topHalf.length || bottom.length !== bottomHalf.length) {
+                const whole = [...top, ...bottom];
+                top = whole.slice(0, Math.floor(whole.length / 2));
+                bottom = whole.slice(Math.floor(whole.length / 2));
+            }
+
+            // Pair the two halves
+            for (let k = 0; k < top.length; k++) {
+                const player = top[k];
+                let opponent;
+                for (let l = 0; l < bottom.length; l++) {
+                    if (player.results.some(result => result.opponent === bottom[l].id)) continue;
+                    else {
+                        opponent = bottom[l];
+                        bottom.splice(1, l);
+                        break;
+                    }
+                }
+                if (opponent === undefined) {
+                    newDownfloats.push(player);
+                    continue;
+                }
+                let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+                while (tournament.matches.some(match => match.id === matchID)) {
+                    matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+                }
+                currentPairings.push(new Match({
+                    id: matchID,
+                    round: tournament.currentRound,
+                    match: matchNumber++,
+                    playerOne: player.id,
+                    playerTwo: opponent.id,
+                    active: true
+                }));
+            }
+
+            // Ensure no players are receiving the bye twice
+            //TODO
+
+            // Check pairing quality
+            // First check if the number of pairings were maximized
+            if (newDownfloats.length === (downfloats.length + scoreGroupPlayers.length) % 2) {
+                candidate = {
+                    pairings: currentPairings,
+                    downfloats: newDownfloats
+                }
+                break;
+            // Then check if this candidate maximizes the number of pairings better than the previous best
+            } else if (candidate.downfloats.length === 0 || newDownfloats.length < candidate.downfloats.length) {
+                candidate = {
+                    pairings: currentPairings,
+                    downfloats: newDownfloats
+                }
+            }
+        }
+
+        // Update pairings and set downfloats for next score group
+        pairings = [...pairings, ...candidate.pairings];
+        downfloats = candidate.downfloats;
+
+        // Remove in-bracket sequence numbers from players
+        scoreGroupPlayers.forEach(player => delete player.bsn);
     }
+
+    // Add pairings to the tournament
+    tournament.matches = [...tournament.matches, ...pairings];
 }
 
 /**

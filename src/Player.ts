@@ -28,6 +28,9 @@ export class Player {
     /** Number of game points. */
     gamePoints: number;
 
+    /** In-bracket sequence number, used for Swiss pairings. */
+    bsn: number;
+
     /** If the player is actively in the tournament. */
     active: boolean;
 
@@ -79,6 +82,7 @@ export class Player {
         this.gameCount = 0;
         this.gamePoints = 0;
         this.active = true;
+        this.bsn = 0;
         this.results = [];
         this.tiebreakers = {
             medianBuchholz: 0,
