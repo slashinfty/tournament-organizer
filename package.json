@@ -4,7 +4,9 @@
   "description": "JavaScript library for running tournaments",
   "main": "./dist/index.js",
   "types": "./dist/index.d.js",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "build": "tsc",
     "docs": "",
@@ -31,10 +33,11 @@
   "homepage": "https://slashinfty.github.io/tournament-organizer",
   "dependencies": {
     "array-shuffle": "^3.0.0",
-    "combinatorial-generators": "^1.0.1",
-    "crypto-random-string": "^4.0.0"
+    "crypto-random-string": "^4.0.0",
+    "edmonds-blossom": "^1.0.0"
   },
   "devDependencies": {
+    "@types/edmonds-blossom": "^1.0.2",
     "typedoc": "^0.22.11",
     "typescript": "^4.5.5"
   }
