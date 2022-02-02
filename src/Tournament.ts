@@ -37,6 +37,7 @@ interface Structure {
         'opponent match win percentage' |
         'opponent opponent match win percentage'
     ];
+    double?: boolean;
     addPlayer: (opt: object) => Player;
 }
 
