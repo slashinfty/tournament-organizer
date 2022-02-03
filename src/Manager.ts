@@ -62,19 +62,16 @@ export class Manager {
         
         // Find tournament
         const index = this.tournaments.findIndex(t => t.id === id);
-        
-        // Delete tournament (if found)
-        if (index > -1) {
-            const tournament = this.tournaments[index];
-            
-            // If active, end the tournament
-            // TODO
-            
-            // Remove the tournament from the list
-            this.tournaments.splice(index, 1);
-            return tournament;
-        } else {
+        if (index === -1) {
             throw `Tournament with ID ${id} was not found.`;
         }
+        const tournament = this.tournaments[index];
+            
+        // If active, end the tournament
+        if (tournament.status !== 'finished') tournament.status = 'aborted';
+        
+        // Remove the tournament from the list
+        this.tournaments.splice(index, 1);
+        return tournament;
     }
 }

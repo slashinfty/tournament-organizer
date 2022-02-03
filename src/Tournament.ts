@@ -1,7 +1,7 @@
 import cryptoRandomString from 'crypto-random-string';
 import { Match } from './Match';
 import { Player } from './Player';
-// import * as Pairings from './Pairings';
+import * as Pairings from './Pairings';
 import * as Tiebreakers from './Tiebreakers';
 
 interface Structure {
@@ -38,7 +38,7 @@ interface Structure {
         'opponent opponent match win percentage'
     ];
     double?: boolean;
-    addPlayer: (opt: object) => Player;
+    //addPlayer: (opt: object) => Player;
 }
 
 type BasicTournamentProperties = {
@@ -172,78 +172,6 @@ class Tournament implements Structure {
     }
 
     /**
-     * Remove a player from the tournament.
-     * If the tournament hasn't started, they are removed entirely.
-     * If the tournament has started, they are dropped and marked inactive.
-     * @param {Player} player The player to be removed.
-     * @returns {?Match[]|Boolean} True, null, or array of new matches if player is removed, else false.
-     */
-    removePlayer(player) {
-        if (player.id === undefined) return false;
-        const playerIndex = this.players.findIndex(p => p.id === player.id);
-        if (playerIndex > -1) {
-            if (!this.active) {
-                this.players.splice(playerIndex, 1);
-                return true;
-            } else {
-                if (!player.active) return false;
-                player.active = false;
-                let newMatches = null;
-                if (this.format.includes('elim') || this.currentRound > this.numberOfRounds) {
-                    const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                    if (m !== undefined) {
-                        if (this.doubleElim) {
-                            newMatches = m.playerOne.id === player.id ? this.result(m, 0, Math.ceil(this.bestOf / 2), 0, false) : this.result(m, Math.ceil(this.bestOf / 2), 0, 0, false);
-                            m.loserPath.playerTwo = undefined;
-                            if (m.loserPath.playerOne !== null) newMatches = newMatches.concat(this.result(m.loserPath, Math.ceil(this.bestOf / 2), 0));
-                        }
-                        else newMatches = m.playerOne.id === player.id ? this.result(m, 0, Math.ceil(this.bestOf / 2)) : this.result(m, Math.ceil(this.bestOf / 2), 0);
-                    }
-                } else if (this.format === 'robin') {
-                    const now = this.activeMatches(this.currentRound).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                    if (now !== undefined && now.active) newMatches = now.playerOne.id === player.id ? this.result(now, 0, Math.ceil(this.bestOf / 2)) : this.result(now, Math.ceil(this.bestOf / 2), 0);
-                    for (let i = this.currentRound + 1; i < this.matches.reduce((x, y) => Math.max(x, y.round), 0); i++) {
-                        const curr = this.matches.filter(r => r.round === i).find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                        if (curr.playerOne.id === player.id) curr.playerOne = null;
-                        else curr.playerTwo = null;
-                    }
-                } else if (this.format === 'swiss') {
-                    const m = this.activeMatches().find(x => x.playerOne.id === player.id || x.playerTwo.id === player.id);
-                    if (m !== undefined && m.active) newMatches = m.playerOne.id === player.id ? this.result(m, 0, Math.ceil(this.bestOf / 2)) : this.result(m, Math.ceil(this.bestOf / 2), 0);
-                }
-                return newMatches;
-            }
-        } else return false;
-    }
-
-    /**
-     * Deletes the results from a match.
-     * If the player was dropped as a result (elimination format), they are made active again.
-     * @param {Match} match Match to have results undone.
-     */
-    undoResults(match) {
-        if (match.playerOne === null || match.playerTwo === null || match.active) return;
-        match.resetResults(this.winValue, this.lossValue, this.drawValue);
-        match.playerOneWins = 0;
-        match.playerTwoWins = 0;
-        match.draws = 0;
-        match.playerOne.active = true;
-        match.playerTwo.active = true;
-        match.active = true;
-        if (this.hasOwnProperty('nextRoundReady') && this.nextRoundReady === true) this.nextRoundReady = false;
-    }
-
-    /**
-     * Get the active matches in the tournament.
-     * If no round is specified, it returns all active matches for all rounds.
-     * @param {?Number} round Optional round selector.
-     * @return {Match[]}
-     */
-    activeMatches(round = null) {
-        return round === null ? this.matches.filter(m => m.active) : this.matches.filter(r => r.round === round).filter(m => m.active);
-    }
-
-    /**
      * Get the current standings of the tournament.
      * @param active If only active players are included in standings (default is true).
      * @returns Sorted array of players
@@ -261,6 +189,99 @@ class Tournament implements Structure {
 
         // Sort players
         return Tiebreakers.sort(playersToSort, this);
+    }
+
+    /**
+     * Record a result during an elimination tournament/playoff.
+     * @param tournament The tournament for which the result is being reported.
+     * @param res Array containing player one's games won and player two's games won.
+     */
+    static eliminationResult(tournament: Structure, res: {
+        match: string,
+        result: [number, number]
+    }) : void {
+        
+        // Wins can not be equal, as elimination needs a winner
+        if (res.result[0] === res.result[1]) {
+            throw 'One player must win more games than the other during elimination.';
+        }
+
+        // Get the match
+        const match = tournament.matches.find(m => m.id === res.match);
+        if (match === undefined) {
+            throw `No match found with the ID ${res.match}.`;
+        }
+
+        // Get the players
+        const playerOne = tournament.players.find(player => player.id === match.playerOne);
+        const playerTwo = tournament.players.find(player => player.id === match.playerTwo);
+
+        // Set result
+        match.result.playerOneWins = res.result[0];
+        playerOne.results.push({
+            match: match.id,
+            round: match.round,
+            opponent: match.playerTwo,
+            outcome: res.result[0] > res.result[1] ? 'win' : 'loss',
+            matchPoints: res.result[0] > res.result[1] ? tournament.pointsForWin : tournament.pointsForLoss,
+            gamePoints: res.result[0],
+            games: res.result.reduce((sum, points) => sum + points, 0)
+        });
+        const playerOneResult = playerOne.results[playerOne.results.length - 1];
+        playerOne.matchCount++;
+        playerOne.matchPoints += playerOneResult.matchPoints;
+        playerOne.gameCount += playerOneResult.games;
+        playerOne.gamePoints += playerOneResult.gamePoints;
+        
+        match.result.playerTwoWins = res.result[1];
+        playerTwo.results.push({
+            match: match.id,
+            round: match.round,
+            opponent: match.playerOne,
+            outcome: res.result[1] > res.result[0] ? 'win' : 'loss',
+            matchPoints: res.result[1] > res.result[0] ? tournament.pointsForWin : tournament.pointsForLoss,
+            gamePoints: res.result[1],
+            games: res.result.reduce((sum, points) => sum + points, 0)
+        });
+        const playerTwoResult = playerTwo.results[playerTwo.results.length - 1];
+        playerTwo.matchCount++;
+        playerTwo.matchPoints += playerTwoResult.matchPoints;
+        playerTwo.gameCount += playerTwoResult.games;
+        playerTwo.gamePoints += playerTwoResult.gamePoints;
+        match.active = false;
+
+        // Move players to next matches (or end event)
+        let winner: Player, loser: Player;
+        if (res.result[0] > res.result[1]) {
+            winner = playerOne;
+            loser = playerTwo;
+        } else {
+            winner = playerTwo;
+            loser = playerOne;
+        }
+        if (match.winnersPath === null) {
+            tournament.status = 'finished';
+            return;
+        } else {
+            const winnersMatch = tournament.matches.find(m => m.id === match.winnersPath);
+            if (winnersMatch.playerOne === null) {
+                winnersMatch.playerOne = winner.id;
+            } else if (winnersMatch.playerTwo === null) {
+                winnersMatch.playerTwo = winner.id;
+                winnersMatch.active = true;
+            }
+        }
+        if (match.losersPath === null) {
+            loser.active = false;
+        } else {
+            const losersMatch = tournament.matches.find(m => m.id === match.losersPath);
+            if (losersMatch.playerOne === null) {
+                losersMatch.playerOne = loser.id;
+            } else if (losersMatch.playerTwo === null) {
+                losersMatch.playerTwo = loser.id;
+                losersMatch.active = true;
+            }
+        }
     }
 }
 
@@ -344,18 +365,48 @@ class Swiss extends Tournament {
     /**
      * Starts the tournament.
      */
-    startEvent() {
-        if (this.players.length < 2) return;
-        this.active = true;
-        if (this.numberOfRounds === null) this.numberOfRounds = Math.ceil(Math.log2(this.players.length));
-        this.currentRound++;
-        if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players, this.currentRound, 0));
-        else {
-            const seedPref = this.seededPlayers ? this.seedOrder : null;
-            this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players, this.currentRound, 0, seedPref));
+    startEvent(): void {
+
+        // Need at least 8 players
+        if (this.players.length < 8) {
+            throw `Swiss tournament requires at least 8 players, and there are currently ${this.players.length} players enrolled`;
         }
-        const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
-        if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
+
+        // Set tournament as active
+        this.status = 'active';
+
+        // Determine number of rounds, if not initially set
+        if (this.rounds === 0) this.rounds = Math.ceil(Math.log2(this.players.length));
+
+        // Create matches
+        this.currentRound++;
+        Pairings.swiss(this);
+
+        // Process byes
+        //TODO
+    }
+
+    /**
+     * Create the next round of the tournament.
+     */
+    nextRound(): void {
+
+        // Can't start the next round if there are active matches
+        if (this.matches.some(match => match.active === true)) {
+            throw `Can not start the next round with ${this.matches.reduce((sum, match) => match.active === true ? sum + 1 : sum, 0)} active matches remaining`;
+        }
+
+        // Check if it's time to start playoffs
+        if (this.currentRound === this.rounds) {
+            //TODO
+        }
+
+        // Create matches
+        this.currentRound++;
+        Pairings.swiss(this);
+
+        // Process byes
+        //TODO
     }
 
     /**
@@ -418,7 +469,7 @@ class Swiss extends Tournament {
      * Starts the next round, if there are no active matches
      * @return {(Match[]|Boolean)} Array of new matches, or false if not ready to start the new round.
      */
-    nextRound() {
+    nextRound2() {
         if (!this.nextRoundReady) return false;
         let newMatches = [];
         this.nextRoundReady = false;
