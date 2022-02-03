@@ -34,7 +34,7 @@ const compute = (tournament: Structure): void => {
             matchPointsAfterEachRound += currentMatch.matchPoints;
             cumulativeScore += matchPointsAfterEachRound;
         }
-        player.tiebreakers.cumulative = cumulativeScore;
+        player.tiebreakers.cumulative = cumulativeScore - (tournament.pointsForWin * player.results.reduce((sum, result) => result.outcome === 'bye' ? sum + 1 : sum, 0));
     }
 
     // Calculate all remaining tiebreakers except for opponent's opponent match win percentage

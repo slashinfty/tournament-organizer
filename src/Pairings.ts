@@ -528,7 +528,7 @@ const swiss = (tournament: Structure): void => {
             id: matchID,
             match: matchCount++,
             round: tournament.currentRound,
-            //playerOne: TODO
+            playerOne: playersCopy[i].id,
             playerTwo: null
         }));
     }

@@ -78,7 +78,34 @@ export class Manager {
      * @returns The reloaded tournament.
      */
     loadTournament(tournament: Tournament.Structure): Tournament.Structure {
-        //TODO
+        
+        // No loading a tournament already in the manager
+        if (this.tournaments.some(t => t.id === tournament.id)) {
+            throw `Tournament with ID ${tournament.id} already exists.`;
+        }
+
+        // Create tournament
+        let loadedTournament: Tournament.Structure;
+        switch (tournament.format) {
+            case 'single elimination':
+                loadedTournament = new Tournament.Elimination(tournament);
+                break;
+            case 'swiss':
+                loadedTournament = new Tournament.Swiss(tournament);
+                break;
+            case 'round robin':
+            case 'double round robin':
+                loadedTournament = new Tournament.RoundRobin(tournament);
+                break;
+        }
+
+        // Copy over all data
+        Object.assign(loadedTournament, tournament);
+
+        // Add tournament to list
+        this.tournaments.push(loadedTournament);
+        
+        return loadedTournament;
     }
 
     /**

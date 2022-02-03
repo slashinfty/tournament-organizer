@@ -13,12 +13,12 @@ interface Structure {
     playerLimit: number;
     pointsForWin: number;
     pointsForDraw: number;
+    currentRound: number;
     startTime: Date;
     players: Array<Player>;
     matches: Array<Match>;
     status: 'registration' | 'active' | 'playoffs' | 'aborted' | 'finished';
     rounds?: number;
-    currentRound?: number;
     playoffs?: 'none' | 'single elimination' | 'double elimination';
     bestOf?: number;
     cut?: {
@@ -78,6 +78,9 @@ class Tournament implements Structure {
     /** Number of points assigned to a drawn match. */
     pointsForDraw: number;
 
+    /** Current round of the tournament. */
+    currentRound: number;
+
     /** Creation date and time of the tournament. */
     startTime: Date;
 
@@ -110,6 +113,7 @@ class Tournament implements Structure {
         this.pointsForWin = options.pointsForWin;
         this.pointsForDraw = options.pointsForDraw;
         this.startTime = new Date(Date.now());
+        this.currentRound = 0;
         this.players = [];
         this.matches = [];
         this.status = 'registration';
@@ -141,6 +145,10 @@ class Tournament implements Structure {
             throw `A player with ID ${opt.id} is already enrolled in the tournament. Duplicate player can not be added.`;
         }
 
+        if (this.format === 'single elimination' || this.format === 'double elimination') {
+            throw `Players can not be added late to ${this.format} tournaments.`;
+        }
+
         // Default values
         let options = Object.assign({
             id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
@@ -158,7 +166,11 @@ class Tournament implements Structure {
 
         // Handling missed rounds due to tardiness
         if (this.status === 'active') {
-            //TODO
+            for (let i = 0; i < this.currentRound; i++) {
+                if (options.missingResults === 'byes') {
+                    //TODO
+                }
+            }
         }
 
         return newPlayer;
@@ -326,16 +338,6 @@ class Tournament implements Structure {
         playerTwo.gamePoints += playerTwoResult.gamePoints;
         match.result.draws = res.result[2];
         match.active = false;
-
-        // If it's the last match, move to playoffs or finish
-        if (tournament.matches.every(match => match.active === false) && tournament.currentRound === tournament.rounds) {
-            if (tournament.playoffs === 'none') {
-                tournament.status = 'finished';
-                return;
-            } else {
-                //TODO move to playoffs
-            }
-        }
     }
 }
 
@@ -344,9 +346,6 @@ class Swiss extends Tournament {
     
     /** Number of rounds in the tournament. If 0, it will be determined by the number of players (base 2 logarithm of the number of players, rounded up). */
     rounds: number;
-
-    /** Current round of the tournament. */
-    currentRound: number;
 
     /** Format for the playoffs. */
     playoffs: 'none' | 'single elimination' | 'double elimination';
@@ -398,7 +397,6 @@ class Swiss extends Tournament {
         // Default values
         let options = Object.assign({
             rounds: 0,
-            currentRound: 0,
             playoffs: 'none',
             bestOf: 1,
             cut: {
@@ -413,7 +411,6 @@ class Swiss extends Tournament {
         this.bestOf = options.bestOf;
         this.cut = options.cut;
         this.tiebreakers = options.tiebreakers;
-        this.currentRound = 0;
     }
 
     /**
@@ -423,7 +420,7 @@ class Swiss extends Tournament {
 
         // Need at least 8 players
         if (this.players.length < 8) {
-            throw `Swiss tournaments require at least 8 players, and there are currently ${this.players.length} players enrolled`;
+            throw `Swiss tournaments require at least 8 players, and there are currently ${this.players.length} players enrolled.`;
         }
 
         // Set tournament as active
@@ -437,7 +434,24 @@ class Swiss extends Tournament {
         Pairings.swiss(this);
 
         // Process byes
-        //TODO
+        const byes = this.matches.filter(match => match.round === this.currentRound && match.playerTwo === null);
+        byes.forEach(bye => {
+            const player = this.players.find(p => p.id === bye.playerOne);
+            player.results.push({
+                match: bye.id,
+                round: bye.round,
+                opponent: null,
+                outcome: 'bye',
+                matchPoints: this.pointsForWin,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                games: Math.ceil(this.bestOf / 2)
+            });
+            player.pairingBye = true;
+            player.matchCount++;
+            player.matchPoints += this.pointsForWin;
+            player.gameCount += Math.ceil(this.bestOf / 2);
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+        });
     }
 
     /**
@@ -447,13 +461,40 @@ class Swiss extends Tournament {
 
         // Can't start the next round if there are active matches
         if (this.matches.some(match => match.active === true)) {
-            throw `Can not start the next round with ${this.matches.reduce((sum, match) => match.active === true ? sum + 1 : sum, 0)} active matches remaining`;
+            throw `Can not start the next round with ${this.matches.reduce((sum, match) => match.active === true ? sum + 1 : sum, 0)} active matches remaining.`;
+        }
+
+        // Can't create new rounds while the tournament isn't active
+        if (this.status !== 'active') {
+            throw `Tournament can only create new rounds while active, and the current status is ${this.status}.`;
         }
 
         // Check if it's time to start playoffs
         if (this.currentRound === this.rounds) {
-            //TODO
-            return;
+            if (this.playoffs === 'none') {
+                this.status = 'finished';
+                return;
+            } else {
+                if (this.cut.type === 'points') {
+                    if (this.cut.limit !== 0) {
+                        const cutPlayers = this.players.filter(player => player.matchPoints < this.cut.limit);
+                        cutPlayers.forEach(player => player.active = false);
+                    }
+                } else if (this.cut.type === 'rank') {
+                    if (this.cut.limit !== 0) {
+                        Tiebreakers.compute(this);
+                        const sortedPlayers = Tiebreakers.sort(this.players.filter(player => player.active === true), this);
+                        const cutPlayers = sortedPlayers.slice(this.cut.limit);
+                        cutPlayers.forEach(player => player.active = false);
+                    }
+                }
+                if (this.playoffs === 'single elimination') {
+                    Pairings.singleElimination(this);
+                } else {
+                    Pairings.doubleElimination(this);
+                }
+                return;
+            }
         }
 
         // Create matches
@@ -461,7 +502,24 @@ class Swiss extends Tournament {
         Pairings.swiss(this);
 
         // Process byes
-        //TODO
+        const byes = this.matches.filter(match => match.round === this.currentRound && match.playerTwo === null);
+        byes.forEach(bye => {
+            const player = this.players.find(p => p.id === bye.playerOne);
+            player.results.push({
+                match: bye.id,
+                round: bye.round,
+                opponent: null,
+                outcome: 'bye',
+                matchPoints: this.pointsForWin,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                games: Math.ceil(this.bestOf / 2)
+            });
+            player.pairingBye = true;
+            player.matchCount++;
+            player.matchPoints += this.pointsForWin;
+            player.gameCount += Math.ceil(this.bestOf / 2);
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+        });
     }
 
     /**
@@ -493,35 +551,8 @@ class Swiss extends Tournament {
     }
 }
 
-/**
- * Class recreating a Swiss pairing tournament from an existing object.
- * @extends Swiss
- */
- class SwissReloaded extends Swiss {
-    constructor(tournament) {
-        super(tournament.id);
-        ['players', 'matches'].forEach(prop => tournament[prop] = tournament.hasOwnProperty(prop) ? tournament[prop] : []);
-        Object.assign(this, tournament);
-        this.players = this.players.map(p => new Player(p));
-        this.matches = this.matches.map(m => new Match(m))
-        this.matches.forEach(m => {
-            if (m.playerOne !== undefined && m.playerOne !== null) {
-                const p1 = this.players.find(p => m.playerOne.id === p.id);
-                if (p1 !== undefined) m.playerOne = p1;
-            }
-            if (m.playerTwo !== undefined && m.playerTwo !== null) {
-                const p2 = this.players.find(p => m.playerTwo.id === p.id);
-                if (p2 !== undefined) m.playerTwo = p2;
-            }
-        });
-    }
- }
-
 /** Class representing a round-robin pairing tournament. */
 class RoundRobin extends Tournament {
-    
-    /** Current round of the tournament. */
-    currentRound: number;
 
     /** Format for the playoffs. */
     playoffs: 'none' | 'single elimination' | 'double elimination';
@@ -575,7 +606,6 @@ class RoundRobin extends Tournament {
 
         // Default values
         let options = Object.assign({
-            currentRound: 0,
             playoffs: 'none',
             bestOf: 1,
             cut: {
@@ -591,7 +621,6 @@ class RoundRobin extends Tournament {
         this.cut = options.cut;
         this.double = options.double;
         this.tiebreakers = options.tiebreakers;
-        this.currentRound = 0;
     }
 
     /**
@@ -612,7 +641,25 @@ class RoundRobin extends Tournament {
         Pairings.roundRobin(this);
 
         // Process bye, if necessary
-        //TODO
+        const byes = this.matches.filter(match => match.round === this.currentRound && (match.playerOne === null || match.playerTwo === null));
+        byes.forEach(bye => {
+            const id = bye.playerTwo === null ? bye.playerOne : bye.playerTwo;
+            const player = this.players.find(p => p.id === id);
+            player.results.push({
+                match: bye.id,
+                round: bye.round,
+                opponent: null,
+                outcome: 'bye',
+                matchPoints: this.pointsForWin,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                games: Math.ceil(this.bestOf / 2)
+            });
+            player.pairingBye = true;
+            player.matchCount++;
+            player.matchPoints += this.pointsForWin;
+            player.gameCount += Math.ceil(this.bestOf / 2);
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+        });
     }
 
     /**
@@ -625,10 +672,37 @@ class RoundRobin extends Tournament {
             throw `Can not start the next round with ${this.matches.reduce((sum, match) => match.active === true ? sum + 1 : sum, 0)} active matches remaining`;
         }
 
+        // Can't create new rounds while the tournament isn't active
+        if (this.status !== 'active') {
+            throw `Tournament can only create new rounds while active, and the current status is ${this.status}.`;
+        }
+
         // Check if it's time to start playoffs
         if (this.currentRound === this.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0)) {
-            //TODO
-            return;
+            if (this.playoffs === 'none') {
+                this.status = 'finished';
+                return;
+            } else {
+                if (this.cut.type === 'points') {
+                    if (this.cut.limit !== 0) {
+                        const cutPlayers = this.players.filter(player => player.matchPoints < this.cut.limit);
+                        cutPlayers.forEach(player => player.active = false);
+                    }
+                } else if (this.cut.type === 'rank') {
+                    if (this.cut.limit !== 0) {
+                        Tiebreakers.compute(this);
+                        const sortedPlayers = Tiebreakers.sort(this.players.filter(player => player.active === true), this);
+                        const cutPlayers = sortedPlayers.slice(this.cut.limit);
+                        cutPlayers.forEach(player => player.active = false);
+                    }
+                }
+                if (this.playoffs === 'single elimination') {
+                    Pairings.singleElimination(this);
+                } else {
+                    Pairings.doubleElimination(this);
+                }
+                return;
+            }
         }
 
         // Create matches
@@ -636,7 +710,25 @@ class RoundRobin extends Tournament {
         Pairings.swiss(this);
 
         // Process byes
-        //TODO
+        const byes = this.matches.filter(match => match.round === this.currentRound && (match.playerOne === null || match.playerTwo === null));
+        byes.forEach(bye => {
+            const id = bye.playerTwo === null ? bye.playerOne : bye.playerTwo;
+            const player = this.players.find(p => p.id === id);
+            player.results.push({
+                match: bye.id,
+                round: bye.round,
+                opponent: null,
+                outcome: 'bye',
+                matchPoints: this.pointsForWin,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                games: Math.ceil(this.bestOf / 2)
+            });
+            player.pairingBye = true;
+            player.matchCount++;
+            player.matchPoints += this.pointsForWin;
+            player.gameCount += Math.ceil(this.bestOf / 2);
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+        });
     }
 
     /**
@@ -667,30 +759,6 @@ class RoundRobin extends Tournament {
         return;
     }
 }
-
-/**
- * Class recreating a round-robin pairing tournament from an existing object.
- * @extends RoundRobin
- */
- class RoundRobinReloaded extends RoundRobin {
-    constructor(tournament) {
-        super(tournament.id);
-        ['players', 'matches', 'groups'].forEach(prop => tournament[prop] = tournament.hasOwnProperty(prop) ? tournament[prop] : []);
-        Object.assign(this, tournament);
-        this.players = this.players.map(p => new Player(p));
-        this.matches = this.matches.map(m => new Match(m));
-        this.matches.forEach(m => {
-            if (m.playerOne !== undefined && m.playerOne !== null) {
-                const p1 = this.players.find(p => m.playerOne.id === p.id);
-                if (p1 !== undefined) m.playerOne = p1;
-            }
-            if (m.playerTwo !== undefined && m.playerTwo !== null) {
-                const p2 = this.players.find(p => m.playerTwo.id === p.id);
-                if (p2 !== undefined) m.playerTwo = p2;
-            }
-        });
-    }
- }
 
 /**
  * Class representing an elimination tournament.
@@ -748,28 +816,5 @@ class Elimination extends Tournament {
         Tournament.eliminationResult(this, res);
     }
 }
-
-/**
- * Class recreating an elimination tournament from an existing object.
- * @extends Elimination
- */
- class EliminationReloaded extends Elimination {
-    constructor(tournament) {
-        super(tournament.id);
-        Object.assign(this, tournament);
-        this.players = this.players.map(p => new Player(p));
-        this.matches = this.matches.map(m => new Match(m));
-        this.matches.forEach(m => {
-            if (m.playerOne !== undefined && m.playerOne !== null) {
-                const p1 = this.players.find(p => m.playerOne.id === p.id);
-                if (p1 !== undefined) m.playerOne = p1;
-            }
-            if (m.playerTwo !== undefined && m.playerTwo !== null) {
-                const p2 = this.players.find(p => m.playerTwo.id === p.id);
-                if (p2 !== undefined) m.playerTwo = p2;
-            }
-        });
-    }
- }
 
 export { BasicTournamentProperties, Structure, Tournament, Swiss, RoundRobin, Elimination };
