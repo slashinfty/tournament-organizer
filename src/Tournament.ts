@@ -423,7 +423,7 @@ class Swiss extends Tournament {
 
         // Need at least 8 players
         if (this.players.length < 8) {
-            throw `Swiss tournament requires at least 8 players, and there are currently ${this.players.length} players enrolled`;
+            throw `Swiss tournaments require at least 8 players, and there are currently ${this.players.length} players enrolled`;
         }
 
         // Set tournament as active
@@ -453,6 +453,7 @@ class Swiss extends Tournament {
         // Check if it's time to start playoffs
         if (this.currentRound === this.rounds) {
             //TODO
+            return;
         }
 
         // Create matches
@@ -465,10 +466,9 @@ class Swiss extends Tournament {
 
     /**
      * Record a result during an elimination tournament/playoff. Called by subclasses.
-     * @param tournament The tournament for which the result is being reported.
      * @param res Array containing player one's games won and player two's games won.
      */
-     result(tournament: Structure, res: {
+     result(res: {
         match: string,
         result: [number, number, number?]
     }) : void {
@@ -476,7 +476,7 @@ class Swiss extends Tournament {
         const result = res.result[2] === undefined ? [...res.result, 0] : [...res.result];
 
         // If it's the playoffs, use elimination to process the result
-        if (tournament.status === 'playoffs') {
+        if (this.status === 'playoffs') {
             Tournament.eliminationResult(this, {
                 match: res.match,
                 result: [result[0], result[1]]
@@ -490,96 +490,6 @@ class Swiss extends Tournament {
             result: [result[0], result[1], result[2]]
         });
         return;
-    }
-
-    /**
-     * Storing results of a match.
-     * @param {Match} match The match being reported.
-     * @param {Number} playerOneWins Number of wins for player one.
-     * @param {Number} playerTwoWins Number of wins for player two.
-     * @param {Number} [draws=0] Number of draws.
-     * @returns {?Match[]} Array of new matches, or null if result failed.
-     */
-    result2(match, playerOneWins, playerTwoWins, draws = 0) {
-        if (!this.active) return null;
-        if (!match.active && match.playerOne !== null && match.playerTwo !== null) {
-            match.resetResults(this.winValue, this.lossValue, this.drawValue);
-            match.playerOneWins = 0;
-            match.playerTwoWins = 0;
-            match.draws = 0;
-        }
-        match.playerOneWins = playerOneWins;
-        if (match.playerTwo === null) {
-            match.assignBye(1, this.winValue);
-            return null;
-        }
-        match.playerTwoWins = playerTwoWins;
-        match.draws = draws;
-        match.active = false;
-        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
-        let active = this.activeMatches();
-        let newMatches = [];
-        if (this.currentRound > this.numberOfRounds) {
-            if (match.winnerPath !== null) {
-                if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-                else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) {
-                    match.winnerPath.active = true;
-                    newMatches.push(match.winnerPath);
-                }
-            }
-            if (match.loserPath !== null) {
-                if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-                else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) {
-                    match.loserPath.active = true;
-                    newMatches.push(match.loserPath);
-                }
-            }
-            if (match.loserPath === null) {
-                if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
-                else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
-            }
-            active = this.activeMatches();
-            this.currentRound = active.length === 0 ? -1 : active.reduce((x, y) => Math.min(x, y.round), active[0].round);
-        }
-        if (active.length === 0) this.nextRoundReady = true;
-        this.players.forEach(p => Tiebreakers.compute(p, this));
-        return newMatches;
-    }
-
-    /**
-     * Starts the next round, if there are no active matches
-     * @return {(Match[]|Boolean)} Array of new matches, or false if not ready to start the new round.
-     */
-    nextRound2() {
-        if (!this.nextRoundReady) return false;
-        let newMatches = [];
-        this.nextRoundReady = false;
-        if (this.currentRound === this.numberOfRounds) {
-            if (this.playoffs !== null) {
-                this.currentRound++;
-                if (this.cutType === 'rank' && this.cutLimit > 0) {
-                    const rankedPlayers = this.standings();
-                    for (let i = this.cutLimit; i < rankedPlayers.length; i++) this.removePlayer(rankedPlayers[i]);
-                } else if (this.cutType === 'points' && this.cutLimit > 0) this.players.filter(p => p.matchPoints < this.cutLimit).forEach(p => this.removePlayer(p));
-                if (this.playoffs === 'elim') Algorithms.elim(this.matches, this.players.filter(p => p.active), this.thirdPlaceMatch, this.currentRound);
-                else Algorithms.doubleElim(this.matches, this.players.filter(p => p.active), this.currentRound);
-                newMatches = this.activeMatches();
-            } else this.active = false;
-        } else if (this.currentRound > this.numberOfRounds || this.currentRound === -1) this.active = false;
-        else {
-            this.currentRound++;
-            if (this.dutch) this.matches = this.matches.concat(Algorithms.dutch(this.matches, this.players.filter(p => p.active), this.currentRound, this.winValue * (this.currentRound - 1)));
-            else {
-                const seedPref = this.seededPlayers ? this.seedOrder : null;
-                this.matches = this.matches.concat(Algorithms.swiss(this.matches, this.players.filter(p => p.active), this.currentRound, this.winValue * (this.currentRound - 1), seedPref));
-            }
-            const bye = this.matches.filter(r => r.round === this.currentRound).find(m => m.playerTwo === null);
-            if (bye !== undefined) this.result(bye, Math.ceil(this.bestOf / 2), 0);
-            newMatches = this.activeMatches();
-        }
-        return newMatches;
     }
 }
 
@@ -607,271 +517,154 @@ class Swiss extends Tournament {
     }
  }
 
-/**
- * Class representing a round-robin pairing tournament.
- * @extends Tournament
- */
+/** Class representing a round-robin pairing tournament. */
 class RoundRobin extends Tournament {
-    /**
-     * Create a new round-robin pairing tournament.
-     * @param {String} id String to be the event ID.
-     * @param {Object} [options={}] Options that can be defined for a tournament.
-     */
-    constructor(id, options = {}) {
-        super(id, options);
+    
+    /** Current round of the tournament. */
+    currentRound: number;
 
-        /**
-         * Format for the second stage of the tournament.
-         * If null, there is only one stage.
-         * @type {?('elim'|'2xelim')}
-         * @default null
-         */
-        this.playoffs = options.hasOwnProperty('playoffs') && ['elim', '2xelim'].includes(options.playoffs) ? options.playoffs : null;
+    /** Format for the playoffs. */
+    playoffs: 'none' | 'single elimination' | 'double elimination';
 
-        /**
-         * Number of possible games for a match, where the winner must win the majority of games up to 1 + x/2 (used for byes).
-         * @type {Number}
-         * @default 1
-         */
-        this.bestOf = options.hasOwnProperty('bestOf') && Number.isInteger(options.bestOf) && options.bestOf % 2 === 1 ? options.bestOf : 1;
+    /** Number of possible games for a match. */
+    bestOf: number;
 
-        /**
-         * Method to determine which players advance to the second stage of the tournament.
-         * @type {('rank'|'points')}
-         * @default 'rank'
-         */
-        this.cutType = options.hasOwnProperty('cutType') && options.cutType === 'points' ? 'points' : 'rank';
+    /** How to cut for playoffs. */
+    cut: {
+        type: 'none' | 'rank' | 'points',
+        limit: number
+    };
 
-        /**
-         * Breakpoint for determining how many players advance to the second stage of the tournament.
-         * If 0, it will override the playoff format to null.
-         * If -1, all players will advance.
-         * @type {Number}
-         * @default 0
-         */
-        this.cutLimit = options.hasOwnProperty('cutLimit') && Number.isInteger(options.cutLimit) && options.cutLimit >= -1 ? options.cutLimit : 0;
-        if (this.cutLimit === 0) this.playoffs = null;
+    /** If the tournament is double round-robin or not. */
+    double: boolean;
 
-        /**
-         * Either the maximum size of each group, or the number of groups (minimum 2).
-         * If null, there are no groups.
-         * @type {?Number}
-         * @default null
-         */
-        this.groupNumber = options.hasOwnProperty('groupNumber') && Number.isInteger(options.groupNumber) && options.groupNumber >= 2 ? options.groupNumber : null;
+    /** Tiebreakers that will be used for the tournament in order of precedence.  */
+    tiebreakers: [
+        'median buchholz' |
+        'solkoff' |
+        'sonneborn berger' |
+        'cumulative' |
+        'versus' |
+        'game win percentage' |
+        'opponent game win percentage' |
+        'opponent match win percentage' |
+        'opponent opponent match win percentage'
+    ];
 
-        /**
-         * Whether to institute the cut limit for each group.
-         * Only applies if cutType is rank.
-         * @type {Boolean}
-         * @default false
-         */
-        this.cutEachGroup = this.cutType === 'rank' && options.hasOwnProperty('cutEachGroup') && typeof options.cutEachGroup === 'boolean' ? options.cutEachGroup : false;
+    constructor(opt: {
+        playoffs?: 'none' | 'single elimination' | 'double elimination',
+        bestOf?: number,
+        cut?: {
+            type: 'none' | 'rank' | 'points',
+            limit: number
+        },
+        double?: boolean,
+        tiebreakers?: [
+            'median buchholz' |
+            'solkoff' |
+            'sonneborn berger' |
+            'cumulative' |
+            'versus' |
+            'game win percentage' |
+            'opponent game win percentage' |
+            'opponent match win percentage' |
+            'opponent opponent match win percentage'
+        ]
+    } & BasicTournamentProperties) {
+        super(opt);
 
-        const tiebreakerOptions = ['buchholz-cut1', 'solkoff', 'median-buchholz', 'sonneborn-berger', 'cumulative', 'versus', 'magic-tcg', 'pokemon-tcg'];
-        /**
-         * Array of tiebreakers to use, in order of precedence.
-         * Options include: buchholz-cut1, solkoff, median-buchholz, sonneborn-berger, cumulative, versus, magic-tcg, pokemon-tcg.
-         * Defaults for round-robin are sonneborn-berger and versus.
-         * @type {String[]}
-         * @default null
-         */
-        this.tiebreakers = options.hasOwnProperty('tiebreakers') && Array.isArray(options.tiebreakers) ? options.tiebreakers.filter(t => tiebreakerOptions.includes(t)) : null;
+        // Default values
+        let options = Object.assign({
+            currentRound: 0,
+            playoffs: 'none',
+            bestOf: 1,
+            cut: {
+                type: 'none',
+                limit: 0
+            },
+            double: false,
+            tiebreakers: ['sonneborn berger', 'versus']
+        }, opt);
 
-        // Validating tiebreakers.
-        if (this.tiebreakers === null || this.tiebreakers.length === 0) this.tiebreakers = ['sonneborn-berger', 'versus'];
-        this.tiebreakers.unshift('match-points');
-
-        /**
-         * If the format is double round-robin.
-         * @type {Boolean}
-         * @default false
-         */
-        this.doubleRR = options.hasOwnProperty('doubleRR') && typeof options.doubleRR === 'boolean' ? options.doubleRR : false;
-
-        /**
-         * Array of groups of players.
-         * @type {Array[]}
-         * @default []
-         */
-        this.groups = [];
-
-        /**
-         * Current round number.
-         * 0 if the tournament has not started, -1 if the tournament is finished.
-         * @type {Number}
-         * @default 0
-         */
+        this.playoffs = options.playoffs;
+        this.bestOf = options.bestOf;
+        this.cut = options.cut;
+        this.double = options.double;
+        this.tiebreakers = options.tiebreakers;
         this.currentRound = 0;
-
-        /**
-         * If the event is ready to proceed to the next round.
-         * @type {Boolean}
-         * @default false
-         */
-         this.nextRoundReady = false;
     }
 
     /**
      * Starts the tournament.
      */
-    startEvent() {
-        if (this.players.length < 2) return;
-        this.active = true;
-        if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
-        else Utilities.shuffle(this.players);
-        if (typeof this.groupNumber === 'number') {
-            const numberOfGroups = Math.ceil(this.players.length / this.groupNumber);
-            let j = 0;
-            let k = 0;
-            for (let i = 0; i < numberOfGroups; i++) {
-                if (j < numberOfGroups - (this.groupNumber * numberOfGroups - this.players.length)) {
-                    const a = [];
-                    for (let l = 0; l < this.groupNumber; l++) {
-                        a.push(this.players[k]);
-                        k++;
-                    }
-                    this.groups.push(a);
-                    j++;
-                } else if (j < numberOfGroups) {
-                    const a = [];
-                    for (let l = 0; l < this.groupNumber - 1; l++) {
-                        a.push(this.players[k]);
-                        k++;
-                    }
-                    this.groups.push(a);
-                    j++;
-                }
-            }
-            this.matches = Algorithms.robin(this.groups, true, this.doubleRR);
-        } else this.matches = Algorithms.robin(this.players, false, this.doubleRR);
+    startEvent(): void {
+        
+        // Need at least 4 players
+        if (this.players.length < 4) {
+            throw `Round-Robin tournaments require at least 4 players, and there are currently ${this.players.length} players enrolled`;
+        }
+
+        // Set tournament as active
+        this.status = 'active';
+
+        // Create matches
         this.currentRound++;
-        const byes = this.matches.filter(r => r.round === this.currentRound && (r.playerOne === null || r.playerTwo === null));
-        byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
-        this.numberOfRounds = this.matches.reduce((x, y) => Math.max(x, y.round), 0);
+        Pairings.roundRobin(this);
+
+        // Process bye, if necessary
+        //TODO
     }
 
     /**
-     * Storing results of a match.
-     * @param {Match} match The match being reported.
-     * @param {Number} playerOneWins Number of wins for player one.
-     * @param {Number} playerTwoWins Number of wins for player two.
-     * @param {Number} [draws=0] Number of draws.
-     * @returns {?Match[]} Array of new matches, or null if result failed.
+     * Create the next round of the tournament.
      */
-    result(match, playerOneWins, playerTwoWins, draws = 0) {
-        if (!this.active) return null;
-        if (!match.active && match.playerOne !== null && match.playerTwo !== null) {
-            match.resetResults(this.winValue, this.lossValue, this.drawValue);
-            match.playerOneWins = 0;
-            match.playerTwoWins = 0;
-            match.draws = 0;
+     nextRound(): void {
+
+        // Can't start the next round if there are active matches
+        if (this.matches.some(match => match.active === true)) {
+            throw `Can not start the next round with ${this.matches.reduce((sum, match) => match.active === true ? sum + 1 : sum, 0)} active matches remaining`;
         }
-        if (match.playerOne === null) {
-            match.assignBye(2, this.winValue);
-            return null;
+
+        // Check if it's time to start playoffs
+        if (this.currentRound === this.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0)) {
+            //TODO
+            return;
         }
-        match.playerOneWins = playerOneWins;
-        if (match.playerTwo === null) {
-            match.assignBye(1, this.winValue);
-            return null;
-        }
-        match.playerTwoWins = playerTwoWins;
-        match.draws = draws;
-        match.active = false;
-        match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
-        let active = this.activeMatches();
-        let newMatches = [];
-        if (this.currentRound > this.numberOfRounds) {
-            if (match.winnerPath !== null) {
-                if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-                else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) {
-                    match.winnerPath.active = true;
-                    newMatches.push(match.winnerPath);
-                }
-            }
-            if (match.loserPath !== null) {
-                if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-                else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-                if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null) {
-                    match.loserPath.active = true;
-                    newMatches.push(match.loserPath);
-                }
-            }
-            if (match.loserPath === null) {
-                if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
-                else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
-            }
-            active = this.activeMatches();
-            this.currentRound = active.length === 0 ? -1 : active.reduce((x, y) => Math.min(x, y.round), active[0].round);
-        }
-        if (active.length === 0) this.nextRoundReady = true;
-        this.players.forEach(p => Tiebreakers.compute(p, this));
-        return newMatches;
+
+        // Create matches
+        this.currentRound++;
+        Pairings.swiss(this);
+
+        // Process byes
+        //TODO
     }
 
     /**
-     * Starts the next round, if there are no active matches
-     * @return {(Match[]|Boolean)} Array of new matches, or false if not ready to start the new round.
+     * Record a result during an elimination tournament/playoff. Called by subclasses.
+     * @param res Array containing player one's games won and player two's games won.
      */
-     nextRound() {
-        if (!this.nextRoundReady) return false;
-        let newMatches = [];
-        this.nextRoundReady = false;
-        if (this.currentRound === this.numberOfRounds) {
-            if (this.playoffs !== null) {
-                this.currentRound++;
-                if (this.cutType === 'rank' && this.cutLimit > 0) {
-                    if (this.cutEachGroup) {
-                        this.groups.forEach(g => {
-                            const rankedGroup = this.groupStandings(g);
-                            for (let i = this.cutLimit; i < g.length; i++) this.removePlayer(rankedGroup[i]);
-                        });
-                    } else {
-                        const rankedPlayers = this.standings();
-                        for (let i = this.cutLimit; i < rankedPlayers.length; i++) this.removePlayer(rankedPlayers[i]);
-                    }
-                } else if (this.cutType === 'points' && this.cutLimit > 0) this.players.filter(p => p.matchPoints < this.cutLimit).forEach(p => this.removePlayer(p));
-                if (this.playoffs === 'elim') Algorithms.elim(this.matches, this.standings(), this.thirdPlaceMatch, this.currentRound);
-                else Algorithms.doubleElim(this.matches, this.standings(), this.currentRound);
-                newMatches = this.activeMatches();
-            } else this.active = false;
-        } else if (this.currentRound > this.numberOfRounds || this.currentRound === -1) this.active = false;
-        else {
-            this.currentRound++;
-            const nextRound = this.matches.filter(p => p.round === this.currentRound);
-            nextRound.forEach(m => {
-                if (m.playerOne !== null && m.playerTwo !== null) m.active = true;
+     result(res: {
+        match: string,
+        result: [number, number, number?]
+    }) : void {
+
+        const result = res.result[2] === undefined ? [...res.result, 0] : [...res.result];
+
+        // If it's the playoffs, use elimination to process the result
+        if (this.status === 'playoffs') {
+            Tournament.eliminationResult(this, {
+                match: res.match,
+                result: [result[0], result[1]]
             });
-            const byes = nextRound.filter(m => m.playerOne === null || m.playerTwo === null);
-            byes.forEach(b => b.playerOne === null ? this.result(b, 0, Math.ceil(this.bestOf / 2)) : this.result(b, Math.ceil(this.bestOf / 2), 0));
-            newMatches = this.activeMatches();
+            return;
         }
-        return newMatches;
-    }
 
-    /**
-     * Get the current standings for a group of players in the tournament.
-     * @param {Player[]} group A group of players.
-     * @param {Boolean} [active=true] Filtering only active players.
-     * @return {Player[]}
-     */
-    groupStandings(group, active = true) {
-        group.forEach(p => Tiebreakers.compute(p, this));
-        let thesePlayers = active ? group.filter(p => p.active) : [...group];
-        thesePlayers.sort((a, b) => {
-            for (let i = 0; i < this.tiebreakers.length; i++) {
-                const prop = this.tiebreakers[i].replace('-', '');
-                const eqCheck = Tiebreakers[prop].equal(a, b);
-                if (eqCheck === true) {
-                    if (i === this.tiebreakers.length - 1) return Math.random() * 2 - 1;
-                    else continue;
-                } else if (typeof eqCheck === 'number') return Tiebreakers[prop].diff(a, b, eqCheck);
-                else return Tiebreakers[prop].diff(a, b);
-            }
+        // Otherwise use standard result process
+        Tournament.standardResult(this, {
+            match: res.match,
+            result: [result[0], result[1], result[2]]
         });
-        return thesePlayers;
+        return;
     }
 }
 
@@ -904,81 +697,55 @@ class RoundRobin extends Tournament {
  * @extends Tournament
  */
 class Elimination extends Tournament {
-    /**
-     * Create a new elimination tournament.
-     * @param {String} id String to be the event ID.
-     * @param {Object} [options={}] Options that can be defined for a tournament.
-     */
-    constructor(id, options = {}) {
-        super(id, options);
+    
+    /** Whether or not to do double elimination. */
+    double: boolean;
 
-        /**
-         * If the format is double elimination.
-         * @type {Boolean}
-         * @default false
-         */
-        this.doubleElim = options.hasOwnProperty('doubleElim') && typeof options.doubleElim === 'boolean' ? options.doubleElim : false;
+    constructor(opt: {
+        double?: boolean
+    } & BasicTournamentProperties) {
+        super(opt);
 
-        this.tiebreakers = ['match-points'];
+        // Default values
+        let options = Object.assign({
+            double: false
+        }, opt);
+
+        this.double = options.double;
     }
 
     /**
      * Starts the tournament.
      */
-    startEvent() {
-        if (this.players.length < 2) return;
-        this.active = true;
-        if (this.seededPlayers) this.players.sort((a, b) => this.seedOrder === 'asc' ? a.seed - b.seed : b.seed - a.seed);
-        else Utilities.shuffle(this.players);
-        this.doubleElim ? Algorithms.doubleElim(this.matches, this.players) : Algorithms.elim(this.matches, this.players, this.thirdPlaceMatch);
+    startEvent(): void {
+        
+        // Need at least 4 players
+        if (this.players.length < 4) {
+            throw `Elimination tournaments require at least 8 players, and there are currently ${this.players.length} players enrolled`;
+        }
+
+        // Set tournament as active
+        this.status = 'active';
+
+        // Create matches
+        if (this.double) {
+            Pairings.doubleElimination(this);
+        } else {
+            Pairings.singleElimination(this);
+        }
     }
 
     /**
-     * Storing results of a match.
-     * @param {Match} match The match being reported.
-     * @param {Number} playerOneWins Number of wins for player one.
-     * @param {Number} playerTwoWins Number of wins for player two.
-     * @param {Number} [draws=0] Number of draws.
-     * @param {Boolean} [dropdown=true] Whether or not to drop the player into loser's bracket in double elimination.
-     * @returns {?Match[]} Array of new matches, or null if result failed.
+     * Record a result during an elimination tournament/playoff. Called by subclasses.
+     * @param res Array containing player one's games won and player two's games won.
      */
-    result(match, playerOneWins, playerTwoWins, draws = 0, dropdown = true) {
-        if (!this.active) return null;
-        if (match.playerTwo === undefined) match.assignBye(1, this.winValue);
-        else {
-            match.playerOneWins = playerOneWins;
-            match.playerTwoWins = playerTwoWins;
-            match.draws = draws;
-            match.active = false;
-            match.resultForPlayers(this.winValue, this.lossValue, this.drawValue);
-        }
-        let newMatches = [];
-        if (match.winnerPath !== null) {
-            if (match.winnerPath.playerOne === null) match.winnerPath.playerOne = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-            else if (match.winnerPath.playerTwo === null) match.winnerPath.playerTwo = playerOneWins >= playerTwoWins ? match.playerOne : match.playerTwo;
-            if (match.winnerPath.playerOne !== null && match.winnerPath.playerTwo !== null) {
-                match.winnerPath.active = true;
-                newMatches.push(match.winnerPath);
-            }
-        }
-        if (match.loserPath !== null && dropdown) {
-            if (match.loserPath.playerOne === null) match.loserPath.playerOne = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-            else if (match.loserPath.playerTwo === null) match.loserPath.playerTwo = playerOneWins < playerTwoWins ? match.playerOne : match.playerTwo;
-            if (match.loserPath.playerTwo === undefined) {
-                let matchesFromDrop = this.result(match.loserPath, 2, 0);
-                matchesFromDrop.forEach(m => newMatches.push(m));
-            }
-            if (match.loserPath.playerOne !== null && match.loserPath.playerTwo !== null && match.loserPath.playerTwo !== undefined) {
-                match.loserPath.active = true;
-                newMatches.push(match.loserPath);
-            }
-        }
-        if (match.loserPath === null && match.playerTwo !== undefined) {
-            if (playerOneWins > playerTwoWins) this.removePlayer(match.playerTwo);
-            else if (playerTwoWins > playerOneWins) this.removePlayer(match.playerOne);
-        }
-        if (this.activeMatches().length === 0) this.active = false;
-        return newMatches;
+    result(res: {
+        match: string,
+        result: [number, number]
+    }) : void {
+        
+        // Use elimination result
+        Tournament.eliminationResult(this, res);
     }
 }
 
@@ -1005,4 +772,4 @@ class Elimination extends Tournament {
     }
  }
 
-export { Structure, Tournament };
+export { BasicTournamentProperties, Structure, Tournament, Swiss, RoundRobin, Elimination };

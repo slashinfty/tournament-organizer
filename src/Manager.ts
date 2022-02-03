@@ -21,13 +21,19 @@ export class Manager {
         if (opt.hasOwnProperty('id') && this.tournaments.some(tournament => tournament.id === opt.id)) {
             throw `A tournament with ID ${opt.id} is already in the event manager. Duplicate tournament can not be added.`;
         }
-        
-        // Default values
-        let options = Object.assign({
+
+        let defaults: {
+            id: string,
+            name: string,
+            format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin'
+        } = {
             id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
             name: 'New Tournament',
-            format: 'Single Elimination'
-        }, opt === undefined ? {} : opt);
+            format: 'single elimination'
+        }
+        
+        // Default values
+        let options: Tournament.BasicTournamentProperties = Object.assign(defaults, opt === undefined ? {} : opt);
         
         // No duplicate IDs
         while (this.tournaments.some(tournament => tournament.id === options.id)) {
@@ -35,8 +41,30 @@ export class Manager {
         }
         
         // Create tournament
-        let tournament;
-        // TODO
+        let tournament: Tournament.Structure;
+        switch (options.format) {
+            case 'single elimination':
+                tournament = new Tournament.Elimination(options);
+                break;
+            case 'double elimination':
+                options = Object.assign({
+                    double: true
+                }, options);
+                tournament = new Tournament.Elimination(options);
+                break;
+            case 'swiss':
+                tournament = new Tournament.Swiss(options);
+                break;
+            case 'round robin':
+                tournament = new Tournament.RoundRobin(options);
+                break;
+            case 'double round robin':
+                options = Object.assign({
+                    double: true
+                }, options);
+                tournament = new Tournament.RoundRobin(options);
+                break;
+        }
         
         // Add tournament to list
         this.tournaments.push(tournament);
@@ -49,7 +77,7 @@ export class Manager {
      * @param tournament The tournament to be reloaded.
      * @returns The reloaded tournament.
      */
-    loadTournament(tournament: Object): Tournament.Structure {
+    loadTournament(tournament: Tournament.Structure): Tournament.Structure {
         //TODO
     }
 
