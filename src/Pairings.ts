@@ -448,12 +448,7 @@ const swiss = (tournament: Structure): void => {
             const upcomingPlayers = players.slice(i + 1);
 
             // Sort players relative to current player, if tournament sorts players
-            let sorted: Player[] = [];
-            if (tournament.sorting === 'ascending') {
-                sorted = [...players.filter(player => player.id !== currentPlayer.id).sort((a, b) => a.seed - b.seed)]; 
-            } else if (tournament.sorting === 'descending') {
-                sorted = [...players.filter(player => player.id !== currentPlayer.id).sort((a, b) => b.seed - a.seed)];
-            }
+            let sorted = tournament.sorting !== 'none' ? [...players.filter(player => player.id !== currentPlayer.id)].sort((a, b) => Math.abs(currentPlayer.seed - a.seed) - Math.abs(currentPlayer.seed - b.seed)) : [];
             
             // Go through upcoming players
             for (let j = 0; j < upcomingPlayers.length; j++) {
