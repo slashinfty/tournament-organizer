@@ -1,9 +1,8 @@
 import cryptoRandomString from 'crypto-random-string';
 import arrayShuffle from 'array-shuffle';
 import blossom from 'edmonds-blossom';
-import { Structure } from './Tournament';
-import { Match } from './Match';
-import { Player } from './Player';
+import { Structure } from './Tournament.js';
+import { Match } from './Match.js';
 
 /**
  * Creates matches for a single elimination tournament/playoffs.
@@ -466,10 +465,12 @@ const swiss = (tournament: Structure): void => {
                 // Assign a value based on how different their points are - higher value assigned to equal and neighboring points
                 const scoreGroupDifference = Math.abs(scoreGroups.findIndex(score => score === currentPlayer.matchPoints) - scoreGroups.findIndex(score => score === upcomingPlayer.matchPoints));
                 weight += scoreGroupDifference < 2 ? 5 / Math.log10(scoreGroupDifference + 2) : 2 / Math.log10(scoreGroupDifference + 2);
-                if (scoreGroupDifference === 1) weight += 4.5;
+                if (scoreGroupDifference === 1) {
+                    weight += 4.5;
+                }
                 // Assign a value based on how close their seed value is, if players are sorted
                 if (sorted.length > 0) {
-                    weight += Math.log2(sorted.length) - Math.log2(sorted.length - sorted.findIndex(player => player.id === upcomingPlayer.id)) - 1;
+                    weight += Math.log2(sorted.length) - Math.log2(sorted.findIndex(player => player.id === upcomingPlayer.id) + 1) - 1;
                 }
                 // If the player has received a bye before, scale up their weights to encourage pairing
                 if (currentPlayer.pairingBye === true) {
@@ -493,7 +494,7 @@ const swiss = (tournament: Structure): void => {
 
     // Create matches
     let playersCopy = [...players];
-    let matchCount = 0;
+    let matchCount = 1;
     do {
         const bsnA = playersCopy[0].bsn;
         playersCopy.splice(0, 1);

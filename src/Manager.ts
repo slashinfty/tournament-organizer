@@ -1,5 +1,5 @@
 import cryptoRandomString from 'crypto-random-string';
-import * as Tournament from './Tournament';
+import * as Tournament from './Tournament.js';
 
 /** Class representing an event manager. */
 export class Manager {

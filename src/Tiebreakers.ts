@@ -1,5 +1,5 @@
-import { Player } from "./Player";
-import { Structure } from "./Tournament";
+import { Player } from "./Player.js";
+import { Structure } from "./Tournament.js";
 
 /** 
  * Computes tiebreakers for all players in a tournament. 

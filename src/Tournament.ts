@@ -1,8 +1,8 @@
 import cryptoRandomString from 'crypto-random-string';
-import { Match } from './Match';
-import { Player } from './Player';
-import * as Pairings from './Pairings';
-import * as Tiebreakers from './Tiebreakers';
+import { Match } from './Match.js';
+import { Player } from './Player.js';
+import * as Pairings from './Pairings.js';
+import * as Tiebreakers from './Tiebreakers.js';
 
 interface Structure {
     id: string;

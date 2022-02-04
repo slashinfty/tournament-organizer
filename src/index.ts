@@ -1,3 +1,3 @@
-import { Manager } from './Manager';
+import { Manager } from './Manager.js';
 
 export default Manager;
