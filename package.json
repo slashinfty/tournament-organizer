@@ -9,8 +9,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "docs": "typedoc --tsconfig ./tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "docs": "typedoc --out ./docs --readme ./README.md --entryPointStrategy expand ./src"
   },
   "repository": {
     "type": "git",

@@ -1,16 +1,12 @@
 {
   "include": ["./src/**/*"],
   "compilerOptions": {
-    "target": "ES6",
+    "target": "es2018",
     "allowJs": true,
     "esModuleInterop": true,
     "declaration": true,
-    "module": "CommonJS",
+    "module": "commonjs",
+    "sourceMap": true,
     "outDir": "./dist"
-  },
-  "typedocOptions": {
-    "out": "./docs",
-    "readme": "./README.md",
-    "entryPoints": "./src"
   }
 }

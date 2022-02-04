@@ -274,6 +274,11 @@ class Tournament implements Structure {
         }
     }
 
+    /**
+     * Record a result during an swiss or round-robin tournament. Called by subclasses.
+     * @param tournament The tournament for which the result is being reported.
+     * @param res Array containing player one's games won, player two's games won, and the number of games drawn.
+     */
     static standardResult(tournament: Structure, res: {
         match: string,
         result: [number, number, number]
@@ -324,6 +329,45 @@ class Tournament implements Structure {
         match.result.draws = res.result[2];
         match.active = false;
     }
+
+    static eliminationRemovePlayer(tournament: Structure, player: Player): void {
+        
+        // Find the player's current match
+        const match = tournament.matches.find(m => m.round === tournament.currentRound && (m.playerOne === player.id || m.playerTwo === player.id));
+        if (match !== undefined) {
+            if (match.active === true) {
+                const result: [number, number] = match.playerOne === player.id ? [0, Math.ceil(tournament.bestOf / 2)] : [Math.ceil(tournament.bestOf / 2), 0];
+                Tournament.eliminationResult(tournament, {
+                    match: match.id,
+                    result: result
+                });
+            }
+
+            // If the player was in the winner's bracket of a double elimination tournament, fix routing in loser's bracket
+            if (match.losersPath !== null) {
+                const nextMatch = tournament.matches.find(m => m.id === match.losersPath);
+                if (nextMatch.playerTwo === null) {
+                    const moveToMatchID = nextMatch.winnersPath;
+                    const moveFromMatch = tournament.matches.find(m => (m.winnersPath === nextMatch.id || m.losersPath === nextMatch.id) && m.playerOne !== player.id && m.playerTwo !== player.id);
+                    if (moveFromMatch.winnersPath === nextMatch.id) {
+                        moveFromMatch.winnersPath = moveToMatchID;
+                    } else {
+                        moveFromMatch.losersPath = moveToMatchID;
+                    }
+                } else {
+                    nextMatch.active = false;
+                    const winnersMatch = tournament.matches.find(m => m.id === nextMatch.winnersPath);
+                    if (winnersMatch.playerOne === null) {
+                        winnersMatch.playerOne = nextMatch.playerOne;
+                    } else if (winnersMatch.playerTwo === null) {
+                        winnersMatch.playerTwo = nextMatch.playerOne;
+                        winnersMatch.active = true;
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 /** Class representing a Swiss pairing tournament. */
@@ -620,7 +664,43 @@ class Swiss extends Tournament {
      * @returns The player that was removed.
      */
     removePlayer(id: string): Player {
-        //TODO
+        
+        const player = this.players.find(p => p.id === id);
+
+        // If the player can't be found
+        if (player === undefined) {
+            throw `Can not find a player with ID ${id}.`;
+        }
+
+        // If the player has already been removed
+        if (player.active === false) {
+            throw `${player.alias} has already been removed from the tournament.`;
+        }
+
+        // No removing players once the tournament is over
+        if (this.status === 'finished' || this.status === 'aborted') {
+            throw `Can not remove players if the tournament is ${this.status}.`;
+        }
+
+        // Remove the player from the tournament
+        if (this.status === 'registration') {
+            const index = this.players.findIndex(p => p.id === player.id);
+            this.players.splice(index, 1);
+        } else if (this.status === 'playoffs') {
+            Tournament.eliminationRemovePlayer(this, player);
+        } else {
+            const match = this.matches.find(m => m.round === this.currentRound && (m.playerOne === player.id || m.playerTwo === player.id));
+            if (match !== undefined && match.active === true) {
+                const result: [number, number, number] = match.playerOne === player.id ? [0, Math.ceil(this.bestOf / 2), 0] : [Math.ceil(this.bestOf / 2), 0, 0];
+                Tournament.standardResult(this, {
+                    match: match.id,
+                    result: result
+                });
+            }
+            player.active = false;
+        }
+
+        return player;
     }
 }
 
@@ -786,7 +866,9 @@ class RoundRobin extends Tournament {
 
         // Process byes
         const byes = this.matches.filter(match => match.round === this.currentRound && (match.playerOne === null || match.playerTwo === null));
-        byes.forEach(bye => {
+        for (let i = 0; i < byes.length; i++) {
+            const bye = byes[i];
+            if (bye.playerOne === null && bye.playerTwo === null) continue;
             const id = bye.playerTwo === null ? bye.playerOne : bye.playerTwo;
             const player = this.players.find(p => p.id === id);
             player.results.push({
@@ -805,7 +887,7 @@ class RoundRobin extends Tournament {
             player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
             if (bye.playerTwo === null) bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
             else bye.result.playerTwoWins = Math.ceil(this.bestOf / 2);
-        });
+        };
     }
 
     /**
@@ -841,7 +923,7 @@ class RoundRobin extends Tournament {
      * @param opt User-defined options for a new player.
      * @returns The newly created player.
      */
-     addPlayer(opt: {
+    addPlayer(opt: {
         alias: string,
         id?: string,
         seed?: number
@@ -869,8 +951,52 @@ class RoundRobin extends Tournament {
      * @param id ID of the player to remove.
      * @returns The player that was removed.
      */
-     removePlayer(id: string): Player {
-        //TODO
+    removePlayer(id: string): Player {
+        
+        const player = this.players.find(p => p.id === id);
+
+        // If the player can't be found
+        if (player === undefined) {
+            throw `Can not find a player with ID ${id}.`;
+        }
+
+        // If the player has already been removed
+        if (player.active === false) {
+            throw `${player.alias} has already been removed from the tournament.`;
+        }
+
+        // No removing players once the tournament is over
+        if (this.status === 'finished' || this.status === 'aborted') {
+            throw `Can not remove players if the tournament is ${this.status}.`;
+        }
+
+        // Remove the player from the tournament
+        if (this.status === 'registration') {
+            const index = this.players.findIndex(p => p.id === player.id);
+            this.players.splice(index, 1);
+        } else if (this.status === 'playoffs') {
+            Tournament.eliminationRemovePlayer(this, player);
+        } else {
+            const match = this.matches.find(m => m.round === this.currentRound && (m.playerOne === player.id || m.playerTwo === player.id));
+            if (match !== undefined && match.active === true) {
+                const result: [number, number, number] = match.playerOne === player.id ? [0, Math.ceil(this.bestOf / 2), 0] : [Math.ceil(this.bestOf / 2), 0, 0];
+                Tournament.standardResult(this, {
+                    match: match.id,
+                    result: result
+                });
+            }
+            for (let i = this.currentRound + 1; i < this.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0); i++) {
+                const futureMatch = this.matches.find(m => m.round === i && (m.playerOne === player.id || m.playerTwo === player.id));
+                if (futureMatch.playerOne === player.id) {
+                    futureMatch.playerOne = null;
+                } else {
+                    futureMatch.playerTwo = null;
+                }
+            }
+            player.active = false;
+        }
+
+        return player;
     }
 }
 
@@ -963,8 +1089,34 @@ class Elimination extends Tournament {
      * @param id ID of the player to remove.
      * @returns The player that was removed.
      */
-     removePlayer(id: string): Player {
-        //TODO
+    removePlayer(id: string): Player {
+        
+        const player = this.players.find(p => p.id === id);
+
+        // If the player can't be found
+        if (player === undefined) {
+            throw `Can not find a player with ID ${id}.`;
+        }
+
+        // If the player has already been removed
+        if (player.active === false) {
+            throw `${player.alias} has already been removed from the tournament.`;
+        }
+
+        // No removing players once the tournament is over
+        if (this.status === 'finished' || this.status === 'aborted') {
+            throw `Can not remove players if the tournament is ${this.status}.`;
+        }
+
+        // Remove the player from the tournament
+        if (this.status === 'registration') {
+            const index = this.players.findIndex(p => p.id === player.id);
+            this.players.splice(index, 1);
+        } else {
+            Tournament.eliminationRemovePlayer(this, player);
+        }
+
+        return player;
     }
 }
 
