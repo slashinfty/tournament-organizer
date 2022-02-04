@@ -120,63 +120,6 @@ class Tournament implements Structure {
     }
 
     /**
-     * Create a new player and add them to the tournament.
-     * @param options User-defined options for a new tournament.
-     * @returns If the player was created and added.
-     */
-    newPlayer(opt: {
-        alias: string,
-        id?: string,
-        seed?: number,
-        initialByes?: number,
-        missingResults?: 'byes' | 'losses'
-    }): Player {
-
-        // Times when a player can not be added
-        if (this.playerLimit > 0 && this.players.length === this.playerLimit) {
-            throw `Player maximum of ${this.playerLimit} has been reached. Player can not be added.`
-        }
-
-        if (['Playoffs', 'Aborted', 'Finished'].some(str => str === this.status)) {
-            throw `Current tournament status is ${this.status}. Player can not be added.`;
-        }
-
-        if (opt.hasOwnProperty('id') && this.players.some(player => player.id === opt.id)) {
-            throw `A player with ID ${opt.id} is already enrolled in the tournament. Duplicate player can not be added.`;
-        }
-
-        if (this.format === 'single elimination' || this.format === 'double elimination') {
-            throw `Players can not be added late to ${this.format} tournaments.`;
-        }
-
-        // Default values
-        let options = Object.assign({
-            id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
-            missingResults: 'losses'
-        }, opt);
-
-        // No duplicate IDs
-        while (this.players.some(player => player.id === opt.id)) {
-            opt.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
-        }
-
-        // Create new player
-        const newPlayer = new Player(options);
-        this.players.push(newPlayer);
-
-        // Handling missed rounds due to tardiness
-        if (this.status === 'active') {
-            for (let i = 0; i < this.currentRound; i++) {
-                if (options.missingResults === 'byes') {
-                    //TODO
-                }
-            }
-        }
-
-        return newPlayer;
-    }
-
-    /**
      * Get the current standings of the tournament.
      * @param active If only active players are included in standings (default is true).
      * @returns Sorted array of players
@@ -195,6 +138,48 @@ class Tournament implements Structure {
         // Sort players
         return Tiebreakers.sort(playersToSort, this);
     }
+
+    /**
+     * Create a new player and add them to the tournament.
+     * @param tournament The tournament for which the player is being added.
+     * @param options User-defined options for a new player.
+     * @returns The newly created player.
+     */
+        static newPlayer(tournament: Structure, options: {
+            alias: string,
+            id: string,
+            seed: number,
+            initialByes: number
+        }): Player {
+    
+            // Times when a player can not be added
+            if (tournament.playerLimit > 0 && tournament.players.length === tournament.playerLimit) {
+                throw `Player maximum of ${tournament.playerLimit} has been reached. Player can not be added.`
+            }
+    
+            if (['Playoffs', 'Aborted', 'Finished'].some(str => str === tournament.status)) {
+                throw `Current tournament status is ${tournament.status}. Player can not be added.`;
+            }
+    
+            if (options.hasOwnProperty('id') && tournament.players.some(player => player.id === options.id)) {
+                throw `A player with ID ${options.id} is already enrolled in the tournament. Duplicate player can not be added.`;
+            }
+    
+            if (tournament.format !== 'swiss') {
+                throw `Players can not be added late to ${tournament.format} tournaments.`;
+            }
+    
+            // No duplicate IDs
+            while (tournament.players.some(player => player.id === options.id)) {
+                options.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
+            }
+    
+            // Create new player
+            const newPlayer = new Player(options);
+            tournament.players.push(newPlayer);
+    
+            return newPlayer;
+        }
 
     /**
      * Record a result during an elimination tournament/playoff. Called by subclasses.
@@ -451,6 +436,7 @@ class Swiss extends Tournament {
             player.matchPoints += this.pointsForWin;
             player.gameCount += Math.ceil(this.bestOf / 2);
             player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
         });
     }
 
@@ -519,6 +505,7 @@ class Swiss extends Tournament {
             player.matchPoints += this.pointsForWin;
             player.gameCount += Math.ceil(this.bestOf / 2);
             player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
         });
     }
 
@@ -548,6 +535,92 @@ class Swiss extends Tournament {
             result: [result[0], result[1], result[2]]
         });
         return;
+    }
+
+    /**
+     * Create a new player and add them to the tournament.
+     * @param opt User-defined options for a new player.
+     * @returns The newly created player.
+     */
+    addPlayer(opt: {
+        alias: string,
+        id?: string,
+        seed?: number,
+        initialByes?: number,
+        missingResults?: 'byes' | 'losses'
+    }) : Player {
+
+        // Default values
+        let options = Object.assign({
+            id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
+            seed: 0,
+            initialByes: 0,
+            missingResults: 'losses'
+        }, opt);
+
+        const player = Tournament.newPlayer(this, {
+            alias: options.alias,
+            id: options.id,
+            seed: options.seed,
+            initialByes: options.initialByes
+        });
+
+        // Handling missed rounds due to tardiness
+        if (this.status === 'active') {
+            for (let i = 0; i < this.currentRound; i++) {
+                let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+                while (this.matches.some(match => match.id === matchID)) {
+                    matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
+                }
+                const match = new Match({
+                    id: matchID,
+                    match: 0,
+                    round: i + 1,
+                    playerOne: player.id,
+                    playerTwo: null
+                });
+                if (options.missingResults === 'byes') {
+                    player.results.push({
+                        match: matchID,
+                        round: i + 1,
+                        opponent: null,
+                        outcome: 'bye',
+                        matchPoints: this.pointsForWin,
+                        gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                        games: Math.ceil(this.bestOf / 2)
+                    });
+                    player.pairingBye = true;
+                    player.matchCount++;
+                    player.matchPoints += this.pointsForWin;
+                    player.gameCount += Math.ceil(this.bestOf / 2);
+                    player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+                    match.result.playerOneWins = Math.ceil(this.bestOf / 2);
+                } else {
+                    player.results.push({
+                        match: matchID,
+                        round: i + 1,
+                        opponent: null,
+                        outcome: 'loss',
+                        matchPoints: 0,
+                        gamePoints: 0,
+                        games: Math.ceil(this.bestOf / 2)
+                    });
+                    player.matchCount++;
+                    player.gameCount += Math.ceil(this.bestOf / 2);
+                }
+            }
+        }
+
+        return player;
+    }
+
+    /**
+     * Remove a player from the tournament.
+     * @param id ID of the player to remove.
+     * @returns The player that was removed.
+     */
+    removePlayer(id: string): Player {
+        //TODO
     }
 }
 
@@ -659,6 +732,8 @@ class RoundRobin extends Tournament {
             player.matchPoints += this.pointsForWin;
             player.gameCount += Math.ceil(this.bestOf / 2);
             player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            if (bye.playerTwo === null) bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
+            else bye.result.playerTwoWins = Math.ceil(this.bestOf / 2);
         });
     }
 
@@ -728,6 +803,8 @@ class RoundRobin extends Tournament {
             player.matchPoints += this.pointsForWin;
             player.gameCount += Math.ceil(this.bestOf / 2);
             player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            if (bye.playerTwo === null) bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
+            else bye.result.playerTwoWins = Math.ceil(this.bestOf / 2);
         });
     }
 
@@ -757,6 +834,43 @@ class RoundRobin extends Tournament {
             result: [result[0], result[1], result[2]]
         });
         return;
+    }
+
+    /**
+     * Create a new player and add them to the tournament.
+     * @param opt User-defined options for a new player.
+     * @returns The newly created player.
+     */
+     addPlayer(opt: {
+        alias: string,
+        id?: string,
+        seed?: number
+    }) : Player {
+
+        // Default values
+        let options = Object.assign({
+            id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
+            seed: 0,
+            initialByes: 0
+        }, opt);
+
+        const player = Tournament.newPlayer(this, {
+            alias: options.alias,
+            id: options.id,
+            seed: options.seed,
+            initialByes: options.initialByes
+        });
+
+        return player;
+    }
+
+    /**
+     * Remove a player from the tournament.
+     * @param id ID of the player to remove.
+     * @returns The player that was removed.
+     */
+     removePlayer(id: string): Player {
+        //TODO
     }
 }
 
@@ -814,6 +928,43 @@ class Elimination extends Tournament {
         
         // Use elimination result
         Tournament.eliminationResult(this, res);
+    }
+
+    /**
+     * Create a new player and add them to the tournament.
+     * @param opt User-defined options for a new player.
+     * @returns The newly created player.
+     */
+     addPlayer(opt: {
+        alias: string,
+        id?: string,
+        seed?: number
+    }) : Player {
+
+        // Default values
+        let options = Object.assign({
+            id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
+            seed: 0,
+            initialByes: 0
+        }, opt);
+
+        const player = Tournament.newPlayer(this, {
+            alias: options.alias,
+            id: options.id,
+            seed: options.seed,
+            initialByes: options.initialByes
+        });
+
+        return player;
+    }
+
+    /**
+     * Remove a player from the tournament.
+     * @param id ID of the player to remove.
+     * @returns The player that was removed.
+     */
+     removePlayer(id: string): Player {
+        //TODO
     }
 }
 
