@@ -15,7 +15,7 @@ const singleElimination = (tournament: Structure): void => {
 
     // Sort players if necessary, otherwise shuffle them
     if (tournament.status === 'playoffs' || tournament.sorting === 'ascending') {
-        players.sort((a, b) => a.seed - b.seed); 
+        players.sort((a, b) => a.seed - b.seed);
     } else if (tournament.sorting === 'descending') {
         players.sort((a, b) => b.seed - a.seed);
     } else {
@@ -126,13 +126,13 @@ const singleElimination = (tournament: Structure): void => {
  * @param tournament The tournament for which matches are being created.
  */
 const doubleElimination = (tournament: Structure): void => {
-    
+
     // Get active players
     let players = tournament.players.filter(player => player.active === true);
 
     // Sort players if necessary, otherwise shuffle them
     if (tournament.status === 'playoffs' || tournament.sorting === 'ascending') {
-        players.sort((a, b) => a.seed - b.seed); 
+        players.sort((a, b) => a.seed - b.seed);
     } else if (tournament.sorting === 'descending') {
         players.sort((a, b) => b.seed - a.seed);
     } else {
@@ -232,7 +232,7 @@ const doubleElimination = (tournament: Structure): void => {
     tournament.matches.find(match => match.round === round - 1).winnersPath = finalMatchID;
     round++;
 
-    // Create first loser's bracket rounds, if players.length != power of 2 
+    // Create first loser's bracket rounds, if players.length != power of 2
     const roundDifference = round - 1;
     if (remainder !== 0) {
         if (remainder <= 2 ** Math.floor(exponent) / 2) {
@@ -434,7 +434,7 @@ const swiss = (tournament: Structure): void => {
     players.forEach((player, index) => player.bsn = index);
 
     // Get all score groups
-    const scoreGroups = [...new Set(players.map(player => player.matchPoints))].sort((a, b) => b - a);
+    const scoreGroups = [...new Set(players.map(player => player.matchPoints))].sort((a, b) => a - b);
 
     // Get all score sums
     const scoreSums = [...new Set(scoreGroups.map((score, index, array) => {
@@ -457,7 +457,7 @@ const swiss = (tournament: Structure): void => {
 
             // Sort players relative to current player, if tournament sorts players
             let sorted = tournament.sorting !== 'none' ? [...players.filter(player => player.id !== currentPlayer.id)].sort((a, b) => Math.abs(currentPlayer.seed - a.seed) - Math.abs(currentPlayer.seed - b.seed)) : [];
-            
+
             // Go through upcoming players
             for (let j = 0; j < upcomingPlayers.length; j++) {
 
@@ -466,7 +466,7 @@ const swiss = (tournament: Structure): void => {
 
                 // Skip if the players have played each other before
                 if (currentPlayer.results.some(result => result.opponent === upcomingPlayer.id) && allowSecondPairing === false) continue;
-                
+
                 // Determine weight of pairing
                 let weight = 0;
 
@@ -478,7 +478,7 @@ const swiss = (tournament: Structure): void => {
                 weight += scoreGroupDifference < 2 ? 5 / (2 * Math.log10(scoreGroupDifference + 2)) : 1 / Math.log10(scoreGroupDifference + 2);
                 if (scoreGroupDifference === 1) {
                     weight += 1.1;
-                } 
+                }
                 // Assign a value based on how close their seed value is, if players are sorted
                 if (sorted.length > 0) {
                     weight += (1 / 3) * (Math.log2(sorted.length) - Math.log2(sorted.findIndex(player => player.id === upcomingPlayer.id) + 1));
@@ -498,7 +498,7 @@ const swiss = (tournament: Structure): void => {
             continue;
         } else break;
     } while (true);
-    
+
 
     // Get best pairings via Blossom Algorithm
     const blossomOutput = blossom(blossomInput, true);
@@ -551,7 +551,7 @@ const swiss = (tournament: Structure): void => {
 }
 
 const roundRobin = (tournament: Structure): void => {
-    
+
     // Get active players
     let players = tournament.players.filter(player => player.active === true);
 
@@ -561,7 +561,7 @@ const roundRobin = (tournament: Structure): void => {
     // Loop to repeat if double round-robin
     const loopCount = tournament.double === true ? 2 : 1;
     for (let loop = 0; loop < loopCount; loop++) {
-        
+
         // Pair all rounds
         const startingRound = tournament.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0);
         for (let round = 1 + startingRound; round < players.length + startingRound; round++) {
@@ -585,7 +585,7 @@ const roundRobin = (tournament: Structure): void => {
                 currentMatches.forEach((match, index) => {
                     match.playerOne = players[index] === null ? null : players[index].id;
                     match.playerTwo = players[players.length - index - 1] === null ? null : players[players.length - index - 1].id;
-                    if (match.playerOne !== null && match.playerTwo !== null) match.active = true;            
+                    if (match.playerOne !== null && match.playerTwo !== null) match.active = true;
                 });
 
             // Pairing subsequent rounds via Berger tables
