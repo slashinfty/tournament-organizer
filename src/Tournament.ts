@@ -101,7 +101,7 @@ class Tournament implements Structure {
             consolation: false,
             playerLimit: 0,
             pointsForWin: 1,
-            pointsForDraw: 0
+            pointsForDraw: 0.5
         }, opt);
         
         this.id = options.id;
@@ -145,41 +145,41 @@ class Tournament implements Structure {
      * @param options User-defined options for a new player.
      * @returns The newly created player.
      */
-        static newPlayer(tournament: Structure, options: {
-            alias: string,
-            id: string,
-            seed: number,
-            initialByes: number
-        }): Player {
-    
-            // Times when a player can not be added
-            if (tournament.playerLimit > 0 && tournament.players.length === tournament.playerLimit) {
-                throw `Player maximum of ${tournament.playerLimit} has been reached. Player can not be added.`
-            }
-    
-            if (['Playoffs', 'Aborted', 'Finished'].some(str => str === tournament.status)) {
-                throw `Current tournament status is ${tournament.status}. Player can not be added.`;
-            }
-    
-            if (options.hasOwnProperty('id') && tournament.players.some(player => player.id === options.id)) {
-                throw `A player with ID ${options.id} is already enrolled in the tournament. Duplicate player can not be added.`;
-            }
-    
-            if (tournament.format !== 'swiss') {
-                throw `Players can not be added late to ${tournament.format} tournaments.`;
-            }
-    
-            // No duplicate IDs
-            while (tournament.players.some(player => player.id === options.id)) {
-                options.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
-            }
-    
-            // Create new player
-            const newPlayer = new Player(options);
-            tournament.players.push(newPlayer);
-    
-            return newPlayer;
+    static newPlayer(tournament: Structure, options: {
+        alias: string,
+        id: string,
+        seed: number,
+        initialByes: number
+    }): Player {
+
+        // Times when a player can not be added
+        if (tournament.playerLimit > 0 && tournament.players.length === tournament.playerLimit) {
+            throw `Player maximum of ${tournament.playerLimit} has been reached. Player can not be added.`
         }
+
+        if (['Playoffs', 'Aborted', 'Finished'].some(str => str === tournament.status)) {
+            throw `Current tournament status is ${tournament.status}. Player can not be added.`;
+        }
+
+        if (options.hasOwnProperty('id') && tournament.players.some(player => player.id === options.id)) {
+            throw `A player with ID ${options.id} is already enrolled in the tournament. Duplicate player can not be added.`;
+        }
+
+        if (tournament.format !== 'swiss') {
+            throw `Players can not be added late to ${tournament.format} tournaments.`;
+        }
+
+        // No duplicate IDs
+        while (tournament.players.some(player => player.id === options.id)) {
+            options.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
+        }
+
+        // Create new player
+        const newPlayer = new Player(options);
+        tournament.players.push(newPlayer);
+
+        return newPlayer;
+    }
 
     /**
      * Record a result during an elimination tournament/playoff. Called by subclasses.
@@ -206,6 +206,42 @@ class Tournament implements Structure {
         const playerOne = tournament.players.find(player => player.id === match.playerOne);
         const playerTwo = tournament.players.find(player => player.id === match.playerTwo);
 
+        // Reset match and pull players back
+        let winnersMatch: Match;
+        let losersMatch: Match;
+        if (match.active === false) {
+            let formerWinner: Player, formerLoser: Player;
+            if (res.result[0] > res.result[1]) {
+                formerWinner = playerOne;
+                formerLoser = playerTwo;
+            } else {
+                formerWinner = playerTwo;
+                formerLoser = playerOne;
+            }
+            winnersMatch = tournament.matches.find(m => m.id === match.winnersPath);
+            if (winnersMatch.playerOne === formerWinner.id) {
+                winnersMatch.playerOne = null;
+            } else if (winnersMatch.playerTwo === formerWinner.id) {
+                winnersMatch.playerTwo = null;
+                winnersMatch.active = false;
+            }
+            if (match.losersPath !== null) {
+                losersMatch = tournament.matches.find(m => m.id === match.losersPath);
+                if (losersMatch.playerOne === formerLoser.id) {
+                    losersMatch.playerOne = null;
+                } else if (losersMatch.playerTwo === formerLoser.id) {
+                    losersMatch.playerTwo = null;
+                    losersMatch.active = false;
+                }
+            } else {
+                formerLoser.active = true;
+            }
+
+            // Erase results if they've been reported already
+            Tournament.eraseResult(tournament, match);
+
+        }
+        
         // Set result
         match.result.playerOneWins = res.result[0];
         playerOne.results.push({
@@ -253,7 +289,7 @@ class Tournament implements Structure {
             tournament.status = 'finished';
             return;
         } else {
-            const winnersMatch = tournament.matches.find(m => m.id === match.winnersPath);
+            if (winnersMatch === undefined) winnersMatch = tournament.matches.find(m => m.id === match.winnersPath);
             if (winnersMatch.playerOne === null) {
                 winnersMatch.playerOne = winner.id;
             } else if (winnersMatch.playerTwo === null) {
@@ -264,7 +300,7 @@ class Tournament implements Structure {
         if (match.losersPath === null) {
             loser.active = false;
         } else {
-            const losersMatch = tournament.matches.find(m => m.id === match.losersPath);
+            if (losersMatch === undefined) losersMatch = tournament.matches.find(m => m.id === match.losersPath);
             if (losersMatch.playerOne === null) {
                 losersMatch.playerOne = loser.id;
             } else if (losersMatch.playerTwo === null) {
@@ -288,6 +324,11 @@ class Tournament implements Structure {
         const match = tournament.matches.find(m => m.id === res.match);
         if (match === undefined) {
             throw `No match found with the ID ${res.match}.`;
+        }
+
+        // Erase results if they've been reported already
+        if (match.active === false) {
+            Tournament.eraseResult(tournament, match);
         }
 
         // Get the players and result
@@ -330,6 +371,56 @@ class Tournament implements Structure {
         match.active = false;
     }
 
+    /**
+     * Reset a result of a match.
+     * @param tournament The tournament the match belongs to.
+     * @param match The match being reset.
+     */
+    static eraseResult(tournament: Structure, match: Match) : void {
+
+        // The match needs to not be active
+        if (match.active === true) {
+            throw `Can only erase results from matches that have been reported.`;
+        }
+
+        // Can't erase results from byes or losses
+        if (match.playerOne === null || match.playerTwo === null) {
+            throw `Can't erase results from byes or assigned losses.`;
+        }
+
+        // Adjust the match status and result
+        match.active = true;
+        match.result = {
+            playerOneWins: 0,
+            playerTwoWins: 0,
+            draws: 0
+        };
+
+        // Get the players
+        const playerOne = tournament.players.find(player => player.id === match.playerOne);
+        const playerTwo = tournament.players.find(player => player.id === match.playerTwo);
+
+        // For each player, fix their scores
+        const playerOneResult = playerOne.results.find(result => result.match === match.id);
+        playerOne.matchCount--;
+        playerOne.matchPoints -= playerOneResult.matchPoints;
+        playerOne.gamePoints -= playerOneResult.gamePoints;
+        playerOne.gameCount -= playerOneResult.games;
+        playerOne.results.splice(playerOne.results.findIndex(res => res.match === playerOneResult.match), 1);
+
+        const playerTwoResult = playerTwo.results.find(result => result.match === match.id);
+        playerTwo.matchCount--;
+        playerTwo.matchPoints -= playerTwoResult.matchPoints;
+        playerTwo.gamePoints -= playerTwoResult.gamePoints;
+        playerTwo.gameCount -= playerTwoResult.games;
+        playerTwo.results.splice(playerTwo.results.findIndex(res => res.match === playerTwoResult.match), 1);
+    }
+
+    /**
+     * Remove a player from an elimination tournament/playoffs.
+     * @param tournament The tournament for which the player is being removed.
+     * @param player The player being removed.
+     */
     static eliminationRemovePlayer(tournament: Structure, player: Player): void {
         
         // Find the player's current match

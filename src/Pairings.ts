@@ -436,6 +436,15 @@ const swiss = (tournament: Structure): void => {
     // Get all score groups
     const scoreGroups = [...new Set(players.map(player => player.matchPoints))].sort((a, b) => b - a);
 
+    // Get all score sums
+    const scoreSums = [...new Set(scoreGroups.map((score, index, array) => {
+        let sums = [];
+        for (let i = index; i < array.length; i++) {
+            sums.push(score + array[i]);
+        }
+        return sums;
+    }).flat())].sort((a, b) => a - b);
+
     // Get all possible pairings and assign weight
     let blossomInput = [];
     let allowSecondPairing = false;
@@ -462,15 +471,17 @@ const swiss = (tournament: Structure): void => {
                 let weight = 0;
 
                 // Weight is determined in the following order:
+                // Give each pair a base value based on score sum
+                weight += 12 * Math.log10(scoreSums.findIndex(sum => sum === currentPlayer.matchPoints + upcomingPlayer.matchPoints) + 1);
                 // Assign a value based on how different their points are - higher value assigned to equal and neighboring points
                 const scoreGroupDifference = Math.abs(scoreGroups.findIndex(score => score === currentPlayer.matchPoints) - scoreGroups.findIndex(score => score === upcomingPlayer.matchPoints));
-                weight += scoreGroupDifference < 2 ? 5 / Math.log10(scoreGroupDifference + 2) : 2 / Math.log10(scoreGroupDifference + 2);
+                weight += scoreGroupDifference < 2 ? 5 / (2 * Math.log10(scoreGroupDifference + 2)) : 1 / Math.log10(scoreGroupDifference + 2);
                 if (scoreGroupDifference === 1) {
-                    weight += 4.5;
-                }
+                    weight += 1.1;
+                } 
                 // Assign a value based on how close their seed value is, if players are sorted
                 if (sorted.length > 0) {
-                    weight += Math.log2(sorted.length) - Math.log2(sorted.findIndex(player => player.id === upcomingPlayer.id) + 1) - 1;
+                    weight += (1 / 3) * (Math.log2(sorted.length) - Math.log2(sorted.findIndex(player => player.id === upcomingPlayer.id) + 1));
                 }
                 // If the player has received a bye before, scale up their weights to encourage pairing
                 if (currentPlayer.pairingBye === true) {
@@ -494,11 +505,16 @@ const swiss = (tournament: Structure): void => {
 
     // Create matches
     let playersCopy = [...players];
+    let byeArray = [];
     let matchCount = 1;
     do {
         const bsnA = playersCopy[0].bsn;
-        playersCopy.splice(0, 1);
         const bsnB = blossomOutput[bsnA];
+        if (bsnB === -1) {
+            byeArray.push(playersCopy.splice(0, 1)[0]);
+            continue;
+        }
+        playersCopy.splice(0, 1);
         playersCopy.splice(playersCopy.findIndex(player => player.bsn === bsnB), 1);
         let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
         while (tournament.matches.some(match => match.id === matchID)) {
@@ -513,9 +529,10 @@ const swiss = (tournament: Structure): void => {
             active: true
         }));
     } while (playersCopy.length > blossomOutput.reduce((sum, bsn) => bsn === -1 ? sum + 1 : sum, 0));
+    byeArray = [...byeArray, ...playersCopy];
 
     // Assign byes for remaining players
-    for (let i = 0; i < playersCopy.length; i++) {
+    for (let i = 0; i < byeArray.length; i++) {
         let matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
         while (tournament.matches.some(match => match.id === matchID)) {
             matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
@@ -524,7 +541,7 @@ const swiss = (tournament: Structure): void => {
             id: matchID,
             match: matchCount++,
             round: tournament.currentRound,
-            playerOne: playersCopy[i].id,
+            playerOne: byeArray[i].id,
             playerTwo: null
         }));
     }
