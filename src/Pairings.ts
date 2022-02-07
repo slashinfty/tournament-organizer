@@ -493,8 +493,8 @@ const swiss = (tournament: Swiss): void => {
                 if (sorted.length > 0) {
                     weight += (1 / 3) * (Math.log2(sorted.length) - Math.log2(sorted.findIndex(player => player.id === upcomingPlayer.id) + 1));
                 }
-                // If the player has received a bye before, scale up their weights to encourage pairing
-                if (currentPlayer.pairingBye === true) {
+                // If either player has received a bye before, scale up their weight to encourage pairing
+                if (currentPlayer.pairingBye === true || upcomingPlayer.pairingBye === true) {
                     weight *= 1.25;
                 }
                 blossomInput.push([currentPlayer.bsn, upcomingPlayer.bsn, weight]);
