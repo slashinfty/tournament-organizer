@@ -3,7 +3,7 @@ import * as Tournament from './Tournament.js';
 
 /** Class representing an event manager. */
 export class Manager {
-    
+
     /** Array of tournaments being managed. */
     tournaments: Array<Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin>;
     
@@ -70,7 +70,7 @@ export class Manager {
 
     /**
      * Reload a saved tournament.
-     * @param tournament The tournament to be reloaded.
+     * @param tournament The tournament (object) to be reloaded.
      * @returns The reloaded tournament.
      */
     loadTournament(tournament: Tournament.Structure): Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin {

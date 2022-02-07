@@ -5,7 +5,7 @@ import * as Pairings from './Pairings.js';
 import * as Tiebreakers from './Tiebreakers.js';
 
 /**
- * Defines the properties that could be included in a tournament. Primarily used for loading tournaments and using tiebreakers.
+ * Defines the properties that could be included in a tournament. Primarily used for loading tournaments and using tiebreakers. All definitions are found in class extensions.
  */
 interface Structure {
     id: string;
@@ -229,7 +229,7 @@ class Tournament implements Structure {
     /**
      * Record a result during an elimination tournament/playoff. Called by subclasses.
      * @param tournament The tournament for which the result is being reported.
-     * @param res Array containing player one's games won and player two's games won.
+     * @param res Match ID and array containing player one's games won and player two's games won.
      * @internal
      */
     static eliminationResult(tournament: Swiss | RoundRobin | Elimination, res: {
@@ -733,8 +733,8 @@ class Swiss extends Tournament {
     }
 
     /**
-     * Record a result during an elimination tournament/playoff. Called by subclasses.
-     * @param res Array containing player one's games won and player two's games won.
+     * Record a result for the tournament.
+     * @param res Match ID and array containing player one's games won and player two's games won.
      */
     result(res: {
         match: string,
@@ -1152,10 +1152,10 @@ class RoundRobin extends Tournament {
     }
 
     /**
-     * Record a result during an elimination tournament/playoff. Called by subclasses.
-     * @param res Array containing player one's games won and player two's games won.
-     */
-     result(res: {
+     * Record a result for the tournament.
+     * @param res Match ID and array containing player one's games won and player two's games won.
+    */
+    result(res: {
         match: string,
         result: [number, number, number?]
     }) : void {
@@ -1380,8 +1380,8 @@ class Elimination extends Tournament {
     }
 
     /**
-     * Record a result during an elimination tournament/playoff. Called by subclasses.
-     * @param res Array containing player one's games won and player two's games won.
+     * Record a result for the tournament.
+     * @param res Match ID and array containing player one's games won and player two's games won.
      */
     result(res: {
         match: string,
