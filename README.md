@@ -30,7 +30,7 @@ Swiss pairings are generated using a weighted [Blossom Algorithm](https://brilli
 
 ## Installation
 ```shell
-npm install tournament-organizer
+npm i tournament-organizer
 ```
 
 ## Documentation
