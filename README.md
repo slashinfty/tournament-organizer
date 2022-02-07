@@ -22,7 +22,7 @@ For non-elimination tournaments, the following tiebreakers systems are supported
 * Opponent's opponent's match win percentage
 
 ### A Couple Details
-For double elimination, the method in which players move to the loser's bracket follows the same four alternating orders as explained [here](https://blog.smash.gg/changes-in-the-world-of-brackets-695ecb777a4c).
+For double elimination, the method in which players move to the loser's bracket follows the same four alternating orders shown [here](https://miro.medium.com/max/1400/1*p9OYmhVdnAAMiHo_OM4PjQ.png) to avoid rematches.
 
 For round-robin (and double round-robin), players are paired via [Berger Tables](https://en.wikipedia.org/wiki/Round-robin_tournament#Berger_tables).
 
