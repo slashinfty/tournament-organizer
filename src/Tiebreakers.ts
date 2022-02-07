@@ -4,6 +4,7 @@ import { Structure } from "./Tournament.js";
 /** 
  * Computes tiebreakers for all players in a tournament. 
  * @param tournament The tournament under consideration.
+ * @internal
 */
 const compute = (tournament: Structure): void => {
     
@@ -96,6 +97,7 @@ const compute = (tournament: Structure): void => {
  * @param players The array of players being sorted.
  * @param tournament The tournament the players belong to.
  * @returns A sorted array of players.
+ * @internal
  */
 const sort = (players: Player[], tournament: Structure): Player[] => {
     return players.sort((playerA, playerB) => {

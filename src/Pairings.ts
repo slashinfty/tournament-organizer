@@ -7,6 +7,7 @@ import { Match } from './Match.js';
 /**
  * Creates matches for a single elimination tournament/playoffs.
  * @param tournament The tournament for which matches are being created.
+ * @internal
  */
 const singleElimination = (tournament: Structure): void => {
 
@@ -124,6 +125,7 @@ const singleElimination = (tournament: Structure): void => {
 /**
  * Creates matches for a double elimination tournament/playoffs.
  * @param tournament The tournament for which matches are being created.
+ * @internal
  */
 const doubleElimination = (tournament: Structure): void => {
 
@@ -344,13 +346,14 @@ const doubleElimination = (tournament: Structure): void => {
         let counterA = 0;
         let counterB = 0;
         let matchNumbersToRoute = tournament.matches.filter(match => match.round === startingRound + 1 && (match.playerOne === null || match.playerTwo === null)).map(match => Math.ceil(match.match / 2));
+        let copyOfMatchNumbers = [...matchNumbersToRoute];
         loserRound.forEach(match => {
             for (let i = 0; i < 2; i++) {
                 const winnerMatch = winnerRound.find(m => m.match === fill[counterA]);
-                if (matchNumbersToRoute.some(num => num === match.match)) {
+                if (copyOfMatchNumbers.some(num => num === match.match)) {
                     winnerMatch.losersPath = tournament.matches.filter(m => m.round === loserRoundCount - 1)[counterB].id;
                     counterB++;
-                    matchNumbersToRoute.splice(matchNumbersToRoute.indexOf(match.match), 1);
+                    copyOfMatchNumbers.splice(copyOfMatchNumbers.indexOf(match.match), 1);
                 } else {
                     winnerMatch.losersPath = match.id;
                 }
@@ -364,7 +367,7 @@ const doubleElimination = (tournament: Structure): void => {
             match.winnersPath = tournament.matches.filter(m => m.round === match.round + 1).find(m => m.match === matchNumbersToRoute[i]).id;
         });
     } else {
-        const winnerRound = tournament.matches.filter(match => match.round === winnerRound);
+        const winnerRound = tournament.matches.filter(match => match.round === winnerRoundCount);
         const firstLoserRound = tournament.matches.filter(match => match.round === loserRoundCount);
         loserRoundCount++;
         const secondLoserRound = tournament.matches.filter(match => match.round === loserRoundCount);
@@ -393,9 +396,15 @@ const doubleElimination = (tournament: Structure): void => {
     }
 
     // Route all remaining winner's bracket matches
+    let fastForward = 0;
     for (let i = winnerRoundCount; i < roundDifference; i++) {
         const winnerRound = tournament.matches.filter(match => match.round === i);
-        const loserRound = tournament.matches.filter(match => match.round === loserRoundCount - winnerRoundCount + i);
+        let loserRound = tournament.matches.filter(match => match.round === loserRoundCount - winnerRoundCount + fastForward + i);
+        const nextLoserRound = tournament.matches.filter(match => match.round === loserRoundCount - winnerRoundCount + fastForward + i + 1);
+        if (nextLoserRound.length === loserRound.length) {
+            loserRound = nextLoserRound;
+            fastForward++;
+        }
         const fill = fillPattern(winnerRound.length, fillCount);
         fillCount++;
         loserRound.forEach((match, index) => {
@@ -424,6 +433,7 @@ const doubleElimination = (tournament: Structure): void => {
 /**
  * Creates Swiss pairings for a single round
  * @param tournament The tournament for which matches are being created.
+ * @internal
  */
 const swiss = (tournament: Structure): void => {
 
@@ -550,6 +560,11 @@ const swiss = (tournament: Structure): void => {
     players.forEach(player => player.bsn = 0);
 }
 
+/**
+ * Creates Round Robin pairings for a tournament
+ * @param tournament The tournament for which matches are being created.
+ * @internal
+ */
 const roundRobin = (tournament: Structure): void => {
 
     // Get active players
