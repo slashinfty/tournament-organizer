@@ -10,26 +10,44 @@ export class Match {
     /** Match number for the round. */
     match: number;
 
-    /** ID of player one. */
+    /** 
+     * ID of player one. 
+     * @default null
+    */
     playerOne: string | null;
 
-    /** ID of player two. */
+    /** 
+     * ID of player two. 
+     * @default null
+    */
     playerTwo: string | null;
 
-    /** If the match is currently active and awaiting a result. */
+    /**
+     * If the match is currently active and awaiting a result. 
+     * @default false
+    */
     active: boolean;
 
-    /** Result of the match. */
+    /** 
+     * Result of the match. 
+     * @default {playerOneWins: 0, playerTwoWins: 0, draws: 0}
+    */
     result: {
         playerOneWins: number,
         playerTwoWins: number,
         draws: number
     };
 
-    /** ID of the next match for the winner in an elimination tournament. */
+    /** 
+     * ID of the next match for the winner in an elimination tournament/playoffs. 
+     * @default null
+    */
     winnersPath: string | null;
 
-    /** ID of the next match for the loser (if it exists) in an elimination tournament. */
+    /** 
+     * ID of the next match for the loser (if it exists) in an elimination tournament/playoffs. 
+     * @default null
+    */
     losersPath: string | null;
 
     constructor(opt: {

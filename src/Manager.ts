@@ -3,8 +3,9 @@ import * as Tournament from './Tournament.js';
 
 /** Class representing an event manager. */
 export class Manager {
+    
     /** Array of tournaments being managed. */
-    tournaments: Array<Tournament.Structure>;
+    tournaments: Array<Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin>;
     
     constructor() {
         this.tournaments = [];
@@ -15,7 +16,7 @@ export class Manager {
      * @param options User-defined options for a new tournament.
      * @returns New tournament.
      */
-    newTournament(opt?: object): Tournament.Structure {
+    newTournament(opt?: object): Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin {
 
         let defaults: {
             id: string,
@@ -36,7 +37,7 @@ export class Manager {
         }
         
         // Create tournament
-        let tournament: Tournament.Structure;
+        let tournament: Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin;
         switch (options.format) {
             case 'single elimination':
                 tournament = new Tournament.Elimination(options);
@@ -72,7 +73,7 @@ export class Manager {
      * @param tournament The tournament to be reloaded.
      * @returns The reloaded tournament.
      */
-    loadTournament(tournament: Tournament.Structure): Tournament.Structure {
+    loadTournament(tournament: Tournament.Structure): Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin {
         
         // No loading a tournament already in the manager
         if (this.tournaments.some(t => t.id === tournament.id)) {
@@ -80,7 +81,7 @@ export class Manager {
         }
 
         // Create tournament
-        let loadedTournament: Tournament.Structure;
+        let loadedTournament: Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin;
         switch (tournament.format) {
             case 'single elimination':
                 loadedTournament = new Tournament.Elimination(tournament);
@@ -108,7 +109,7 @@ export class Manager {
      * @param id ID of the tournament to be removed.
      * @returns The deleted tournament.
      */
-    deleteTournament(id: string): Tournament.Structure {
+    deleteTournament(id: string): Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin {
         
         // Find tournament
         const index = this.tournaments.findIndex(t => t.id === id);

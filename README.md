@@ -26,58 +26,15 @@ For double elimination, the method in which players move to the loser's bracket 
 
 For round-robin (and double round-robin), players are paired via [Berger Tables](https://en.wikipedia.org/wiki/Round-robin_tournament#Berger_tables).
 
+Swiss pairings are generated using a weighted [Blossom Algorithm](https://brilliant.org/wiki/blossom-algorithm/) with maximum cardinality.
+
 ## Installation
 ```shell
 npm install tournament-organizer
 ```
 
-## Basic Usage
-```js
-import TournamentOrganizer from 'tournament-organizer';
-
-// Create an event manager
-
-const manager = new TournamentOrganizer();
-
-// Create a tournament
-// First parameter can be set to a custom ID
-// More options are available to set
-
-const tourney = manager.createTournament(null, {
-    name: 'My Example Tournament',
-    format: 'swiss',
-    playoffs: 'elim',
-    cutLimit: 8,
-    bestOf: 3,
-    winValue: 3,
-    drawValue: 1,
-    tiebreakers: ['magic-tcg']
-});
-
-// Add players
-
-tourney.addPlayer('Liam S');
-tourney.addPlayer('Emma P.');
-tourney.addPlayer('Noah B.');
-tourney.addPlayer('Sophia R.');
-// As many as desired
-
-// Start the tournament
-
-tourney.startEvent();
-
-// Get all active matches
-
-const active = tourney.activeMatches();
-
-// Record a result
-
-tourney.result(active[0], 2, 1);
-
-// Get standings
-
-const standings = tourney.standings();
-```
+## Documentation
+To see all methods and properties, please visit the [Wiki](https://github.com/slashinfty/tournament-organizer/wiki).
 
 ## Implementations
 * [Bracketeer](https://slashinfty.github.io/bracketeer) - A Discord bot that runs tournaments
@@ -86,6 +43,6 @@ const standings = tourney.standings();
 ## Contributing
 Please submit an issue if you encounter a bug or have a feature suggestion.
 
-If you are interested, please feel free to fork and clone the repository (on main branch), then submit a pull request.
+If you are interested in contributing, please feel free to fork and clone the repository (on main branch), then submit a pull request.
 
 I am a high school teacher, and would appreciate any and all support in continuing this project.

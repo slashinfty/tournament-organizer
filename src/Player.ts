@@ -7,34 +7,64 @@ export class Player {
     /** Name of the player. */
     alias: string;
 
-    /** Seed value for the player, if players are to be sorted. */
+    /** 
+     * Seed value for the player, if players are to be sorted.
+     * @default 0
+    */
     seed: number;
 
-    /** Number of initial byes for a player in a Swiss tournament. */
+    /** 
+     * Number of initial byes for a player in a Swiss tournament. 
+     * @default 0
+    */
     initialByes: number;
 
-    /** If the player has received a pairing bye. */
+    /** 
+     * If the player has received a pairing bye.
+     * @default false
+    */
     pairingBye: boolean;
 
-    /** Number of matches played. */
+    /** 
+     * Number of matches played. 
+     * @default 0
+    */
     matchCount: number;
 
-    /** Number of match points. */
+    /** 
+     * Number of match points. 
+     * @default 0
+    */
     matchPoints: number;
 
-    /** Number of games played. */
+    /** 
+     * Number of games played. 
+     * @default 0
+    */
     gameCount: number;
 
-    /** Number of game points. */
+    /** 
+     * Number of game points. 
+     * @default 0
+    */
     gamePoints: number;
 
-    /** In-bracket sequence number, used for Swiss pairings. */
+    /**
+     * In-bracket sequence number, used for Swiss pairings. 
+     * @default 0
+    */
     bsn: number;
 
-    /** If the player is actively in the tournament. */
+    /** 
+     * If the player is actively in the tournament. 
+     * @default true
+    */
     active: boolean;
 
-    /** Results from each match. */
+    /** 
+     * Results from each match. 
+     * @default []
+    */
     results: {
         match: string,
         round: number,
@@ -45,7 +75,9 @@ export class Player {
         games: number
     }[];
 
-    /** Tiebreaker values for Swiss and round-robin tournaments. */
+    /** Tiebreaker values for Swiss and round-robin tournaments. 
+     * @default {medianBuchholz: 0, solkoff: 0, sonnebornBerger: 0, cumulative: 0, oppCumulative: 0, matchWinPct: 0, oppMatchWinPct: 0, oppOppMatchWinPct: 0, gameWinPct: 0, oppGameWinPct: 0}
+    */
     tiebreakers: {
         medianBuchholz: number,
         solkoff: number,

@@ -5,7 +5,7 @@ import * as Pairings from './Pairings.js';
 import * as Tiebreakers from './Tiebreakers.js';
 
 /**
- * @internal
+ * Defines the properties that could be included in a tournament. Primarily used for loading tournaments and using tiebreakers.
  */
 interface Structure {
     id: string;
@@ -40,7 +40,6 @@ interface Structure {
         'opponent opponent match win percentage'
     ];
     double?: boolean;
-    //addPlayer: (opt: object) => Player;
 }
 
 /**
@@ -57,49 +56,88 @@ type BasicTournamentProperties = {
     pointsForDraw?: number
 }
 
-/** Class representing a tournament. */
+/** Class representing a tournament. All tournaments that are created will be a subclass of this. */
 class Tournament implements Structure {
 
     /** Unique ID of the tournament. */
     id: string;
 
-    /** Name of the tournament. */
+    /**
+     * Name of the tournament.
+     * @default 'New Tournament'
+    */
     name: string;
 
-    /** Format for the first stage of the tournament. */
+    /** 
+     * Format for the first stage of the tournament.
+     * @default 'single elimination'
+    */
     format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin';
 
-    /** If players are sorted by a seed value, and the direction in which to sort them. */
+    /** 
+     * If players are sorted by a seed value, and the direction in which to sort them. 
+     * @default 'none'
+    */
     sorting: 'none' | 'ascending' | 'descending';
 
-    /** If there is a third place consolation match. Only used in elimination formats/playoffs. */
+    /** 
+     * If there is a third place consolation match. Only used in elimination formats/playoffs. 
+     * @default false
+    */
     consolation: boolean;
 
-    /** Maximum number of players allowed to register for the tournament. If equal to 0, then there is no maximum. */
+    /** 
+     * Maximum number of players allowed to register for the tournament. If equal to 0, then there is no maximum. 
+     * @default 0
+    */
     playerLimit: number;
     
-    /** Number of points assigned to a match win. */
+    /** 
+     * Number of points assigned to a match win. 
+     * @default 1
+    */
     pointsForWin: number;
 
-    /** Number of points assigned to a drawn match. */
+    /** 
+     * Number of points assigned to a drawn match. 
+     * @default 0.5
+    */
     pointsForDraw: number;
 
-    /** Current round of the tournament. */
+    /** 
+     * Current round of the tournament.
+     * @default 0
+    */
     currentRound: number;
 
     /** Creation date and time of the tournament. */
     startTime: Date;
 
-    /** Array of all players in the tournament. */
+    /** 
+     * Array of all players in the tournament.
+     * @default []
+    */
     players: Player[];
 
-    /** Array of all matches in the tournament. */
+    /** 
+     * Array of all matches in the tournament.
+     * @default []
+    */
     matches: Match[];
 
     /** The current status of the tournament. */
     status: 'registration' | 'active' | 'playoffs' | 'aborted' | 'finished';
 
-    constructor(opt: BasicTournamentProperties) {
+    constructor(opt: {
+        id: string,
+        name: string,
+        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        sorting?: 'none' | 'ascending' | 'descending',
+        consolation?: boolean,
+        playerLimit?: number,
+        pointsForWin?: number,
+        pointsForDraw?: number
+    }) {
         
         // Default values
         let options = Object.assign({
@@ -152,7 +190,7 @@ class Tournament implements Structure {
      * @returns The newly created player.
      * @internal
      */
-    static newPlayer(tournament: Structure, options: {
+    static newPlayer(tournament: Swiss | RoundRobin | Elimination, options: {
         alias: string,
         id: string,
         seed: number,
@@ -194,7 +232,7 @@ class Tournament implements Structure {
      * @param res Array containing player one's games won and player two's games won.
      * @internal
      */
-    static eliminationResult(tournament: Structure, res: {
+    static eliminationResult(tournament: Swiss | RoundRobin | Elimination, res: {
         match: string,
         result: [number, number]
     }) : void {
@@ -326,7 +364,7 @@ class Tournament implements Structure {
      * @param res Array containing player one's games won, player two's games won, and the number of games drawn.
      * @internal
      */
-    static standardResult(tournament: Structure, res: {
+    static standardResult(tournament: Swiss | RoundRobin, res: {
         match: string,
         result: [number, number, number]
     }) : void {
@@ -390,7 +428,7 @@ class Tournament implements Structure {
      * @param match The match being reset.
      * @internal
      */
-    static eraseResult(tournament: Structure, match: Match) : void {
+    static eraseResult(tournament: Swiss | RoundRobin | Elimination, match: Match) : void {
 
         // The match needs to not be active
         if (match.active === true) {
@@ -436,7 +474,7 @@ class Tournament implements Structure {
      * @param player The player being removed.
      * @internal
      */
-    static eliminationRemovePlayer(tournament: Structure, player: Player): void {
+    static eliminationRemovePlayer(tournament: Swiss | RoundRobin | Elimination, player: Player): void {
         
         // Find the player's current match
         const match = tournament.matches.find(m => m.round === tournament.currentRound && (m.playerOne === player.id || m.playerTwo === player.id));
@@ -489,22 +527,37 @@ class Tournament implements Structure {
 /** Class representing a Swiss pairing tournament. */
 class Swiss extends Tournament {
     
-    /** Number of rounds in the tournament. If 0, it will be determined by the number of players (base 2 logarithm of the number of players, rounded up). */
+    /** 
+     * Number of rounds in the tournament. If 0, it will be determined by the number of players (base 2 logarithm of the number of players, rounded up). 
+     * @default 0
+    */
     rounds: number;
 
-    /** Format for the playoffs. */
+    /** 
+     * Format for the playoffs. 
+     * @default 0
+    */
     playoffs: 'none' | 'single elimination' | 'double elimination';
 
-    /** Number of possible games for a match. */
+    /** 
+     * Number of possible games for a match.
+     * @default 1
+    */
     bestOf: number;
 
-    /** How to cut for playoffs. */
+    /** 
+     * How to cut for playoffs. 
+     * @default {type: 'none', limit: 0}
+    */
     cut: {
         type: 'none' | 'rank' | 'points',
         limit: number
     };
 
-    /** Tiebreakers that will be used for the tournament in order of precedence.  */
+    /** 
+     * Tiebreakers that will be used for the tournament in order of precedence. 
+     * @default ['solkoff', 'cumulative']
+    */
     tiebreakers: [
         'median buchholz' |
         'solkoff' |
@@ -518,6 +571,14 @@ class Swiss extends Tournament {
     ];
 
     constructor(opt: {
+        id: string,
+        name: string,
+        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        sorting?: 'none' | 'ascending' | 'descending',
+        consolation?: boolean,
+        playerLimit?: number,
+        pointsForWin?: number,
+        pointsForDraw?: number,
         rounds?: number,
         playoffs?: 'none' | 'single elimination' | 'double elimination',
         bestOf?: number,
@@ -536,7 +597,7 @@ class Swiss extends Tournament {
             'opponent match win percentage' |
             'opponent opponent match win percentage'
         ]
-    } & BasicTournamentProperties) {
+    }) {
         super(opt);
 
         // Default values
@@ -881,22 +942,37 @@ class Swiss extends Tournament {
 /** Class representing a round-robin pairing tournament. */
 class RoundRobin extends Tournament {
 
-    /** Format for the playoffs. */
+    /** 
+     * Format for the playoffs. 
+     * @default 'none'
+    */
     playoffs: 'none' | 'single elimination' | 'double elimination';
 
-    /** Number of possible games for a match. */
+    /** 
+     * Number of possible games for a match. 
+     * @default 1
+    */
     bestOf: number;
 
-    /** How to cut for playoffs. */
+    /** 
+     * How to cut for playoffs. 
+     * @default {type: 'none', limit: 0}
+    */
     cut: {
         type: 'none' | 'rank' | 'points',
         limit: number
     };
 
-    /** If the tournament is double round-robin or not. */
+    /** 
+     * If the tournament is double round-robin or not. 
+     * @default false
+    */
     double: boolean;
 
-    /** Tiebreakers that will be used for the tournament in order of precedence.  */
+    /** 
+     * Tiebreakers that will be used for the tournament in order of precedence. 
+     * @default ['sonneborn berger', 'versus']
+    */
     tiebreakers: [
         'median buchholz' |
         'solkoff' |
@@ -910,6 +986,14 @@ class RoundRobin extends Tournament {
     ];
 
     constructor(opt: {
+        id: string,
+        name: string,
+        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        sorting?: 'none' | 'ascending' | 'descending',
+        consolation?: boolean,
+        playerLimit?: number,
+        pointsForWin?: number,
+        pointsForDraw?: number,
         playoffs?: 'none' | 'single elimination' | 'double elimination',
         bestOf?: number,
         cut?: {
@@ -928,7 +1012,7 @@ class RoundRobin extends Tournament {
             'opponent match win percentage' |
             'opponent opponent match win percentage'
         ]
-    } & BasicTournamentProperties) {
+    }) {
         super(opt);
 
         // Default values
@@ -1099,7 +1183,7 @@ class RoundRobin extends Tournament {
      * Erase the result of a reported match.
      * @param match ID for the match to reset.
      */
-     eraseResult(match: string): void {
+    eraseResult(match: string): void {
 
         // Get the match
         const matchToErase = this.matches.find(m => m.id === match);
@@ -1239,12 +1323,29 @@ class RoundRobin extends Tournament {
  */
 class Elimination extends Tournament {
     
-    /** Whether or not to do double elimination. */
+    /** 
+     * Whether or not to do double elimination. 
+     * @default false
+    */
     double: boolean;
 
+    /**
+     * This exists solely for removing players from the playoffs of swiss and round robin events
+     * @hidden
+     */
+    bestOf: number;
+
     constructor(opt: {
+        id: string,
+        name: string,
+        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        sorting?: 'none' | 'ascending' | 'descending',
+        consolation?: boolean,
+        playerLimit?: number,
+        pointsForWin?: number,
+        pointsForDraw?: number,
         double?: boolean
-    } & BasicTournamentProperties) {
+    }) {
         super(opt);
 
         // Default values
@@ -1253,6 +1354,7 @@ class Elimination extends Tournament {
         }, opt);
 
         this.double = options.double;
+        this.bestOf = 1;
     }
 
     /**
@@ -1295,7 +1397,7 @@ class Elimination extends Tournament {
      * @param opt User-defined options for a new player.
      * @returns The newly created player.
      */
-     addPlayer(opt: {
+    addPlayer(opt: {
         alias: string,
         id?: string,
         seed?: number

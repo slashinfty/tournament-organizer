@@ -1,7 +1,7 @@
 import cryptoRandomString from 'crypto-random-string';
 import arrayShuffle from 'array-shuffle';
 import blossom from 'edmonds-blossom';
-import { Structure } from './Tournament.js';
+import { Swiss, RoundRobin, Elimination } from './Tournament.js';
 import { Match } from './Match.js';
 
 /**
@@ -9,7 +9,7 @@ import { Match } from './Match.js';
  * @param tournament The tournament for which matches are being created.
  * @internal
  */
-const singleElimination = (tournament: Structure): void => {
+const singleElimination = (tournament: Swiss | RoundRobin | Elimination): void => {
 
     // Get active players
     let players = tournament.players.filter(player => player.active === true);
@@ -127,7 +127,7 @@ const singleElimination = (tournament: Structure): void => {
  * @param tournament The tournament for which matches are being created.
  * @internal
  */
-const doubleElimination = (tournament: Structure): void => {
+const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void => {
 
     // Get active players
     let players = tournament.players.filter(player => player.active === true);
@@ -435,7 +435,7 @@ const doubleElimination = (tournament: Structure): void => {
  * @param tournament The tournament for which matches are being created.
  * @internal
  */
-const swiss = (tournament: Structure): void => {
+const swiss = (tournament: Swiss): void => {
 
     // Get active players
     let players = tournament.players.filter(player => player.active === true);
@@ -565,7 +565,7 @@ const swiss = (tournament: Structure): void => {
  * @param tournament The tournament for which matches are being created.
  * @internal
  */
-const roundRobin = (tournament: Structure): void => {
+const roundRobin = (tournament: RoundRobin): void => {
 
     // Get active players
     let players = tournament.players.filter(player => player.active === true);
