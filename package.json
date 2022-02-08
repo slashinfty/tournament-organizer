@@ -9,11 +9,11 @@
   "type": "module",
   "types": "./dist/index.d.js",
   "files": [
-    "dist/**/*"
+    "./dist"
   ],
   "scripts": {
     "build": "tsc",
-    "docs": "typedoc --theme github-wiki --out ./docs --excludeInternal --entryPointStrategy expand ./src"
+    "docs": "typedoc --tsconfig ./tsconfig.json ./src"
   },
   "repository": {
     "type": "git",

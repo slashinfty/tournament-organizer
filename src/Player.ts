@@ -20,10 +20,16 @@ export class Player {
     initialByes: number;
 
     /** 
-     * If the player has received a pairing bye.
+     * If the player has received a pairing bye in a Swiss tournament.
      * @default false
     */
     pairingBye: boolean;
+
+    /**
+     * If the player has been paired up/down in a Swiss tournament.
+     * @default false
+     */
+    pairUpDown: boolean;
 
     /** 
      * Number of matches played. 
@@ -109,6 +115,7 @@ export class Player {
         this.seed = options.seed;
         this.initialByes = options.initialByes;
         this.pairingBye = false;
+        this.pairUpDown = false;
         this.matchCount = 0;
         this.matchPoints = 0;
         this.gameCount = 0;

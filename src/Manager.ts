@@ -13,7 +13,7 @@ export class Manager {
 
     /**
      * Create a new tournament.
-     * @param options User-defined options for a new tournament.
+     * @param options User-defined options for a new tournament. All options can be found in the constructors of the Tournament classes.
      * @returns New tournament.
      */
     newTournament(opt?: object): Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin {
@@ -84,6 +84,7 @@ export class Manager {
         let loadedTournament: Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin;
         switch (tournament.format) {
             case 'single elimination':
+            case 'double elimination':
                 loadedTournament = new Tournament.Elimination(tournament);
                 break;
             case 'swiss':

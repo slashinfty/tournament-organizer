@@ -229,23 +229,21 @@ class Tournament implements Structure {
     /**
      * Record a result during an elimination tournament/playoff. Called by subclasses.
      * @param tournament The tournament for which the result is being reported.
-     * @param res Match ID and array containing player one's games won and player two's games won.
+     * @param matchID ID of the match being reported.
+     * @param result Array containing player one's game wins and player two's game wins.
      * @internal
      */
-    static eliminationResult(tournament: Swiss | RoundRobin | Elimination, res: {
-        match: string,
-        result: [number, number]
-    }) : void {
+    static eliminationResult(tournament: Swiss | RoundRobin | Elimination, matchID: string, result: [number, number]) : void {
         
         // Wins can not be equal, as elimination needs a winner
-        if (res.result[0] === res.result[1]) {
+        if (result[0] === result[1]) {
             throw 'One player must win more games than the other during elimination.';
         }
 
         // Get the match
-        const match = tournament.matches.find(m => m.id === res.match);
+        const match = tournament.matches.find(m => m.id === matchID);
         if (match === undefined) {
-            throw `No match found with the ID ${res.match}.`;
+            throw `No match found with the ID ${matchID}.`;
         }
 
         // Get the players
@@ -291,15 +289,15 @@ class Tournament implements Structure {
         }
         
         // Set result
-        match.result.playerOneWins = res.result[0];
+        match.result.playerOneWins = result[0];
         playerOne.results.push({
             match: match.id,
             round: match.round,
             opponent: match.playerTwo,
-            outcome: res.result[0] > res.result[1] ? 'win' : 'loss',
-            matchPoints: res.result[0] > res.result[1] ? tournament.pointsForWin : 0,
-            gamePoints: res.result[0] * tournament.pointsForWin,
-            games: res.result.reduce((sum, points) => sum + points, 0)
+            outcome: result[0] > result[1] ? 'win' : 'loss',
+            matchPoints: result[0] > result[1] ? tournament.pointsForWin : 0,
+            gamePoints: result[0] * tournament.pointsForWin,
+            games: result.reduce((sum, points) => sum + points, 0)
         });
         const playerOneResult = playerOne.results[playerOne.results.length - 1];
         playerOne.matchCount++;
@@ -307,15 +305,15 @@ class Tournament implements Structure {
         playerOne.gameCount += playerOneResult.games;
         playerOne.gamePoints += playerOneResult.gamePoints;
         
-        match.result.playerTwoWins = res.result[1];
+        match.result.playerTwoWins = result[1];
         playerTwo.results.push({
             match: match.id,
             round: match.round,
             opponent: match.playerOne,
-            outcome: res.result[1] > res.result[0] ? 'win' : 'loss',
-            matchPoints: res.result[1] > res.result[0] ? tournament.pointsForWin : 0,
-            gamePoints: res.result[1] * tournament.pointsForWin,
-            games: res.result.reduce((sum, points) => sum + points, 0)
+            outcome: result[1] > result[0] ? 'win' : 'loss',
+            matchPoints: result[1] > result[0] ? tournament.pointsForWin : 0,
+            gamePoints: result[1] * tournament.pointsForWin,
+            games: result.reduce((sum, points) => sum + points, 0)
         });
         const playerTwoResult = playerTwo.results[playerTwo.results.length - 1];
         playerTwo.matchCount++;
@@ -326,7 +324,7 @@ class Tournament implements Structure {
 
         // Move players to next matches (or end event)
         let winner: Player, loser: Player;
-        if (res.result[0] > res.result[1]) {
+        if (result[0] > result[1]) {
             winner = playerOne;
             loser = playerTwo;
         } else {
@@ -361,18 +359,16 @@ class Tournament implements Structure {
     /**
      * Record a result during an swiss or round-robin tournament. Called by subclasses.
      * @param tournament The tournament for which the result is being reported.
-     * @param res Array containing player one's games won, player two's games won, and the number of games drawn.
+     * @param matchID ID of the match being reported.
+     * @param result Array containing player one's games won, player two's games won, and the number of games drawn.
      * @internal
      */
-    static standardResult(tournament: Swiss | RoundRobin, res: {
-        match: string,
-        result: [number, number, number]
-    }) : void {
+    static standardResult(tournament: Swiss | RoundRobin, matchID: string, result: [number, number, number]) : void {
 
         // Get the match
-        const match = tournament.matches.find(m => m.id === res.match);
+        const match = tournament.matches.find(m => m.id === matchID);
         if (match === undefined) {
-            throw `No match found with the ID ${res.match}.`;
+            throw `No match found with the ID ${matchID}.`;
         }
 
         // Erase results if they've been reported already
@@ -387,15 +383,15 @@ class Tournament implements Structure {
         playerTwo.active = true;
 
         // Set result
-        match.result.playerOneWins = res.result[0];
+        match.result.playerOneWins = result[0];
         playerOne.results.push({
             match: match.id,
             round: match.round,
             opponent: match.playerTwo,
-            outcome: res.result[0] > res.result[1] ? 'win' : res.result[1] > res.result[0] ? 'loss': 'draw',
-            matchPoints: res.result[0] > res.result[1] ? tournament.pointsForWin : res.result[1] > res.result[0] ? 0 : tournament.pointsForDraw,
-            gamePoints: res.result[0] * tournament.pointsForWin + res.result[2] * tournament.pointsForDraw,
-            games: res.result.reduce((sum, points) => sum + points, 0)
+            outcome: result[0] > result[1] ? 'win' : result[1] > result[0] ? 'loss': 'draw',
+            matchPoints: result[0] > result[1] ? tournament.pointsForWin : result[1] > result[0] ? 0 : tournament.pointsForDraw,
+            gamePoints: result[0] * tournament.pointsForWin + result[2] * tournament.pointsForDraw,
+            games: result.reduce((sum, points) => sum + points, 0)
         });
         const playerOneResult = playerOne.results[playerOne.results.length - 1];
         playerOne.matchCount++;
@@ -403,23 +399,26 @@ class Tournament implements Structure {
         playerOne.gameCount += playerOneResult.games;
         playerOne.gamePoints += playerOneResult.gamePoints;
         
-        match.result.playerTwoWins = res.result[1];
+        match.result.playerTwoWins = result[1];
         playerTwo.results.push({
             match: match.id,
             round: match.round,
             opponent: match.playerOne,
-            outcome: res.result[1] > res.result[0] ? 'win' : res.result[0] > res.result[1] ?'loss': 'draw',
-            matchPoints: res.result[1] > res.result[0] ? tournament.pointsForWin : res.result[0] > res.result[1] ? 0 : tournament.pointsForDraw,
-            gamePoints: res.result[1] * tournament.pointsForWin + res.result[2] * tournament.pointsForDraw,
-            games: res.result.reduce((sum, points) => sum + points, 0)
+            outcome: result[1] > result[0] ? 'win' : result[0] > result[1] ?'loss': 'draw',
+            matchPoints: result[1] > result[0] ? tournament.pointsForWin : result[0] > result[1] ? 0 : tournament.pointsForDraw,
+            gamePoints: result[1] * tournament.pointsForWin + result[2] * tournament.pointsForDraw,
+            games: result.reduce((sum, points) => sum + points, 0)
         });
         const playerTwoResult = playerTwo.results[playerTwo.results.length - 1];
         playerTwo.matchCount++;
         playerTwo.matchPoints += playerTwoResult.matchPoints;
         playerTwo.gameCount += playerTwoResult.games;
         playerTwo.gamePoints += playerTwoResult.gamePoints;
-        match.result.draws = res.result[2];
+        match.result.draws = result[2];
         match.active = false;
+
+        // Compute tiebreakers
+        Tiebreakers.compute(tournament);
     }
 
     /**
@@ -481,10 +480,7 @@ class Tournament implements Structure {
         if (match !== undefined) {
             if (match.active === true) {
                 const result: [number, number] = match.playerOne === player.id ? [0, Math.ceil(tournament.bestOf / 2)] : [Math.ceil(tournament.bestOf / 2), 0];
-                Tournament.eliminationResult(tournament, {
-                    match: match.id,
-                    result: result
-                });
+                Tournament.eliminationResult(tournament, match.id, result);
             }
 
             // If the player was in the winner's bracket of a double elimination tournament, fix routing in loser's bracket
@@ -734,29 +730,21 @@ class Swiss extends Tournament {
 
     /**
      * Record a result for the tournament.
-     * @param res Match ID and array containing player one's games won and player two's games won.
+     * @param match ID for the match being reported.
+     * @param result Array containing player one's game wins, player two's game wins, and (optionally) the number of draws.
      */
-    result(res: {
-        match: string,
-        result: [number, number, number?]
-    }) : void {
+    enterResult(match: string, result: [number, number, number?]) : void {
 
-        const result = res.result[2] === undefined ? [...res.result, 0] : [...res.result];
+        const res = result[2] === undefined ? [...result, 0] : [...result];
 
         // If it's the playoffs, use elimination to process the result
         if (this.status === 'playoffs') {
-            Tournament.eliminationResult(this, {
-                match: res.match,
-                result: [result[0], result[1]]
-            });
+            Tournament.eliminationResult(this, match, [res[0], res[1]]);
             return;
         }
 
         // Otherwise use standard result process
-        Tournament.standardResult(this, {
-            match: res.match,
-            result: [result[0], result[1], result[2]]
-        });
+        Tournament.standardResult(this, match, [res[0], res[1], res[2]]);
         return;
     }
 
@@ -887,6 +875,7 @@ class Swiss extends Tournament {
                     player.matchCount++;
                     player.gameCount += Math.ceil(this.bestOf / 2);
                 }
+                this.matches.push(match);
             }
         }
 
@@ -927,10 +916,7 @@ class Swiss extends Tournament {
             const match = this.matches.find(m => m.round === this.currentRound && (m.playerOne === player.id || m.playerTwo === player.id));
             if (match !== undefined && match.active === true) {
                 const result: [number, number, number] = match.playerOne === player.id ? [0, Math.ceil(this.bestOf / 2), 0] : [Math.ceil(this.bestOf / 2), 0, 0];
-                Tournament.standardResult(this, {
-                    match: match.id,
-                    result: result
-                });
+                Tournament.standardResult(this, match.id, result);
             }
             player.active = false;
         }
@@ -1153,29 +1139,21 @@ class RoundRobin extends Tournament {
 
     /**
      * Record a result for the tournament.
-     * @param res Match ID and array containing player one's games won and player two's games won.
-    */
-    result(res: {
-        match: string,
-        result: [number, number, number?]
-    }) : void {
+     * @param match ID for the match being reported.
+     * @param result Array containing player one's game wins, player two's game wins, and (optionally) the number of draws.
+     */
+     enterResult(match: string, result: [number, number, number?]) : void {
 
-        const result = res.result[2] === undefined ? [...res.result, 0] : [...res.result];
+        const res = result[2] === undefined ? [...result, 0] : [...result];
 
         // If it's the playoffs, use elimination to process the result
         if (this.status === 'playoffs') {
-            Tournament.eliminationResult(this, {
-                match: res.match,
-                result: [result[0], result[1]]
-            });
+            Tournament.eliminationResult(this, match, [res[0], res[1]]);
             return;
         }
 
         // Otherwise use standard result process
-        Tournament.standardResult(this, {
-            match: res.match,
-            result: [result[0], result[1], result[2]]
-        });
+        Tournament.standardResult(this, match, [res[0], res[1], res[2]]);
         return;
     }
 
@@ -1297,10 +1275,7 @@ class RoundRobin extends Tournament {
             const match = this.matches.find(m => m.round === this.currentRound && (m.playerOne === player.id || m.playerTwo === player.id));
             if (match !== undefined && match.active === true) {
                 const result: [number, number, number] = match.playerOne === player.id ? [0, Math.ceil(this.bestOf / 2), 0] : [Math.ceil(this.bestOf / 2), 0, 0];
-                Tournament.standardResult(this, {
-                    match: match.id,
-                    result: result
-                });
+                Tournament.standardResult(this, match.id, result);
             }
             for (let i = this.currentRound + 1; i < this.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0); i++) {
                 const futureMatch = this.matches.find(m => m.round === i && (m.playerOne === player.id || m.playerTwo === player.id));
@@ -1381,15 +1356,13 @@ class Elimination extends Tournament {
 
     /**
      * Record a result for the tournament.
-     * @param res Match ID and array containing player one's games won and player two's games won.
+     * @param match ID for the match being reported.
+     * @param result Array containing player one's game wins, player two's game wins, and (optionally) the number of draws.
      */
-    result(res: {
-        match: string,
-        result: [number, number]
-    }) : void {
+     enterResult(match: string, result: [number, number, ]) : void {
         
         // Use elimination result
-        Tournament.eliminationResult(this, res);
+        Tournament.eliminationResult(this, match, result);
     }
 
     /**

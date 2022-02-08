@@ -486,7 +486,7 @@ const swiss = (tournament: Swiss): void => {
                 // Assign a value based on how different their points are - higher value assigned to equal and neighboring points
                 const scoreGroupDifference = Math.abs(scoreGroups.findIndex(score => score === currentPlayer.matchPoints) - scoreGroups.findIndex(score => score === upcomingPlayer.matchPoints));
                 weight += scoreGroupDifference < 2 ? 5 / (2 * Math.log10(scoreGroupDifference + 2)) : 1 / Math.log10(scoreGroupDifference + 2);
-                if (scoreGroupDifference === 1) {
+                if (scoreGroupDifference === 1 && currentPlayer.pairUpDown === false && upcomingPlayer.pairUpDown === false) {
                     weight += 1.1;
                 }
                 // Assign a value based on how close their seed value is, if players are sorted
@@ -530,14 +530,20 @@ const swiss = (tournament: Swiss): void => {
         while (tournament.matches.some(match => match.id === matchID)) {
             matchID = cryptoRandomString({length: 10, type: 'alphanumeric'});
         }
+        const playerOne = players.find(player => player.bsn === bsnA);
+        const playerTwo = players.find(player => player.bsn === bsnB);
         tournament.matches.push(new Match({
             id: matchID,
             match: matchCount++,
             round: tournament.currentRound,
-            playerOne: players.find(player => player.bsn === bsnA).id,
-            playerTwo: players.find(player => player.bsn === bsnB).id,
+            playerOne: playerOne.id,
+            playerTwo: playerTwo.id,
             active: true
         }));
+        if (playerOne.matchPoints !== playerTwo.matchPoints) {
+            playerOne.pairUpDown = true;
+            playerTwo.pairUpDown = true;
+        }
     } while (playersCopy.length > blossomOutput.reduce((sum, bsn) => bsn === -1 ? sum + 1 : sum, 0));
     byeArray = [...byeArray, ...playersCopy];
 
