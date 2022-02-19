@@ -440,6 +440,9 @@ const swiss = (tournament: Swiss): void => {
     // Get active players
     let players = tournament.players.filter(player => player.active === true);
 
+    // Shuffle players for the first round
+    arrayShuffle(players);
+
     // Give each player an index
     players.forEach((player, index) => player.bsn = index);
 

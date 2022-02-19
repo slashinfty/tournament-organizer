@@ -1,6 +1,6 @@
 {
   "name": "tournament-organizer",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "JavaScript library for running tournaments",
   "exports": "./dist/index.js",
   "engines": {
@@ -33,7 +33,7 @@
   "bugs": {
     "url": "https://github.com/slashinfty/tournament-organizer/issues"
   },
-  "homepage": "https://slashinfty.github.io/tournament-organizer",
+  "homepage": "https://github.com/slashinfty/tournament-organizer/wiki",
   "dependencies": {
     "array-shuffle": "^3.0.0",
     "crypto-random-string": "^4.0.0",
