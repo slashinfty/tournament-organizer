@@ -1,4 +1,4 @@
-import cryptoRandomString from 'crypto-random-string';
+import randomstring from 'randomstring';
 import * as Tournament from './Tournament.js';
 
 /** Class representing an event manager. */
@@ -23,7 +23,7 @@ export class Manager {
             name: string,
             format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin'
         } = {
-            id: cryptoRandomString({length: 10, type: 'alphanumeric'}),
+            id: randomstring.generate({length: 10, charset: 'alphanumeric'}),
             name: 'New Tournament',
             format: 'single elimination'
         }
@@ -33,7 +33,7 @@ export class Manager {
         
         // No duplicate IDs
         while (this.tournaments.some(tournament => tournament.id === options.id)) {
-            options.id = cryptoRandomString({length: 10, type: 'alphanumeric'});
+            options.id = randomstring.generate({length: 10, charset: 'alphanumeric'});
         }
         
         // Create tournament

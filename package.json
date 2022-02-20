@@ -1,12 +1,11 @@
 {
   "name": "tournament-organizer",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "JavaScript library for running tournaments",
   "exports": "./dist/index.js",
   "engines": {
     "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
   },
-  "type": "module",
   "types": "./dist/index.d.js",
   "files": [
     "dist/**/*"
@@ -35,12 +34,13 @@
   },
   "homepage": "https://github.com/slashinfty/tournament-organizer/wiki",
   "dependencies": {
-    "array-shuffle": "^3.0.0",
-    "crypto-random-string": "^4.0.0",
-    "edmonds-blossom": "^1.0.0"
+    "edmonds-blossom": "^1.0.0",
+    "just-shuffle": "^4.0.1",
+    "randomstring": "^1.2.2"
   },
   "devDependencies": {
     "@types/edmonds-blossom": "^1.0.2",
+    "@types/randomstring": "^1.1.8",
     "typedoc": "^0.22.11",
     "typedoc-github-wiki-theme": "^1.0.0",
     "typedoc-plugin-markdown": "^3.11.13",

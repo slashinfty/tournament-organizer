@@ -1,5 +1,5 @@
 ## Tournament Organizer
-A [pure ESM](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) module for organizing tournaments, written in TypeScript.
+A Node.js module for organizing tournaments, written in TypeScript.
 
 If you are upgrading from v1.X to v2.X, it is strongly recommended you read the [documentation](#Documentation), as a lot has changed.
 
