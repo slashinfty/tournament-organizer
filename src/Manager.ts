@@ -21,11 +21,11 @@ export class Manager {
         let defaults: {
             id: string,
             name: string,
-            format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin'
+            format: 'elimination'| 'swiss' | 'round robin'
         } = {
             id: randomstring.generate({length: 10, charset: 'alphanumeric'}),
             name: 'New Tournament',
-            format: 'single elimination'
+            format: 'elimination'
         }
         
         // Default values
@@ -39,13 +39,7 @@ export class Manager {
         // Create tournament
         let tournament: Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin;
         switch (options.format) {
-            case 'single elimination':
-                tournament = new Tournament.Elimination(options);
-                break;
-            case 'double elimination':
-                options = Object.assign({
-                    double: true
-                }, options);
+            case 'elimination':
                 tournament = new Tournament.Elimination(options);
                 break;
             case 'swiss':
@@ -54,13 +48,7 @@ export class Manager {
             case 'round robin':
                 tournament = new Tournament.RoundRobin(options);
                 break;
-            case 'double round robin':
-                options = Object.assign({
-                    double: true
-                }, options);
-                tournament = new Tournament.RoundRobin(options);
-                break;
-        }
+            }
         
         // Add tournament to list
         this.tournaments.push(tournament);
@@ -83,15 +71,13 @@ export class Manager {
         // Create tournament
         let loadedTournament: Tournament.Elimination | Tournament.Swiss | Tournament.RoundRobin;
         switch (tournament.format) {
-            case 'single elimination':
-            case 'double elimination':
+            case 'elimination':
                 loadedTournament = new Tournament.Elimination(tournament);
                 break;
             case 'swiss':
                 loadedTournament = new Tournament.Swiss(tournament);
                 break;
             case 'round robin':
-            case 'double round robin':
                 loadedTournament = new Tournament.RoundRobin(tournament);
                 break;
         }

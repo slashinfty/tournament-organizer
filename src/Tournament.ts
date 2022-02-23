@@ -10,7 +10,7 @@ import * as Tiebreakers from './Tiebreakers.js';
 interface Structure {
     id: string;
     name: string;
-    format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin';
+    format: 'elimination'| 'swiss' | 'round robin';
     sorting: 'none' | 'ascending' | 'descending';
     consolation: boolean;
     playerLimit: number;
@@ -48,7 +48,7 @@ interface Structure {
 type BasicTournamentProperties = {
     id: string,
     name: string,
-    format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+    format: 'elimination'| 'swiss' | 'round robin',
     sorting?: 'none' | 'ascending' | 'descending',
     consolation?: boolean,
     playerLimit?: number,
@@ -72,7 +72,7 @@ class Tournament implements Structure {
      * Format for the first stage of the tournament.
      * @default 'single elimination'
     */
-    format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin';
+    format: 'elimination'| 'swiss' | 'round robin';
 
     /** 
      * If players are sorted by a seed value, and the direction in which to sort them. 
@@ -131,7 +131,7 @@ class Tournament implements Structure {
     constructor(opt: {
         id: string,
         name: string,
-        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        format: 'elimination'| 'swiss' | 'round robin',
         sorting?: 'none' | 'ascending' | 'descending',
         consolation?: boolean,
         playerLimit?: number,
@@ -569,7 +569,7 @@ class Swiss extends Tournament {
     constructor(opt: {
         id: string,
         name: string,
-        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        format: 'elimination'| 'swiss' | 'round robin',
         sorting?: 'none' | 'ascending' | 'descending',
         consolation?: boolean,
         playerLimit?: number,
@@ -974,7 +974,7 @@ class RoundRobin extends Tournament {
     constructor(opt: {
         id: string,
         name: string,
-        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        format: 'elimination'| 'swiss' | 'round robin',
         sorting?: 'none' | 'ascending' | 'descending',
         consolation?: boolean,
         playerLimit?: number,
@@ -1313,7 +1313,7 @@ class Elimination extends Tournament {
     constructor(opt: {
         id: string,
         name: string,
-        format: 'single elimination' | 'double elimination' | 'swiss' | 'round robin' | 'double round robin',
+        format: 'elimination'| 'swiss' | 'round robin',
         sorting?: 'none' | 'ascending' | 'descending',
         consolation?: boolean,
         playerLimit?: number,
