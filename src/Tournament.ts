@@ -53,7 +53,18 @@ type BasicTournamentProperties = {
     consolation?: boolean,
     playerLimit?: number,
     pointsForWin?: number,
-    pointsForDraw?: number
+    pointsForDraw?: number,
+    tiebreakers?: [
+        'median buchholz' |
+        'solkoff' |
+        'sonneborn berger' |
+        'cumulative' |
+        'versus' |
+        'game win percentage' |
+        'opponent game win percentage' |
+        'opponent match win percentage' |
+        'opponent opponent match win percentage'
+    ]
 }
 
 /** Class representing a tournament. All tournaments that are created will be a subclass of this. */
@@ -1310,6 +1321,23 @@ class Elimination extends Tournament {
      */
     bestOf: number;
 
+    /** 
+     * Tiebreakers that will be used for the tournament in order of precedence. 
+     * This is ignored in single elimination, but needed for standings.
+     * @default []
+    */
+     tiebreakers: [
+        'median buchholz' |
+        'solkoff' |
+        'sonneborn berger' |
+        'cumulative' |
+        'versus' |
+        'game win percentage' |
+        'opponent game win percentage' |
+        'opponent match win percentage' |
+        'opponent opponent match win percentage'
+    ] | [];
+
     constructor(opt: {
         id: string,
         name: string,
@@ -1330,6 +1358,7 @@ class Elimination extends Tournament {
 
         this.double = options.double;
         this.bestOf = 1;
+        this.tiebreakers = [];
     }
 
     /**
