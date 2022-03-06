@@ -1,5 +1,7 @@
 import randomstring from 'randomstring';
 import * as Tournament from './Tournament.js';
+import { Match } from './Match.js';
+import { Player } from './Player.js';
 
 /** Class representing an event manager. */
 export class Manager {
@@ -84,6 +86,22 @@ export class Manager {
 
         // Copy over all data
         Object.assign(loadedTournament, tournament);
+        loadedTournament.players.forEach((player, index) => {
+            const newPlayer = new Player({
+                id: player.id,
+                alias: player.alias,
+                seed: player.seed
+            });
+            loadedTournament.players[index] = Object.assign(newPlayer, player);
+        });
+        loadedTournament.matches.forEach((match, index) => {
+            const newMatch = new Match({
+                id: match.id,
+                round: match.round,
+                match: match.match
+            });
+            loadedTournament.matches[index] = Object.assign(newMatch, match);
+        });
 
         // Add tournament to list
         this.tournaments.push(loadedTournament);
