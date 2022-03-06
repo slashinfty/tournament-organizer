@@ -1395,6 +1395,60 @@ class Elimination extends Tournament {
     }
 
     /**
+     * Erase the result of a reported match.
+     * @param match ID for the match to reset.
+     */
+     eraseResult(match: string): void {
+
+        // Get the match
+        const matchToErase = this.matches.find(m => m.id === match);
+        if (matchToErase === undefined) {
+            throw `Can't find a match with ID ${match}.`;
+        }
+
+        if (matchToErase.active === true) {
+            throw `Can't erase results of a match that is still active.`;
+        }
+
+        // Get the players
+        const playerOne = this.players.find(player => player.id === matchToErase.playerOne);
+        const playerTwo = this.players.find(player => player.id === matchToErase.playerTwo);
+        let winnersMatch: Match;
+        let losersMatch: Match;
+        let formerWinner: Player;
+        let formerLoser: Player;
+        if (matchToErase.result.playerOneWins > matchToErase.result.playerTwoWins) {
+            formerWinner = playerOne;
+            formerLoser = playerTwo;
+        } else {
+            formerWinner = playerTwo;
+            formerLoser = playerOne;
+        }
+        formerWinner.active = true;
+        formerLoser.active = true;
+        winnersMatch = this.matches.find(m => m.id === matchToErase.winnersPath);
+        if (winnersMatch.playerOne === formerWinner.id) {
+            winnersMatch.playerOne = null;
+        } else if (winnersMatch.playerTwo === formerWinner.id) {
+            winnersMatch.playerTwo = null;
+            winnersMatch.active = false;
+        }
+        if (matchToErase.losersPath !== null) {
+            losersMatch = this.matches.find(m => m.id === matchToErase.losersPath);
+            if (losersMatch.playerOne === formerLoser.id) {
+                losersMatch.playerOne = null;
+            } else if (losersMatch.playerTwo === formerLoser.id) {
+                losersMatch.playerTwo = null;
+                losersMatch.active = false;
+            }
+        } else {
+            formerLoser.active = true;
+        }
+
+        Tournament.eraseResult(this, matchToErase);
+    }
+
+    /**
      * Create a new player and add them to the tournament.
      * @param opt User-defined options for a new player.
      * @returns The newly created player.
