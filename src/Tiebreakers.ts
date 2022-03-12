@@ -13,7 +13,7 @@ const compute = (tournament: Structure): void => {
 
         // If the current player has played no matches, set tiebreakers to zero
         const player = tournament.players[i];
-        if (player.matchCount === 0) {
+        if (player.matchCount === 0 || player.results.length === 0) {
             for (const tiebreak in player.tiebreakers) {
                 player.tiebreakers[tiebreak] = 0;
             }
@@ -47,6 +47,16 @@ const compute = (tournament: Structure): void => {
 
         // Get the current player's opponents
         const opponents = tournament.players.filter(opp => player.results.some(result => result.opponent === opp.id));
+
+        // Set to 0 if no opponents
+        if (opponents.length === 0) {
+            player.tiebreakers.oppMatchWinPct = 0;
+            player.tiebreakers.oppGameWinPct = 0;
+            player.tiebreakers.medianBuchholz = 0;
+            player.tiebreakers.sonnebornBerger = 0;
+            player.tiebreakers.oppCumulative = 0;
+            continue;
+        }
 
         // Calculate opponent match win percentage
         player.tiebreakers.oppMatchWinPct = opponents.reduce((sum, opponent) => sum + opponent.tiebreakers.matchWinPct, 0) / opponents.length;
@@ -87,6 +97,12 @@ const compute = (tournament: Structure): void => {
 
         // Get the current player's opponents
         const opponents = tournament.players.filter(opp => player.results.some(result => result.opponent === opp.id));
+
+        // Set to 0 if no opponents
+        if (opponents.length === 0) {
+            player.tiebreakers.oppOppMatchWinPct = 0;
+            continue;
+        }
 
         player.tiebreakers.oppOppMatchWinPct = opponents.reduce((sum, opponent) => sum + opponent.tiebreakers.oppMatchWinPct, 0) / opponents.length;
     }
