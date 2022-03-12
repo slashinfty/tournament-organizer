@@ -21,7 +21,7 @@ const compute = (tournament: Structure): void => {
         }
 
         // Calculate game win percentage
-        player.tiebreakers.gameWinPct = player.gamePoints / player.gameCount;
+        player.tiebreakers.gameWinPct = player.gamePoints / (player.gameCount * tournament.pointsForWin);
 
         // Calculate match win percentage
         player.tiebreakers.matchWinPct = player.matchPoints / (player.matchCount * tournament.pointsForWin);
