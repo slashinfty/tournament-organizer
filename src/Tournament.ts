@@ -16,7 +16,7 @@ interface Structure {
     playerLimit: number;
     pointsForWin: number;
     pointsForDraw: number;
-    pointsForBye: number;
+    pointsForBye?: number;
     currentRound: number;
     startTime: Date;
     players: Array<Player>;
@@ -55,7 +55,6 @@ type BasicTournamentProperties = {
     playerLimit?: number,
     pointsForWin?: number,
     pointsForDraw?: number,
-    pointsForBye?: number,
     tiebreakers?: [
         'median buchholz' |
         'solkoff' |
@@ -621,6 +620,7 @@ class Swiss extends Tournament {
             rounds: 0,
             playoffs: 'none',
             bestOf: 1,
+            pointsForBye: 1,
             cut: {
                 type: 'none',
                 limit: 0
@@ -631,6 +631,7 @@ class Swiss extends Tournament {
         this.rounds = options.rounds;
         this.playoffs = options.playoffs;
         this.bestOf = options.bestOf;
+        this.pointsForBye = opt.hasOwnProperty('pointsForWin') && !opt.hasOwnProperty('pointsForBye') ? opt.pointsForWin : options.pointsForBye;
         this.cut = options.cut;
         this.tiebreakers = options.tiebreakers;
     }
@@ -1032,6 +1033,7 @@ class RoundRobin extends Tournament {
         let options = Object.assign({
             playoffs: 'none',
             bestOf: 1,
+            pointsForBye: 1,
             cut: {
                 type: 'none',
                 limit: 0
@@ -1042,6 +1044,7 @@ class RoundRobin extends Tournament {
 
         this.playoffs = options.playoffs;
         this.bestOf = options.bestOf;
+        this.pointsForBye = opt.hasOwnProperty('pointsForWin') && !opt.hasOwnProperty('pointsForBye') ? opt.pointsForWin : options.pointsForBye;
         this.cut = options.cut;
         this.double = options.double;
         this.tiebreakers = options.tiebreakers;
