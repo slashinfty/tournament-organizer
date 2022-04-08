@@ -555,6 +555,12 @@ class Swiss extends Tournament {
     bestOf: number;
 
     /** 
+     * Number of points assigned to a bye match. 
+     * @default 1
+    */
+    pointsForBye: number;
+
+    /** 
      * How to cut for playoffs. 
      * @default {type: 'none', limit: 0}
     */
@@ -953,6 +959,12 @@ class RoundRobin extends Tournament {
      * @default 1
     */
     bestOf: number;
+
+    /** 
+     * Number of points assigned to a bye match. 
+     * @default 1
+    */
+    pointsForBye: number;
 
     /** 
      * How to cut for playoffs. 
