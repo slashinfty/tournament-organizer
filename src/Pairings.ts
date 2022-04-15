@@ -558,7 +558,7 @@ const swiss = (tournament: Swiss): void => {
         }
         tournament.matches.push(new Match({
             id: matchID,
-            match: matchCount++,
+            match: 0,
             round: tournament.currentRound,
             playerOne: byeArray[i].id,
             playerTwo: null

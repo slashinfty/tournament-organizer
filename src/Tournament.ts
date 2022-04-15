@@ -873,15 +873,15 @@ class Swiss extends Tournament {
                         round: i + 1,
                         opponent: null,
                         outcome: 'bye',
-                        matchPoints: this.pointsForWin,
-                        gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                        matchPoints: this.pointsForBye,
+                        gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForBye,
                         games: Math.ceil(this.bestOf / 2)
                     });
                     player.pairingBye = true;
                     player.matchCount++;
-                    player.matchPoints += this.pointsForWin;
+                    player.matchPoints += this.pointsForBye;
                     player.gameCount += Math.ceil(this.bestOf / 2);
-                    player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+                    player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForBye;
                     match.result.playerOneWins = Math.ceil(this.bestOf / 2);
                 } else {
                     player.results.push({
