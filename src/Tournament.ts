@@ -16,6 +16,7 @@ interface Structure {
     playerLimit: number;
     pointsForWin: number;
     pointsForDraw: number;
+    pointsForBye?: number;
     currentRound: number;
     startTime: Date;
     players: Array<Player>;
@@ -553,6 +554,12 @@ class Swiss extends Tournament {
     bestOf: number;
 
     /** 
+     * Number of points assigned to a bye match. 
+     * @default 1
+    */
+    pointsForBye: number;
+
+    /** 
      * How to cut for playoffs. 
      * @default {type: 'none', limit: 0}
     */
@@ -586,6 +593,7 @@ class Swiss extends Tournament {
         playerLimit?: number,
         pointsForWin?: number,
         pointsForDraw?: number,
+        pointsForBye?: number,
         rounds?: number,
         playoffs?: 'none' | 'single elimination' | 'double elimination',
         bestOf?: number,
@@ -612,6 +620,7 @@ class Swiss extends Tournament {
             rounds: 0,
             playoffs: 'none',
             bestOf: 1,
+            pointsForBye: 1,
             cut: {
                 type: 'none',
                 limit: 0
@@ -622,6 +631,7 @@ class Swiss extends Tournament {
         this.rounds = options.rounds;
         this.playoffs = options.playoffs;
         this.bestOf = options.bestOf;
+        this.pointsForBye = opt.hasOwnProperty('pointsForWin') && !opt.hasOwnProperty('pointsForBye') ? opt.pointsForWin : options.pointsForBye;
         this.cut = options.cut;
         this.tiebreakers = options.tiebreakers;
     }
@@ -655,15 +665,15 @@ class Swiss extends Tournament {
                 round: bye.round,
                 opponent: null,
                 outcome: 'bye',
-                matchPoints: this.pointsForWin,
-                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                matchPoints: this.pointsForBye,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForBye,
                 games: Math.ceil(this.bestOf / 2)
             });
             player.pairingBye = true;
             player.matchCount++;
-            player.matchPoints += this.pointsForWin;
+            player.matchPoints += this.pointsForBye;
             player.gameCount += Math.ceil(this.bestOf / 2);
-            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForBye;
             bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
         });
     }
@@ -726,15 +736,15 @@ class Swiss extends Tournament {
                 round: bye.round,
                 opponent: null,
                 outcome: 'bye',
-                matchPoints: this.pointsForWin,
-                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                matchPoints: this.pointsForBye,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForBye,
                 games: Math.ceil(this.bestOf / 2)
             });
             player.pairingBye = true;
             player.matchCount++;
-            player.matchPoints += this.pointsForWin;
+            player.matchPoints += this.pointsForBye;
             player.gameCount += Math.ceil(this.bestOf / 2);
-            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForBye;
             bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
         });
     }
@@ -863,15 +873,15 @@ class Swiss extends Tournament {
                         round: i + 1,
                         opponent: null,
                         outcome: 'bye',
-                        matchPoints: this.pointsForWin,
-                        gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                        matchPoints: this.pointsForBye,
+                        gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForBye,
                         games: Math.ceil(this.bestOf / 2)
                     });
                     player.pairingBye = true;
                     player.matchCount++;
-                    player.matchPoints += this.pointsForWin;
+                    player.matchPoints += this.pointsForBye;
                     player.gameCount += Math.ceil(this.bestOf / 2);
-                    player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+                    player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForBye;
                     match.result.playerOneWins = Math.ceil(this.bestOf / 2);
                 } else {
                     player.results.push({
@@ -952,6 +962,12 @@ class RoundRobin extends Tournament {
     bestOf: number;
 
     /** 
+     * Number of points assigned to a bye match. 
+     * @default 1
+    */
+    pointsForBye: number;
+
+    /** 
      * How to cut for playoffs. 
      * @default {type: 'none', limit: 0}
     */
@@ -991,6 +1007,7 @@ class RoundRobin extends Tournament {
         playerLimit?: number,
         pointsForWin?: number,
         pointsForDraw?: number,
+        pointsForBye?: number,
         playoffs?: 'none' | 'single elimination' | 'double elimination',
         bestOf?: number,
         cut?: {
@@ -1016,6 +1033,7 @@ class RoundRobin extends Tournament {
         let options = Object.assign({
             playoffs: 'none',
             bestOf: 1,
+            pointsForBye: 1,
             cut: {
                 type: 'none',
                 limit: 0
@@ -1026,6 +1044,7 @@ class RoundRobin extends Tournament {
 
         this.playoffs = options.playoffs;
         this.bestOf = options.bestOf;
+        this.pointsForBye = opt.hasOwnProperty('pointsForWin') && !opt.hasOwnProperty('pointsForBye') ? opt.pointsForWin : options.pointsForBye;
         this.cut = options.cut;
         this.double = options.double;
         this.tiebreakers = options.tiebreakers;
@@ -1058,15 +1077,15 @@ class RoundRobin extends Tournament {
                 round: bye.round,
                 opponent: null,
                 outcome: 'bye',
-                matchPoints: this.pointsForWin,
-                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                matchPoints: this.pointsForBye,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForBye,
                 games: Math.ceil(this.bestOf / 2)
             });
             player.pairingBye = true;
             player.matchCount++;
-            player.matchPoints += this.pointsForWin;
+            player.matchPoints += this.pointsForBye;
             player.gameCount += Math.ceil(this.bestOf / 2);
-            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForBye;
             if (bye.playerTwo === null) bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
             else bye.result.playerTwoWins = Math.ceil(this.bestOf / 2);
         });
@@ -1134,15 +1153,15 @@ class RoundRobin extends Tournament {
                 round: bye.round,
                 opponent: null,
                 outcome: 'bye',
-                matchPoints: this.pointsForWin,
-                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForWin,
+                matchPoints: this.pointsForBye,
+                gamePoints: Math.ceil(this.bestOf / 2) * this.pointsForBye,
                 games: Math.ceil(this.bestOf / 2)
             });
             player.pairingBye = true;
             player.matchCount++;
-            player.matchPoints += this.pointsForWin;
+            player.matchPoints += this.pointsForBye;
             player.gameCount += Math.ceil(this.bestOf / 2);
-            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForWin;
+            player.gamePoints += Math.ceil(this.bestOf / 2) * this.pointsForBye;
             if (bye.playerTwo === null) bye.result.playerOneWins = Math.ceil(this.bestOf / 2);
             else bye.result.playerTwoWins = Math.ceil(this.bestOf / 2);
         };
