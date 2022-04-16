@@ -1,4 +1,4 @@
-import randomstring from 'randomstring';
+import randomstring from 'randomized-string';
 import * as Tournament from './Tournament.js';
 import { Match } from './Match.js';
 import { Player } from './Player.js';

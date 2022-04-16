@@ -1,6 +1,6 @@
 {
   "name": "tournament-organizer",
-  "version": "2.1.8",
+  "version": "2.2.0",
   "description": "JavaScript library for running tournaments",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -43,11 +43,10 @@
   "dependencies": {
     "edmonds-blossom": "^1.0.0",
     "just-shuffle": "^4.0.1",
-    "randomstring": "^1.2.2"
+    "randomized-string": "^1.2.6"
   },
   "devDependencies": {
     "@types/edmonds-blossom": "^1.0.2",
-    "@types/randomstring": "^1.1.8",
     "typedoc": "^0.22.15",
     "typedoc-github-wiki-theme": "^1.0.0",
     "typedoc-plugin-markdown": "^3.12.0",

@@ -1,4 +1,4 @@
-import randomstring from 'randomstring';
+import randomstring from 'randomized-string';
 import arrayShuffle from 'just-shuffle';
 import blossom from 'edmonds-blossom';
 import { Swiss, RoundRobin, Elimination } from './Tournament.js';
