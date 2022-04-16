@@ -1,4 +1,4 @@
-import randomstring from 'randomized-string';
+import * as randomString from 'randomized-string';
 import arrayShuffle from 'just-shuffle';
 import blossom from 'edmonds-blossom';
 import { Swiss, RoundRobin, Elimination } from './Tournament.js';
@@ -40,9 +40,9 @@ const singleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     let round = startingRound;
     if (remainder !== 0) {
         for (let i = 0; i < remainder; i++) {
-            let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             while (tournament.matches.some(match => match.id === matchID)) {
-                matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             }
             tournament.matches.push(new Match({
                 id: matchID,
@@ -58,9 +58,9 @@ const singleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     let firstIterationComplete = false;
     do {
         for (let i = 0; i < 2 ** matchExponent; i++) {
-            let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             while (tournament.matches.some(match => match.id === matchID)) {
-                matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             }
             tournament.matches.push(new Match({
                 id: matchID,
@@ -107,9 +107,9 @@ const singleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     if (tournament.consolation === true) {
         const lastRound = tournament.matches.reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.round), 0);
         const lastMatch = tournament.matches.filter(match => match.round === lastRound).reduce((currentMax, currentMatch) => Math.max(currentMax, currentMatch.match), 0);
-        let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+        let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
         while (tournament.matches.some(match => match.id === matchID)) {
-            matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
         }
         tournament.matches.push(new Match({
             id: matchID,
@@ -158,9 +158,9 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     let round = startingRound;
     if (remainder !== 0) {
         for (let i = 0; i < remainder; i++) {
-            let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             while (tournament.matches.some(match => match.id === matchID)) {
-                matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             }
             tournament.matches.push(new Match({
                 id: matchID,
@@ -176,9 +176,9 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     let firstIterationComplete = false;
     do {
         for (let i = 0; i < 2 ** matchExponent; i++) {
-            let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             while (tournament.matches.some(match => match.id === matchID)) {
-                matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
             }
             tournament.matches.push(new Match({
                 id: matchID,
@@ -222,9 +222,9 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     }
 
     // Create final round for winners of each bracket
-    let finalMatchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+    let finalMatchID = randomString.generate({length: 10, charset: 'alphanumeric'});
     while (tournament.matches.some(match => match.id === finalMatchID)) {
-        finalMatchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+        finalMatchID = randomString.generate({length: 10, charset: 'alphanumeric'});
     }
     tournament.matches.push(new Match({
         id: finalMatchID,
@@ -239,9 +239,9 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     if (remainder !== 0) {
         if (remainder <= 2 ** Math.floor(exponent) / 2) {
             for (let i = 0; i < remainder; i++) {
-                let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 while (tournament.matches.some(match => match.id === matchID)) {
-                    matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                    matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 }
                 tournament.matches.push(new Match({
                     id: matchID,
@@ -252,9 +252,9 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
             round++;
         } else {
             for (let i = 0; i < remainder - 2 ** (Math.floor(exponent) - 1); i++) {
-                let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 while (tournament.matches.some(match => match.id === matchID)) {
-                    matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                    matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 }
                 tournament.matches.push(new Match({
                     id: matchID,
@@ -264,9 +264,9 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
             }
             round++;
             for (let i = 0; i < 2 ** (Math.floor(exponent) - 1); i++) {
-                let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 while (tournament.matches.some(match => match.id === matchID)) {
-                    matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                    matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 }
                 tournament.matches.push(new Match({
                     id: matchID,
@@ -283,9 +283,9 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
     do {
         for (let i = 0; i < 2; i++) {
             for (let j = 0; j < 2 ** loserExponent; j++) {
-                let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 while (tournament.matches.some(match => match.id === matchID)) {
-                    matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                    matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 }
                 tournament.matches.push(new Match({
                     id: matchID,
@@ -529,9 +529,9 @@ const swiss = (tournament: Swiss): void => {
         }
         playersCopy.splice(0, 1);
         playersCopy.splice(playersCopy.findIndex(player => player.bsn === bsnB), 1);
-        let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+        let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
         while (tournament.matches.some(match => match.id === matchID)) {
-            matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
         }
         const playerOne = players.find(player => player.bsn === bsnA);
         const playerTwo = players.find(player => player.bsn === bsnB);
@@ -552,9 +552,9 @@ const swiss = (tournament: Swiss): void => {
 
     // Assign byes for remaining players
     for (let i = 0; i < byeArray.length; i++) {
-        let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+        let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
         while (tournament.matches.some(match => match.id === matchID)) {
-            matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
         }
         tournament.matches.push(new Match({
             id: matchID,
@@ -593,9 +593,9 @@ const roundRobin = (tournament: RoundRobin): void => {
             // Create matches
             let currentMatches = [];
             for (let i = 0; i < players.length / 2; i++) {
-                let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 while (tournament.matches.some(match => match.id === matchID)) {
-                    matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                    matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 }
                 currentMatches.push(new Match({
                     id: matchID,

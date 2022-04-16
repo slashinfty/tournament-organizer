@@ -1,4 +1,4 @@
-import randomstring from 'randomized-string';
+import * as randomString from 'randomized-string';
 import * as Tournament from './Tournament.js';
 import { Match } from './Match.js';
 import { Player } from './Player.js';
@@ -25,7 +25,7 @@ export class Manager {
             name: string,
             format: 'elimination'| 'swiss' | 'round robin'
         } = {
-            id: randomstring.generate({length: 10, charset: 'alphanumeric'}),
+            id: randomString.generate({length: 10, charset: 'alphanumeric'}),
             name: 'New Tournament',
             format: 'elimination'
         }
@@ -35,7 +35,7 @@ export class Manager {
         
         // No duplicate IDs
         while (this.tournaments.some(tournament => tournament.id === options.id)) {
-            options.id = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            options.id = randomString.generate({length: 10, charset: 'alphanumeric'});
         }
         
         // Create tournament

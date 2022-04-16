@@ -1,4 +1,4 @@
-import randomstring from 'randomized-string';
+import * as randomString from 'randomized-string';
 import { Match } from './Match.js';
 import { Player } from './Player.js';
 import * as Pairings from './Pairings.js';
@@ -228,7 +228,7 @@ class Tournament implements Structure {
 
         // No duplicate IDs
         while (tournament.players.some(player => player.id === options.id)) {
-            options.id = randomstring.generate({length: 10, charset: 'alphanumeric'});
+            options.id = randomString.generate({length: 10, charset: 'alphanumeric'});
         }
 
         // Create new player
@@ -840,7 +840,7 @@ class Swiss extends Tournament {
 
         // Default values
         let options = Object.assign({
-            id: randomstring.generate({length: 10, charset: 'alphanumeric'}),
+            id: randomString.generate({length: 10, charset: 'alphanumeric'}),
             seed: 0,
             initialByes: 0,
             missingResults: 'losses'
@@ -856,9 +856,9 @@ class Swiss extends Tournament {
         // Handling missed rounds due to tardiness
         if (this.status === 'active') {
             for (let i = 0; i < this.currentRound; i++) {
-                let matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                let matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 while (this.matches.some(match => match.id === matchID)) {
-                    matchID = randomstring.generate({length: 10, charset: 'alphanumeric'});
+                    matchID = randomString.generate({length: 10, charset: 'alphanumeric'});
                 }
                 const match = new Match({
                     id: matchID,
@@ -1256,7 +1256,7 @@ class RoundRobin extends Tournament {
 
         // Default values
         let options = Object.assign({
-            id: randomstring.generate({length: 10, charset: 'alphanumeric'}),
+            id: randomString.generate({length: 10, charset: 'alphanumeric'}),
             seed: 0,
             initialByes: 0
         }, opt);
@@ -1480,7 +1480,7 @@ class Elimination extends Tournament {
 
         // Default values
         let options = Object.assign({
-            id: randomstring.generate({length: 10, charset: 'alphanumeric'}),
+            id: randomString.generate({length: 10, charset: 'alphanumeric'}),
             seed: 0,
             initialByes: 0
         }, opt);
