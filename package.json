@@ -1,6 +1,6 @@
 {
   "name": "tournament-organizer",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "JavaScript library for running tournaments",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -13,7 +13,7 @@
   "engines": {
     "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
   },
-  "types": "./dist/index.d.js",
+  "types": "./dist/esm/index.d.js",
   "files": [
     "dist/**/*"
   ],
