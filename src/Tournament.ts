@@ -641,9 +641,9 @@ class Swiss extends Tournament {
      */
     startEvent(): void {
 
-        // Need at least 8 players
-        if (this.players.length < 8) {
-            throw `Swiss tournaments require at least 8 players, and there are currently ${this.players.length} players enrolled.`;
+        // Need at least 2 players
+        if (this.players.length < 2) {
+            throw `Swiss tournaments require at least 2 players, and there are currently ${this.players.length} players enrolled.`;
         }
 
         // Set tournament as active
