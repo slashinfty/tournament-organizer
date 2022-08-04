@@ -1055,9 +1055,9 @@ class RoundRobin extends Tournament {
      */
     startEvent(): void {
         
-        // Need at least 4 players
-        if (this.players.length < 4) {
-            throw `Round-Robin tournaments require at least 4 players, and there are currently ${this.players.length} players enrolled`;
+        // Need at least 2 players
+        if (this.players.length < 2) {
+            throw `Round-Robin tournaments require at least 2 players, and there are currently ${this.players.length} players enrolled`;
         }
 
         // Set tournament as active
@@ -1385,9 +1385,9 @@ class Elimination extends Tournament {
      */
     startEvent(): void {
         
-        // Need at least 4 players
-        if (this.players.length < 4) {
-            throw `Elimination tournaments require at least 8 players, and there are currently ${this.players.length} players enrolled`;
+        // Need at least 2 players
+        if (this.players.length < 2) {
+            throw `Elimination tournaments require at least 2 players, and there are currently ${this.players.length} players enrolled`;
         }
 
         // Set tournament as active
