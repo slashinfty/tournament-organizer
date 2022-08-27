@@ -21,6 +21,7 @@ const singleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
         players.sort((a, b) => b.seed - a.seed);
     } else {
         players = arrayShuffle(players);
+        players.forEach((player, index) => player.seed = index + 1);
     }
 
     // Important values (determines bracket sizing)
@@ -139,6 +140,7 @@ const doubleElimination = (tournament: Swiss | RoundRobin | Elimination): void =
         players.sort((a, b) => b.seed - a.seed);
     } else {
         players = arrayShuffle(players);
+        players.forEach((player, index) => player.seed = index + 1);
     }
 
     // Important values (determines bracket sizing)
