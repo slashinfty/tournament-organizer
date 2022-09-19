@@ -2,13 +2,16 @@
   "include": ["./src/**/*"],
   "compilerOptions": {
     "target": "ES2019",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "./dist",
     "allowJs": true,
     "esModuleInterop": true,
     "declaration": true,
     "sourceMap": true
   },
   "typedocOptions": {
-    "theme": "github-wiki",
+    "theme": "default",
     "out": "./docs",
     "excludeInternal": true,
     "entryPointStrategy": "expand"
