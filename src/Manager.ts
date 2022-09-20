@@ -20,18 +20,23 @@ export class Manager {
      * Create a new tournament
      * @param name Name of the tournament
      * @param format Format of the tournament
+     * @param id ID of the tournament
      * @returns The new tournament
      */
-    create(name: string, format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin'): Tournament {
-        let id: string;
-        do {
-            id = cryptoRandomString({
-                length: 12,
-                type: 'base64'
-            });
-        } while (this.#tournaments.some(t => t.id === id));
-        const tournament = new Tournament(id, name, format);
+    createTournament(name: string, format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin', id: string | undefined = undefined): Tournament {
+        let ID = id;
+        if (ID === undefined) {
+            do {
+                ID = cryptoRandomString({
+                    length: 12,
+                    type: 'base64'
+                });
+            } while (this.#tournaments.some(t => t.id === ID));
+        }
+        const tournament = new Tournament(ID, name, format);
         this.#tournaments.push(tournament);
         return tournament;
     }
+
+    // reload tournament
 }

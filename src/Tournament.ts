@@ -149,6 +149,7 @@ export class Tournament {
 
     /** Set tournament options */
     set options(settings: {
+        id?: string,
         name?: string,
         format?: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin',
         state?: 'setup' | 'active' | 'playoffs' | 'inactive',
@@ -184,6 +185,7 @@ export class Tournament {
             current?: number
         }
     }) {
+        this.#id = settings.id || this.#id;
         this.#name = settings.name || this.#name;
         this.#format = settings.format || this.#format;
         this.#state = settings.state || this.#state;
@@ -207,15 +209,24 @@ export class Tournament {
         }
     }
 
-    // get players
+    /** Get an array of players */
+    get players(): Array<Player> {
+        return this.#players;
+    }
 
     // set players
 
     // create player
+    createPlayer(name: string, id: string | undefined = undefined): Player {
+        
+    }
 
     // remove player
 
-    // get matches
+    /** Get an array of matches */
+    get matches(): Array<Match> {
+        return this.#matches;
+    }
 
     // set matches
 
