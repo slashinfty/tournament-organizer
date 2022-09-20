@@ -11,7 +11,7 @@ export class Tournament {
     #name: string;
 
     /** Format of the tournament */
-    #format: 'elimination' | 'swiss' | 'round-robin';
+    #format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin';
 
     /** All players in the tournament */
     #players: Array<Player>;
@@ -69,7 +69,7 @@ export class Tournament {
      * @param name Name of the tournament
      * @param format Format of the tournament
      */
-    constructor(id: string, name: string, format: 'elimination' | 'swiss' | 'round-robin') {
+    constructor(id: string, name: string, format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin') {
         this.id = id;
         this.#name = name;
         this.#format = format;
@@ -87,7 +87,7 @@ export class Tournament {
             draw: 0.5,
             loss: 0,
             bye: 1,
-            tiebreaks: format === 'swiss' ? ['solkoff', 'cumulative'] : format === 'round-robin' ? ['sonneborn berger', 'versus'] : []
+            tiebreaks: format === 'swiss' ? ['solkoff', 'cumulative'] : format === 'round-robin' || format === 'double-round-robin' ? ['sonneborn berger', 'versus'] : []
         };
         this.#sorting = 'none';
         this.#rounds = {
@@ -100,7 +100,7 @@ export class Tournament {
     get options(): {
         id: string,
         name: string,
-        format: 'elimination' | 'swiss' | 'round-robin',
+        format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin',
         state: 'setup' | 'active' | 'playoffs' | 'inactive',
         consolation: boolean,
         playoffs: {
@@ -150,7 +150,8 @@ export class Tournament {
     /** Set tournament options */
     set options(settings: {
         name?: string,
-        format?: 'elimination' | 'swiss' | 'round-robin',
+        format?: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin',
+        state?: 'setup' | 'active' | 'playoffs' | 'inactive',
         consolation?: boolean,
         playoffs?: {
             format?: 'single-elimination' | 'double-elimination' | 'none',
@@ -179,11 +180,13 @@ export class Tournament {
         },
         sorting?: 'ascending' | 'descending' | 'none',
         rounds?: {
-            total?: number
+            total?: number,
+            current?: number
         }
     }) {
         this.#name = settings.name || this.#name;
         this.#format = settings.format || this.#format;
+        this.#state = settings.state || this.#state;
         this.#consolation = settings.consolation || this.#consolation;
         if (settings.hasOwnProperty('playoffs')) {
             this.#playoffs.format = settings.playoffs.format || this.#playoffs.format;
@@ -198,6 +201,29 @@ export class Tournament {
             this.#scoring.tiebreaks = settings.scoring.tiebreaks || this.#scoring.tiebreaks;
         }
         this.#sorting = settings.sorting || this.#sorting;
-        this.#rounds.total = settings.rounds.total || this.#rounds.total;
+        if (settings.hasOwnProperty('rounds')) {
+            this.#rounds.total = settings.rounds.total || this.#rounds.total;
+            this.#rounds.current = settings.rounds.current || this.#rounds.current;
+        }
     }
+
+    // get players
+
+    // set players
+
+    // create player
+
+    // remove player
+
+    // get matches
+
+    // set matches
+
+    // create result
+
+    // remove result
+
+    // get standings
+
+    // create round/matches
 }

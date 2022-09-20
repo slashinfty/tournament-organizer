@@ -22,7 +22,7 @@ export class Manager {
      * @param format Format of the tournament
      * @returns The new tournament
      */
-    create(name: string, format: 'elimination' | 'swiss' | 'round-robin'): Tournament {
+    create(name: string, format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin'): Tournament {
         let id: string;
         do {
             id = cryptoRandomString({
