@@ -20,8 +20,8 @@ export class Manager {
      * Create a new tournament
      * @param name Name of the tournament
      * @param format Format of the tournament
-     * @param id ID of the tournament
-     * @returns The new tournament
+     * @param id ID of the tournament (randomly assigned if omitted)
+     * @returns The newly created tournament
      */
     createTournament(name: string, format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin', id: string | undefined = undefined): Tournament {
         let ID = id;

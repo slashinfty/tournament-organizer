@@ -35,7 +35,6 @@
   },
   "homepage": "https://github.com/slashinfty/tournament-organizer/wiki",
   "dependencies": {
-    "array-shuffle": "^3.0.0",
     "crypto-random-string": "^5.0.0",
     "tournament-pairings": "^1.1.0"
   },

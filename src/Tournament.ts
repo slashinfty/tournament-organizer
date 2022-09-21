@@ -1,4 +1,5 @@
 import cryptoRandomString from 'crypto-random-string';
+import * as Pairings from 'tournament-pairings';
 import { Match } from './Match.js';
 import { Player } from './Player.js';
 
@@ -185,7 +186,7 @@ export class Tournament {
             current?: number
         }
     }) {
-        this.#id = settings.id || this.#id;
+        this.id = settings.id || this.id;
         this.#name = settings.name || this.#name;
         this.#format = settings.format || this.#format;
         this.#state = settings.state || this.#state;
@@ -214,12 +215,12 @@ export class Tournament {
         return this.#players;
     }
 
-    // set players TODO
-    set players(players: {
+    /** Set existing array of players */
+    set players(players: Array<{
         id: string,
         alias: string,
         active: boolean,
-        matches: Array<{
+        results: Array<{
             id: string,
             round: number,
             match: number,
@@ -232,11 +233,23 @@ export class Tournament {
                 bye: boolean
             } | undefined
         }>
-    }) {
-        
+    }>) {
+        players.forEach(p => {
+            const player = new Player(p.id, p.alias);
+            player.data = {
+                active: p.active,
+                results: p.results
+            };
+            this.#players.push(player);
+        });
     }
 
-    // create player
+    /**
+     * Create a new player
+     * @param alias Alias of the player
+     * @param id ID of the player (randomly assigned if omitted)
+     * @returns The newly created player
+     */
     createPlayer(alias: string, id: string | undefined = undefined): Player {
         let ID = id;
         if (ID === undefined) {
@@ -253,6 +266,9 @@ export class Tournament {
     }
 
     // remove player
+    removePlayer(id: string) {
+        const player = this.#players.find(p => p.id === id);
+    }
 
     /** Get an array of matches */
     get matches(): Array<Match> {
@@ -267,7 +283,11 @@ export class Tournament {
 
     // get standings
 
-    // create round/matches
+    /** Create matches for the round/tournament */
+    createMatches(): Array<Match> {
+        
+        return;
+    }
 
     /** Get all details of the tournament */
     get tournament(): {
