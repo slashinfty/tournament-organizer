@@ -144,10 +144,10 @@ export class Tournament {
             scoring: this.#scoring,
             sorting: this.#sorting,
             rounds: this.#rounds
-        }
+        };
     }
 
-    /** Set tournament options */
+    /** Set tournament options (only changes in options need to be included in the object) */
     set options(settings: {
         id?: string,
         name?: string,
@@ -214,11 +214,42 @@ export class Tournament {
         return this.#players;
     }
 
-    // set players
+    // set players TODO
+    set players(players: {
+        id: string,
+        alias: string,
+        active: boolean,
+        matches: Array<{
+            id: string,
+            round: number,
+            match: number,
+            opponent: string,
+            result: {
+                win: number,
+                draw: number,
+                loss: number,
+                pairUpDown: boolean,
+                bye: boolean
+            } | undefined
+        }>
+    }) {
+        
+    }
 
     // create player
-    createPlayer(name: string, id: string | undefined = undefined): Player {
-        
+    createPlayer(alias: string, id: string | undefined = undefined): Player {
+        let ID = id;
+        if (ID === undefined) {
+            do {
+                ID = cryptoRandomString({
+                    length: 12,
+                    type: 'base64'
+                });
+            } while (this.#players.some(t => t.id === ID));
+        }
+        const player = new Player(ID, alias);
+        this.#players.push(player);
+        return player;
     }
 
     // remove player
@@ -237,4 +268,51 @@ export class Tournament {
     // get standings
 
     // create round/matches
+
+    /** Get all details of the tournament */
+    get tournament(): {
+        id: string,
+        name: string,
+        format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin',
+        state: 'setup' | 'active' | 'playoffs' | 'inactive',
+        consolation: boolean,
+        playoffs: {
+            format: 'single-elimination' | 'double-elimination' | 'none',
+            cut: {
+                type: 'rank' | 'points',
+                value: number
+            } | 'none'
+        },
+        scoring: {
+            bestOf: number,
+            win: number,
+            draw: number,
+            loss: number,
+            bye: number,
+            tiebreaks: Array<
+                'median buchholz' |
+                'solkoff' |
+                'sonneborn berger' |
+                'cumulative' |
+                'versus' |
+                'game win percentage' |
+                'opponent game win percentage' |
+                'opponent match win percentage' |
+                'opponent opponent match win percentage'
+            >
+        },
+        sorting: 'ascending' | 'descending' | 'none',
+        rounds: {
+            total: number,
+            current: number
+        },
+        players: Array<Player>,
+        matches: Array<Match>
+    } {
+        return {
+            ...this.options,
+            players: this.#players,
+            matches: this.#matches
+        };
+    }
 }
