@@ -268,6 +268,7 @@ export class Tournament {
     // remove player
     removePlayer(id: string) {
         const player = this.#players.find(p => p.id === id);
+        player.active = false;
     }
 
     /** Get an array of matches */
