@@ -210,7 +210,10 @@ export class Tournament {
         }
     }
 
-    /** Set existing array of players */
+    /**
+     * Load existing set of players
+     * @param players Array of player objects
+     */
     loadPlayers(players: Array<{
         id: string,
         alias: string,
@@ -253,7 +256,11 @@ export class Tournament {
                     length: 12,
                     type: 'base64'
                 });
-            } while (this.players.some(t => t.id === ID));
+            } while (this.players.some(p => p.id === ID));
+        } else {
+            if (this.players.some(p => p.id === ID)) {
+                throw `Player with ID ${ID} already exists`;
+            }
         }
         const player = new Player(ID, alias);
         this.players.push(player);
@@ -266,6 +273,9 @@ export class Tournament {
      */
     removePlayer(id: string) {
         const player = this.players.find(p => p.id === id);
+        if (player === undefined) {
+            throw `Player with ID ${id} does not exist`;
+        }
         player.active = false;
     }
 
@@ -274,34 +284,57 @@ export class Tournament {
     /** Create matches for the round/tournament */
     nextRound(): Array<Match> {
         if (this.rounds.current === 0) {
+            if (this.players.length < 2) {
+                throw 'Insufficient number of players (minimum: 2)';
+            }
             this.#createMatches();
         }
         return;
     }
 
-    #createMatches(method: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin'): Array<{
-        round: number,
-        match: number,
-        player1: string | number | null,
-        player2: string | number | null,
-        win?: {
-            round: number,
-            match: number
-        },
-        loss?: {
-            round: number,
-            match: number
-        }
-    }> {
+    #createMatches(method: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin') {
         this.rounds.current++;
         if (this.sorting !== 'none') {
+            this.players.sort((a, b) => this.sorting === 'ascending' ? a.value - b.value : b.value - a.value);
+        }
+        if (method === 'single-elimination' || method === 'double-elimination') {
+            const matches = method === 'single-elimination' ? Pairings.SingleElimination(this.players.filter(player => player.active === true).map(player => player.id), this.rounds.current, this.consolation, this.sorting !== 'none') : Pairings.DoubleElimination(this.players.filter(player => player.active === true).map(player => player.id), this.rounds.current, this.sorting !== 'none');
+            matches.forEach(match => {
+                let id;
+                do {
+                    id = cryptoRandomString({
+                        length: 12,
+                        type: 'base64'
+                    });
+                } while (this.matches.some(m => m.id === id));
+                const newMatch = new Match(id, match.round, match.match);
+                this.matches.push(newMatch);
+            });
+            matches.forEach(match => {
+                const existingMatch = this.matches.find(m => m.round === match.round && m.match === match.match);
+                existingMatch.data = {
+                    playerA: match.player1 === null ? undefined : match.player1.toString(),
+                    playerB: match.player2 === null ? undefined : match.player2.toString(),
+                    path: match.hasOwnProperty('win') || match.hasOwnProperty('loss') ? {
+                        win: match.hasOwnProperty('win') ? this.matches.find(m => m.round === match.win.round && m.match === match.win.match) : undefined,
+                        loss: match.hasOwnProperty('loss') ? this.matches.find(m => m.round === match.loss.round && m.match === match.loss.match) : undefined
+                    } : undefined
+                };
+            });
+        }
+        if (method === 'swiss') {
+            const players = this.players.filter(player => player.active === true).map(player => ({
+                id: player.id, //TODO
+                score: '',
+                pairedUpDown: '',
+                receivedBye: '',
+                avoid: [],
+                rating: ''
+            }));
+        }
+        if (method === 'round-robin' || method === 'double-round-robin') {
 
         }
-        let matches;
-        if (this.method === 'single-elimination') {
-            matches = Pairings.SingleElimination(this.players.map(player => player.id), this.rounds.current, this.consolation, this.sorting !== 'none');
-        }
-        return matches;
     }
 
     #assignMatches() {

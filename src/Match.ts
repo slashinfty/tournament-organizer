@@ -83,7 +83,7 @@ export class Match {
         }
     }
 
-    set result(values: {
+    result(values: {
         playerA: number,
         playerB: number,
         draw?: number
@@ -92,5 +92,14 @@ export class Match {
         this.result.playerB = values.playerB;
         this.result.draw = values.draw || this.result.draw;
         this.active = false;
+    }
+
+    clearResult() {
+        this.result = {
+            playerA: 0,
+            playerB: 0,
+            draw: 0
+        };
+        this.active = true;
     }
 }

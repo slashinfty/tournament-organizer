@@ -9,6 +9,9 @@ export class Player {
     /** If the player is active */
     active: boolean;
 
+    /** Numerical value for player, such as rating or seed */
+    value: number | undefined;
+
     /** Array of matches the player is in */
     matches: Array<{
         id: string,
@@ -29,6 +32,7 @@ export class Player {
         this.id = id;
         this.alias = alias;
         this.active = true;
+        this.value = undefined;
         this.matches = [];
     }
 
@@ -37,6 +41,7 @@ export class Player {
         id?: string,
         alias?: string,
         active?: boolean,
+        value?: number | undefined,
         matches?: Array<{
             id: string,
             round: number,
@@ -54,6 +59,7 @@ export class Player {
         this.id = values.id || this.id;
         this.alias = values.alias || this.alias;
         this.active = values.active || this.active;
+        this.value = values.value || this.value;
         this.matches = values.matches || this.matches;
     }
 

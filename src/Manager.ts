@@ -32,6 +32,10 @@ export class Manager {
                     type: 'base64'
                 });
             } while (this.#tournaments.some(t => t.id === ID));
+        } else {
+            if (this.#tournaments.some(t => t.id === ID)) {
+                throw `Tournament with ID ${ID} already exists`;
+            }
         }
         const tournament = new Tournament(ID, name, format);
         this.#tournaments.push(tournament);
