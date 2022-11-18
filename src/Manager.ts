@@ -1,29 +1,25 @@
 import cryptoRandomString from 'crypto-random-string';
 import { Tournament } from './Tournament.js';
+import { SettableTournamentSettings } from './interfaces/SettableTournamentSettings.js';
 
 /** Class representing a tournament manager */
 export class Manager {
     /** All tournaments being managed */
-    #tournaments: Array<Tournament>;
+    tournaments: Array<Tournament>;
 
     /** Create a tournament manager */
     constructor() {
-        this.#tournaments = [];
-    }
-
-    /** Get all tournaments */
-    get tournaments(): Array<Tournament> {
-        return this.#tournaments;
+        this.tournaments = [];
     }
 
     /**
      * Create a new tournament
      * @param name Name of the tournament
-     * @param format Format of the tournament
+     * @param settings Settings of the tournament
      * @param id ID of the tournament (randomly assigned if omitted)
      * @returns The newly created tournament
      */
-    createTournament(name: string, format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin', id: string | undefined = undefined): Tournament {
+    createTournament(name: string, settings: SettableTournamentSettings = {}, id: string | undefined = undefined): Tournament {
         let ID = id;
         if (ID === undefined) {
             do {
@@ -31,14 +27,15 @@ export class Manager {
                     length: 12,
                     type: 'base64'
                 });
-            } while (this.#tournaments.some(t => t.id === ID));
+            } while (this.tournaments.some(t => t.id === ID));
         } else {
-            if (this.#tournaments.some(t => t.id === ID)) {
+            if (this.tournaments.some(t => t.id === ID)) {
                 throw `Tournament with ID ${ID} already exists`;
             }
         }
-        const tournament = new Tournament(ID, name, format);
-        this.#tournaments.push(tournament);
+        const tournament = new Tournament(ID, name);
+        tournament.settings = settings;
+        this.tournaments.push(tournament);
         return tournament;
     }
 

@@ -1,68 +1,41 @@
 import cryptoRandomString from 'crypto-random-string';
 import * as Pairings from 'tournament-pairings';
+import { SettableTournamentSettings } from './interfaces/SettableTournamentSettings.js';
+import { TournamentSettings } from './interfaces/TournamentSettings.js';
 import { Match } from './Match.js';
 import { Player } from './Player.js';
 
 /** Class representing a tournament */
 export class Tournament {
     /** Unique ID of the tournament */
-    id: string;
+    id: TournamentSettings.id;
 
     /** Name of the tournament */
-    name: string;
-
-    /** Format of the tournament */
-    format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin';
-
-    /** All players in the tournament */
-    players: Array<Player>;
-
-    /** All matches of the tournament */
-    matches: Array<Match>;
+    name: TournamentSettings.name;
 
     /** Current state of the tournament */
-    state: 'setup' | 'active' | 'playoffs' | 'inactive';
+    status: TournamentSettings.status;
 
-    /** Existence of a match for third-place in single elimination */
-    consolation: boolean;
+    /** Current round of the tournament */
+    round: TournamentSettings.number;
 
-    /** Details regarding playoffs */
-    playoffs: {
-        format: 'single-elimination' | 'double-elimination' | 'none',
-        cut: {
-            type: 'rank' | 'points',
-            value: number
-        } | 'none'
-    }
+    /** All players in the tournament */
+    players: TournamentSettings.players;
+
+    /** All matches of the tournament */
+    matches: TournamentSettings.matches;
+
+    /** Sorting method, if players are rated/seeded */
+    sorting: TournamentSettings.sorting;
 
     /** Details regarding scoring */
-    scoring: {
-        bestOf: number,
-        win: number,
-        draw: number,
-        loss: number,
-        bye: number,
-        tiebreaks: Array<
-            'median buchholz' |
-            'solkoff' |
-            'sonneborn berger' |
-            'cumulative' |
-            'versus' |
-            'game win percentage' |
-            'opponent game win percentage' |
-            'opponent match win percentage' |
-            'opponent opponent match win percentage'
-        >
-    };
+    scoring: TournamentSettings.scoring;
 
-    /** If the players are rated or seeded, the sorting method */
-    sorting: 'ascending' | 'descending' | 'none';
+    /** Details regarding the tournament */
+    stageOne: TournamentSettings.stageOne;
 
-    /** Details regarding rounds */
-    rounds: {
-        total: number,
-        current: number
-    };
+    /** Details regarding playoffs */
+    stageTwo: TournamentSettings.stageTwo;
 
     /**
      * Create a new tournament
@@ -70,143 +43,73 @@ export class Tournament {
      * @param name Name of the tournament
      * @param format Format of the tournament
      */
-    constructor(id: string, name: string, format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin') {
+    constructor(id: string, name: string) {
         this.id = id;
         this.name = name;
-        this.format = format;
+        this.status = 'setup';
+        this.round = 0;
         this.players = [];
         this.matches = [];
-        this.state = 'setup';
-        this.consolation = false;
-        this.playoffs = {
-            format: 'none',
-            cut: 'none'
-        };
+        this.sorting = 'none';
         this.scoring = {
             bestOf: 1,
             win: 1,
             draw: 0.5,
             loss: 0,
             bye: 1,
-            tiebreaks: format === 'swiss' ? ['solkoff', 'cumulative'] : format === 'round-robin' || format === 'double-round-robin' ? ['sonneborn berger', 'versus'] : []
+            tiebreaks: []
         };
-        this.sorting = 'none';
-        this.rounds = {
-            total: 0,
-            current: 0
-        };
-    }
-    
-    /** Get tournament options */
-    get options(): {
-        id: string,
-        name: string,
-        format: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin',
-        state: 'setup' | 'active' | 'playoffs' | 'inactive',
-        consolation: boolean,
-        playoffs: {
-            format: 'single-elimination' | 'double-elimination' | 'none',
-            cut: {
-                type: 'rank' | 'points',
-                value: number
-            } | 'none'
-        },
-        scoring: {
-            bestOf: number,
-            win: number,
-            draw: number,
-            loss: number,
-            bye: number,
-            tiebreaks: Array<
-                'median buchholz' |
-                'solkoff' |
-                'sonneborn berger' |
-                'cumulative' |
-                'versus' |
-                'game win percentage' |
-                'opponent game win percentage' |
-                'opponent match win percentage' |
-                'opponent opponent match win percentage'
-            >
-        },
-        sorting: 'ascending' | 'descending' | 'none',
-        rounds: {
-            total: number,
-            current: number
+        this.stageOne = {
+            format: 'single-elimination',
+            rounds: 0,
+            maxPlayers: 0
         }
-    } {
-        return {
-            id: this.id,
-            name: this.name,
-            format: this.format,
-            state: this.state,
-            consolation: this.consolation,
-            playoffs: this.playoffs,
-            scoring: this.scoring,
-            sorting: this.sorting,
-            rounds: this.rounds
-        };
+        this.stageTwo = null;
     }
 
     /** Set tournament options (only changes in options need to be included in the object) */
-    set options(settings: {
-        id?: string,
-        name?: string,
-        format?: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin',
-        state?: 'setup' | 'active' | 'playoffs' | 'inactive',
-        consolation?: boolean,
-        playoffs?: {
-            format?: 'single-elimination' | 'double-elimination' | 'none',
-            cut?: {
-                type: 'rank' | 'points',
-                value: number
-            } | 'none'
-        },
-        scoring?: {
-            bestOf?: number,
-            win?: number,
-            draw?: number,
-            loss?: number,
-            bye?: number,
-            tiebreaks?: Array<
-                'median buchholz' |
-                'solkoff' |
-                'sonneborn berger' |
-                'cumulative' |
-                'versus' |
-                'game win percentage' |
-                'opponent game win percentage' |
-                'opponent match win percentage' |
-                'opponent opponent match win percentage'
-            >
-        },
-        sorting?: 'ascending' | 'descending' | 'none',
-        rounds?: {
-            total?: number,
-            current?: number
+    set settings(options: SettableTournamentSettings) {
+        this.name = options.name || this.name;
+        this.status = options.status || this.status;
+        this.round = options.round || this.round;
+        this.players = options.players || this.players;
+        this.matches = options.matches || this.matches;
+        this.sorting = options.sorting || this.sorting;
+        if (options.hasOwnProperty('scoring')) {
+            this.scoring.bestOf = options.scoring.bestOf || this.scoring.bestOf;
+            this.scoring.win = options.scoring.win || this.scoring.win;
+            this.scoring.draw = options.scoring.draw || this.scoring.draw;
+            this.scoring.loss = options.scoring.loss || this.scoring.loss;
+            this.scoring.bye = options.scoring.bye || this.scoring.bye;
+            this.scoring.tiebreaks = options.scoring.tiebreaks || this.scoring.tiebreaks;
         }
-    }) {
-        this.id = settings.id || this.id;
-        this.name = settings.name || this.name;
-        this.format = settings.format || this.format;
-        this.state = settings.state || this.state;
-        this.consolation = settings.consolation || this.consolation;
-        if (settings.hasOwnProperty('playoffs')) {
-            this.playoffs.format = settings.playoffs.format || this.playoffs.format;
-            this.playoffs.cut = settings.playoffs.cut || this.playoffs.cut;
+        if (options.hasOwnProperty('stageOne')) {
+            this.stageOne.format = options.stageOne.format || this.stageOne.format;
+            this.stageOne.consolation = options.stageOne.consolation || this.stageOne.consolation;
+            this.stageOne.rounds = options.stageOne.rounds || this.stageOne.rounds;
+            this.stageOne.maxPlayers = options.stageOne.maxPlayers || this.stageOne.maxPlayers;
         }
-        if (settings.hasOwnProperty('scoring')) {
-            this.scoring.bestOf = settings.scoring.bestOf || this.scoring.bestOf;
-            this.scoring.win = settings.scoring.win || this.scoring.win;
-            this.scoring.draw = settings.scoring.draw || this.scoring.draw;
-            this.scoring.loss = settings.scoring.loss || this.scoring.loss;
-            this.scoring.bye = settings.scoring.bye || this.scoring.bye;
-            this.scoring.tiebreaks = settings.scoring.tiebreaks || this.scoring.tiebreaks;
-        }
-        this.sorting = settings.sorting || this.sorting;
-        if (settings.hasOwnProperty('rounds')) {
-            this.rounds.total = settings.rounds.total || this.rounds.total;
-            this.rounds.current = settings.rounds.current || this.rounds.current;
+        if (options.hasOwnProperty('stageTwo')) {
+            if (options.stageTwo === null) {
+                this.stageTwo = options.stageTwo;
+            } else {
+                if (this.stageTwo === null) {
+                    this.stageTwo = {
+                        format: 'single-elimination',
+                        consolation: false,
+                        advance: {
+                            value: 8,
+                            method: 'rank'
+                        }
+                    };
+                }
+                this.stageTwo.format = options.stageTwo.format || this.stageTwo.format;
+                this.stageTwo.consolation = options.stageTwo.consolation || this.stageTwo.consolation;
+                if (options.stageTwo.hasOwnProperty('advance')) {
+                    this.stageTwo.advance.value = options.stageTwo.advance.value || this.stageTwo.advance.value;
+                    this.stageTwo.advance.method = options.stageTwo.advance.method || this.stageTwo.advance.method;
+                }
+            }
         }
     }
 
