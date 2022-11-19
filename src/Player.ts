@@ -1,108 +1,80 @@
+import { PlayerValues } from './interfaces/PlayerValues.js';
+import { SettablePlayerValues } from './interfaces/SettablePlayerValues.js';
+
 /** Class representing a player */
 export class Player {
     /** Unique ID of the player */
-    id: string;
+    id: PlayerValues['id'];
 
     /** Name of the player */
-    alias: string;
+    name: PlayerValues['name'];
 
     /** If the player is active */
-    active: boolean;
+    active: PlayerValues['active'];
 
     /** Numerical value for player, such as rating or seed */
-    value: number | undefined;
+    value: PlayerValues['value'];
 
     /** Array of matches the player is in */
-    matches: Array<{
-        id: string,
-        round: number,
-        match: number,
-        opponent: string,
-        pairUpDown: boolean,
-        bye: boolean
-        result: {
-            win: number,
-            draw: number,
-            loss: number
-        } | undefined
-    }>;
+    matches: PlayerValues['matches'];
 
     /** Create a new player */
-    constructor(id: string, alias: string) {
+    constructor(id: string, name: string) {
         this.id = id;
-        this.alias = alias;
+        this.name = name;
         this.active = true;
-        this.value = undefined;
+        this.value = 0;
         this.matches = [];
     }
 
     /** Set information about the player (only changes in information need to be included in the object) */
-    set data(values: {
-        id?: string,
-        alias?: string,
-        active?: boolean,
-        value?: number | undefined,
-        matches?: Array<{
-            id: string,
-            round: number,
-            match: number,
-            opponent: string,
-            pairUpDown: boolean,
-            bye: boolean
-            result: {
-                win: number,
-                draw: number,
-                loss: number,
-            } | undefined
-        }>
-    }) {
-        this.id = values.id || this.id;
-        this.alias = values.alias || this.alias;
-        this.active = values.active || this.active;
-        this.value = values.value || this.value;
-        this.matches = values.matches || this.matches;
+    set values(options: SettablePlayerValues) {
+        this.name = options.name || this.name;
+        this.active = options.active || this.active;
+        this.value = options.value || this.value;
+        if (options.hasOwnProperty('matches')) {
+            this.matches = [...this.matches, ...options.matches];
+        }
     }
 
     /** Add a new match for the player */
-    createMatch(match: {
+    addMatch(match: {
         id: string,
-        round: number,
-        match: number,
-        opponent: string,
+        opponent: string | null,
         pairUpDown: boolean,
-        bye: boolean
-        result: {
-            win: number,
-            draw: number,
-            loss: number
-        } | undefined
+        bye: boolean,
+        win: number,
+        loss: number,
+        draw: number
     }) {
+        if (this.matches.find(m => m.id === match.id) !== undefined) {
+            throw `Match with ID ${match.id} already exists`;
+        }
         this.matches.push(match);
     }
 
     /** Remove a match from player history */
     removeMatch(id: string) {
-        this.matches.splice(this.matches.findIndex(m => m.id === id), 1);
+        const index = this.matches.findIndex(m => m.id === id);
+        if (index === -1) {
+            throw `Match with ID ${id} does not exist`;
+        }
+        this.matches.splice(index, 1);
     }
 
-    /** Record the result of a match for a player */
-    result(result: {
-        id: string,
-        win: number,
-        draw: number,
-        loss: number
+    /** Update the details of a match for a player */
+    updateMatch(id: string, values: {
+        opponent?: string | null,
+        pairUpDown?: boolean,
+        bye?: boolean,
+        win?: number,
+        loss?: number,
+        draw?: number
     }) {
-        const match = this.matches.find(m => m.id === result.id);
-        Object.assign(match.result, {
-            win: result.win,
-            draw: result.draw,
-            loss: result.loss
-        });
-    }
-
-    /** Clear the result of a match for a player */
-    clearResult(id: string) {
         const match = this.matches.find(m => m.id === id);
-        match.result = undefined;
+        if (match === undefined) {
+            throw `Match with ID ${id} does not exist`;
+        }
+        Object.assign(match, values);
     }
 }

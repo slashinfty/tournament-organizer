@@ -10,11 +10,5 @@
     "esModuleInterop": true,
     "declaration": true,
     "sourceMap": true
-  },
-  "typedocOptions": {
-    "theme": "default",
-    "out": "./docs",
-    "excludeInternal": true,
-    "entryPointStrategy": "expand"
   }
 }

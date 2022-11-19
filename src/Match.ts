@@ -1,105 +1,78 @@
+import { MatchValues } from "./interfaces/MatchValues";
+import { SettableMatchValues } from "./interfaces/SettableMatchValues";
+
 /** Class representing a match */
 export class Match {
     /** Unique ID of the match */
-    id: string;
+    id: MatchValues['id'];
 
-    round: number;
+    /** Round number for the match */
+    round: MatchValues['round'];
 
-    match: number;
+    /** Match number for the match */
+    match: MatchValues['match'];
 
-    active: boolean;
+    /** If the match is active */
+    active: MatchValues['active'];
 
-    playerA: string | undefined;
+    /** If the match is a bye */
+    bye: MatchValues['bye'];
 
-    playerB: string | undefined;
+    /** Details for player one */
+    player1: MatchValues['player1'];
 
-    result: {
-        playerA: number,
-        playerB: number,
-        draw: number
-    };
+    /** Details for player two */
+    player2: MatchValues['player2'];
 
-    pairUpDown: boolean;
+    /** Next match for winners and losers */
+    path: MatchValues['path'];
 
-    bye: boolean;
-
-    path: {
-        win: string | undefined,
-        loss: string | undefined
-    } | undefined;
-
+    /** Create a new match */
     constructor(id: string, round: number, match: number) {
         this.id = id;
         this.round = round;
         this.match = match;
         this.active = false;
-        this.playerA = undefined;
-        this.playerB = undefined;
-        this.result = {
-            playerA: 0,
-            playerB: 0,
-            draw: 0
-        };
-        this.pairUpDown = false;
         this.bye = false;
-        this.path = undefined;
-    }
-
-    set data(values: {
-        id?: string,
-        round?: number,
-        match?: number,
-        active?: boolean,
-        playerA?: string | undefined,
-        playerB?: string | undefined,
-        result?: {
-            playerA?: number,
-            playerB?: number,
-            draw?: number
-        },
-        pairUpDown?: boolean,
-        bye?: boolean,
-        path?: {
-            win?: string | undefined,
-            loss?: string | undefined
-        }
-    }) {
-        this.id = values.id || this.id;
-        this.round = values.round || this.round;
-        this.match = values.match || this.match;
-        this.active = values.active || this.active;
-        this.playerA = values.playerA || this.playerA;
-        this.playerB = values.playerB || this.playerB;
-        if (values.hasOwnProperty('result')) {
-            this.result.playerA = values.result.playerA || this.result.playerA;
-            this.result.playerB = values.result.playerB || this.result.playerB;
-            this.result.draw = values.result.draw || this.result.draw;
-        }
-        this.pairUpDown = values.pairUpDown || this.pairUpDown;
-        this.bye = values.bye || this.bye;
-        if (values.hasOwnProperty('path')) {
-            this.path.win = values.path.win || this.path.win;
-            this.path.loss = values.path.loss || this.path.loss;
-        }
-    }
-
-    result(values: {
-        playerA: number,
-        playerB: number,
-        draw?: number
-    }) {
-        this.result.playerA = values.playerA;
-        this.result.playerB = values.playerB;
-        this.result.draw = values.draw || this.result.draw;
-        this.active = false;
-    }
-
-    clearResult() {
-        this.result = {
-            playerA: 0,
-            playerB: 0,
+        this.player1 = {
+            id: null,
+            win: 0,
+            loss: 0,
             draw: 0
         };
-        this.active = true;
+        this.player2 = {
+            id: null,
+            win: 0,
+            loss: 0,
+            draw: 0
+        }
+        this.path = {
+            win: null,
+            loss: null
+        }
+    }
+
+    /** Set information about the match (only changes in information need to be included in the object) */
+    set values(options: SettableMatchValues) {
+        this.round = options.round || this.round;
+        this.match = options.match || this.match;
+        this.active = options.active || this.active;
+        this.bye = options.bye || this.bye;
+        if (options.hasOwnProperty('player1')) {
+            this.player1.id = options.player1.id || this.player1.id;
+            this.player1.win = options.player1.win || this.player1.win;
+            this.player1.loss = options.player1.loss || this.player1.loss;
+            this.player1.draw = options.player1.draw || this.player1.draw;
+        }
+        if (options.hasOwnProperty('player2')) {
+            this.player2.id = options.player2.id || this.player2.id;
+            this.player2.win = options.player2.win || this.player2.win;
+            this.player2.loss = options.player2.loss || this.player2.loss;
+            this.player2.draw = options.player2.draw || this.player2.draw;
+        }
+        if (options.hasOwnProperty('path')) {
+            this.path.win = options.path.win || this.path.win;
+            this.path.loss = options.path.loss || this.path.loss;
+        }
     }
 }

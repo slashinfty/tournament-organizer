@@ -3,17 +3,16 @@
   "version": "3.0.0",
   "description": "JavaScript library for running tournaments",
   "main": "./dist/index.js",
-  "type": "module",
-  "engines": {
-    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
-  },
   "types": "./dist/index.d.js",
   "files": [
     "dist/**/*"
   ],
+  "type": "module",
+  "engines": {
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+  },
   "scripts": {
-    "build": "rm -rf dist/* && tsc -p tsconfig.json",
-    "docs": "rm -rf docs/* && typedoc --tsconfig ./tsconfig.json ./src"
+    "build": "rm -rf dist/* && tsc -p tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -36,10 +35,9 @@
   "homepage": "https://github.com/slashinfty/tournament-organizer/wiki",
   "dependencies": {
     "crypto-random-string": "^5.0.0",
-    "tournament-pairings": "^1.1.0"
+    "tournament-pairings": "^1.4.1"
   },
   "devDependencies": {
-    "typedoc": "^0.23.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.9.3"
   }
 }

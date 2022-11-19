@@ -1,6 +1,6 @@
 import cryptoRandomString from 'crypto-random-string';
 import { Tournament } from './Tournament.js';
-import { SettableTournamentSettings } from './interfaces/SettableTournamentSettings.js';
+import { SettableTournamentValues } from './interfaces/SettableTournamentValues.js';
 
 /** Class representing a tournament manager */
 export class Manager {
@@ -19,7 +19,7 @@ export class Manager {
      * @param id ID of the tournament (randomly assigned if omitted)
      * @returns The newly created tournament
      */
-    createTournament(name: string, settings: SettableTournamentSettings = {}, id: string | undefined = undefined): Tournament {
+    createTournament(name: string, settings: SettableTournamentValues = {}, id: string | undefined = undefined): Tournament {
         let ID = id;
         if (ID === undefined) {
             do {
@@ -40,4 +40,7 @@ export class Manager {
     }
 
     // reload tournament
+
+    // remove tournament
+    
 }

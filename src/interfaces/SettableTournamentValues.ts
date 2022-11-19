@@ -1,4 +1,7 @@
-export interface SettableTournamentSettings {
+import { Player } from '../Player.js';
+import { Match } from '../Match.js';
+
+export interface SettableTournamentValues {
     name?: string,
     status?: 'setup' | 'stage-one' | 'stage-two' | 'complete',
     round?: number,
@@ -24,17 +27,17 @@ export interface SettableTournamentSettings {
         >
     },
     stageOne?: {
-        format?: 'single-elimination' | 'double-elimination' | 'swiss' | 'round-robin' | 'double-round-robin',
+        format?: 'single-elimination' | 'double-elimination' | 'stepladder' | 'swiss' | 'round-robin' | 'double-round-robin',
         consolation?: boolean,
         rounds?: number,
         maxPlayers?: number
     },
     stageTwo?: {
-        format?: 'single-elimination' | 'double-elimination',
+        format?: 'single-elimination' | 'double-elimination' | 'stepladder' | null,
         consolation?: boolean,
         advance?: {
             value?: number,
             method?: 'points' | 'rank'
         }
-    } | null
+    }
 }
