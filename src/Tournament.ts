@@ -2,6 +2,7 @@ import cryptoRandomString from 'crypto-random-string';
 import * as Pairings from 'tournament-pairings';
 import { Match } from './Match.js';
 import { Player } from './Player.js';
+import { StandingsValues } from './interfaces/StandingsValues.js';
 import { TournamentValues } from './interfaces/TournamentValues.js';
 import { SettableTournamentValues } from './interfaces/SettableTournamentValues.js';
 
@@ -238,6 +239,83 @@ export class Tournament {
         }
     }
 
+    #computeScores(): Array<StandingsValues> {
+        const playerScores = this.players.map(player => ({
+            player: player,
+            gamePoints: 0,
+            games: 0,
+            matchPoints: 0,
+            matches: 0,
+            tiebreaks: {
+                medianBuchholz: 0,
+                solkoff: 0,
+                sonnebornBerger: 0,
+                cumulative: 0,
+                oppCumulative: 0,
+                matchWinPct: 0,
+                oppMatchWinPct: 0,
+                oppOppMatchWinPct: 0,
+                gameWinPct: 0,
+                oppGameWinPct: 0
+            }
+        }));
+        for (let i = 0; i < playerScores.length; i++) {
+            const player = playerScores[i];
+            if (player.player.matches.length === 0) {
+                continue;
+            }
+            player.player.matches.sort((a, b) => {
+                const matchA = this.matches.find(m => m.id === a.id);
+                const matchB = this.matches.find(m => m.id === b.id);
+                return matchA.round - matchB.round;
+            });
+            player.player.matches.forEach(match => {
+                player.gamePoints += (this.scoring.win * match.win) + (this.scoring.loss * match.loss) + (this.scoring.draw + match.draw);
+                player.games += match.win + match.loss + match.draw;
+                player.matchPoints += match.win > match.loss ? this.scoring.win : match.loss > match.win ? this.scoring.loss : this.scoring.draw;
+                player.tiebreaks.cumulative += player.matchPoints;
+                player.matches++;
+            });
+            player.tiebreaks.gameWinPct = player.gamePoints / (player.games * this.scoring.win);
+            player.tiebreaks.matchWinPct = player.matchPoints / (player.matches * this.scoring.win);
+        }
+        for (let i = 0; i < playerScores.length; i++) {
+            const player = playerScores[i];
+            const opponents = playerScores.filter(p => player.player.matches.some(match => match.opponent === p.player.id));
+            if (opponents.length === 0) {
+                continue;
+            }
+            player.tiebreaks.oppMatchWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.matchWinPct, 0) / opponents.length;
+            player.tiebreaks.oppGameWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.gameWinPct, 0) / opponents.length;
+            const oppMatchPoints = opponents.map(opp => opp.matchPoints);
+            player.tiebreaks.solkoff = oppMatchPoints.reduce((sum, curr) => sum + curr, 0);
+            if (oppMatchPoints.length > 2) {
+                const max = oppMatchPoints.reduce((max, curr) => Math.max(max, curr), 0);
+                const min = oppMatchPoints.reduce((min, curr) => Math.min(min, curr), max);
+                oppMatchPoints.splice(oppMatchPoints.indexOf(max), 1);
+                oppMatchPoints.splice(oppMatchPoints.indexOf(min), 1);
+                player.tiebreaks.medianBuchholz = oppMatchPoints.reduce((sum, curr) => sum + curr, 0);
+            }
+            player.tiebreaks.sonnebornBerger = opponents.reduce((sum, opp) => {
+                const match = player.player.matches.find(m => m.opponent === opp.player.id);
+                if (this.matches.find(m => m.id === match.id).active === true) {
+                    return sum;
+                }
+                return match.win > match.loss ? sum + opp.matchPoints : sum + (0.5 * opp.matchPoints);
+            }, 0);
+            player.tiebreaks.oppCumulative = opponents.reduce((sum, opp) => sum + opp.tiebreaks.cumulative, 0);
+        }
+        for (let i = 0; i < playerScores.length; i++) {
+            const player = playerScores[i];
+            const opponents = playerScores.filter(p => player.player.matches.some(match => match.opponent === p.player.id));
+            if (opponents.length === 0) {
+                continue;
+            }
+            player.tiebreaks.oppOppMatchWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.oppMatchWinPct, 0) / opponents.length;
+        }
+        return playerScores;
+    }
+
     /**
      * Create a new player
      * @param name Alias of the player
@@ -273,6 +351,9 @@ export class Tournament {
             throw `Player with ID ${id} does not exist`;
         }
         player.active = false;
+        // fix elimination bracket
+        // fix stepladder
+        // fix round robin
     }
 
     /** Start the tournament */
@@ -307,11 +388,11 @@ export class Tournament {
                 if (this.stageTwo.advance.method === 'points') {
                     this.players.filter(player => player.matches.reduce((sum, match) => match.win > match.loss ? sum + this.scoring.win : match.loss > match.win ? sum + this.scoring.loss : this.scoring.draw, 0) < this.stageTwo.advance.value).forEach(player => player.active = false);
                 } else {
-                    //standings
+                    const standings = this.standings();
+                    standings.splice(0, this.stageTwo.advance.value - 1);
+                    standings.forEach(s => this.players.find(p => p.id === s.player.id).active = false);
                 }
-                const players = this.players.filter(p => p.active === true);
-                // sort with standings
-                this.#createMatches(players);
+                this.#createMatches(this.standings().map(s => s.player));
             } else {
                 this.end();
             }
@@ -333,8 +414,66 @@ export class Tournament {
 
     }
 
-    standings(activeOnly: boolean = true) {
-
+    standings(activeOnly: boolean = true): Array<StandingsValues> {
+        let players = this.#computeScores();
+        if (activeOnly === true) {
+            players = players.filter(p => p.player.active === true);
+        }
+        players.sort((a, b) => {
+            if (a.matchPoints !== b.matchPoints) {
+                return b.matchPoints - a.matchPoints;
+            }
+            for (let i = 0; i < this.scoring.tiebreaks.length; i++) {
+                switch (this.scoring.tiebreaks[i]) {
+                    case 'median buchholz':
+                        if (a.tiebreaks.medianBuchholz !== b.tiebreaks.medianBuchholz) {
+                            return b.tiebreaks.medianBuchholz - a.tiebreaks.medianBuchholz;
+                        } else continue;
+                    case 'solkoff':
+                        if (a.tiebreaks.solkoff !== b.tiebreaks.solkoff) {
+                            return b.tiebreaks.solkoff - a.tiebreaks.solkoff;
+                        } else continue;
+                    case 'sonneborn berger':
+                        if (a.tiebreaks.sonnebornBerger !== b.tiebreaks.sonnebornBerger) {
+                            return b.tiebreaks.sonnebornBerger - a.tiebreaks.sonnebornBerger;
+                        } else continue;
+                    case 'cumulative':
+                        if (a.tiebreaks.cumulative !== b.tiebreaks.cumulative) {
+                            return b.tiebreaks.cumulative - a.tiebreaks.cumulative;
+                        } else if (a.tiebreaks.oppCumulative !== b.tiebreaks.oppCumulative) {
+                            return b.tiebreaks.oppCumulative - a.tiebreaks.oppCumulative;
+                        } else continue;
+                    case 'versus':
+                        const matchIDs = a.player.matches.filter(m => m.opponent === b.player.id).map(m => m.id);
+                        if (matchIDs.length === 0) {
+                            continue;
+                        }
+                        const pointsA = a.player.matches.filter(m => matchIDs.some(i => i === m.id)).reduce((sum, curr) => curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
+                        const pointsB = b.player.matches.filter(m => matchIDs.some(i => i === m.id)).reduce((sum, curr) => curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
+                        if (pointsA !== pointsB) {
+                            return pointsB - pointsA;
+                        } else continue;
+                    case 'game win percentage':
+                        if (a.tiebreaks.gameWinPct !== b.tiebreaks.gameWinPct) {
+                            return b.tiebreaks.gameWinPct - a.tiebreaks.gameWinPct;
+                        } else continue;
+                    case 'opponent game win percentage':
+                        if (a.tiebreaks.oppGameWinPct !== b.tiebreaks.oppGameWinPct) {
+                            return b.tiebreaks.oppGameWinPct - a.tiebreaks.oppGameWinPct;
+                        } else continue;
+                    case 'opponent match win percentage':
+                        if (a.tiebreaks.oppMatchWinPct !== b.tiebreaks.oppMatchWinPct) {
+                            return b.tiebreaks.oppMatchWinPct - a.tiebreaks.oppMatchWinPct;
+                        } else continue;
+                    case 'opponent opponent match win percentage':
+                        if (a.tiebreaks.oppOppMatchWinPct !== b.tiebreaks.oppOppMatchWinPct) {
+                            return b.tiebreaks.oppOppMatchWinPct - a.tiebreaks.oppOppMatchWinPct;
+                        } else continue;
+                }
+            }
+            return parseInt(b.player.id, 64) - parseInt(a.player.id, 64);
+        });
+        return players;
     }
 
     end(): void {

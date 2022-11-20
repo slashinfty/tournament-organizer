@@ -176,6 +176,7 @@ createPlayer(
 ): Player
 ```
 * creates a new player and returns it
+* throws an error if `id` is specified and already exists
 ---
 ```ts
 removePlayer(
@@ -183,6 +184,38 @@ removePlayer(
 ): void
 ```
 * removes a player from the tournament
+* throws an error if no player has an ID equaling `id`
+---
+```ts
+start(): void
+```
+* starts the tournament
+* throws an error if there are an insufficient number of players (4 for elimination, 2 for all other formats)
+---
+```ts
+next(): void
+```
+* progresses the tournament to the next round
+* throws an error if there are active matches, if the tournament is not in the first stage, or if the format is elimination or stepladder
+---
+```ts
+result(
+    id: string,
+    player1Wins: number,
+    player2Wins: number,
+    draws: number = 0,
+    bye: boolean = false
+): void
+```
+* updates the result of a match
+---
+```ts
+standings(
+    activeOnly: boolean = true
+): Array<StandingsValues>
+```
+* computes tiebreakers for all players
+* returns an array of players with scores and tiebreaker values
 ---
 ## `Player` Class
 
@@ -207,3 +240,5 @@ removePlayer(
 ### `SettablePlayerValues`
 
 ### `SettableMatchValues`
+
+### `StandingsValues`
