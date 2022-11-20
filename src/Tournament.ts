@@ -267,7 +267,7 @@ export class Tournament {
      * Remove a player
      * @param id ID of the player
      */
-    removePlayer(id: string) {
+    removePlayer(id: string): void {
         const player = this.players.find(p => p.id === id);
         if (player === undefined) {
             throw `Player with ID ${id} does not exist`;
@@ -276,7 +276,7 @@ export class Tournament {
     }
 
     /** Start the tournament */
-    start() {
+    start(): void {
         if ((['single-elimination', 'double-elimination'].includes(this.stageOne.format) && this.players.length < 4) || this.players.length < 2) {
             throw `Insufficient number of players to start event`;
         }
@@ -290,19 +290,46 @@ export class Tournament {
     }
 
     /** Progress to the next round in the tournament */
-    next() {
-        // reject if elim or step
-        // reject if active matches
+    next(): void {
+        if (this.status !== 'stage-one') {
+            throw `Can only advance rounds during stage one`;
+        }
+        if (['single-elimination', 'double-elimination', 'stepladder'].includes(this.stageOne.format)) {
+            throw `Can not advance rounds in elimination or stepladder`;
+        }
+        if (this.matches.filter(match => match.active === true).length > 0) {
+            throw `Can not advance rounds with active matches`;
+        }
         this.round++;
-        // for r-r:
-        /*
-        matches = this.matches.filter(m => m.round === this.round);
-        matches.forEach(match => match.values = { active: true });
-        */
-        // swiss needs to creatematches
+        if (this.round > this.stageOne.rounds) {
+            if (this.stageTwo.format !== null) {
+                this.status = 'stage-two';
+                if (this.stageTwo.advance.method === 'points') {
+                    this.players.filter(player => player.matches.reduce((sum, match) => match.win > match.loss ? sum + this.scoring.win : match.loss > match.win ? sum + this.scoring.loss : this.scoring.draw, 0) < this.stageTwo.advance.value).forEach(player => player.active = false);
+                } else {
+                    //standings
+                }
+                const players = this.players.filter(p => p.active === true);
+                // sort with standings
+                this.#createMatches(players);
+            } else {
+                this.end();
+            }
+        } else {
+            if (['round-robin', 'double-round-robin'].includes(this.stageOne.format)) {
+                const matches = this.matches.filter(m => m.round === this.round);
+                matches.forEach(match => match.values = { active: true });
+            } else {
+                const players = this.players.filter(p => p.active === true);
+                if (this.sorting !== 'none') {
+                    players.sort((a, b) => this.sorting === 'ascending' ? a.value - b.value : b.value - a.value);
+                }
+                this.#createMatches(players);
+            }
+        }
     }
 
-    result(id: string, player1Wins: number, player2Wins: number, draws: number = 0, bye: boolean = false) {
+    result(id: string, player1Wins: number, player2Wins: number, draws: number = 0, bye: boolean = false): void {
 
     }
 
@@ -310,7 +337,7 @@ export class Tournament {
 
     }
 
-    end() {
-        
+    end(): void {
+
     }
 }

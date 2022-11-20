@@ -20,23 +20,170 @@ const Manager = new TournamentOrganizer();
 
 ### Properties
 
-* `tournaments: Array<Tournament>`
-    * an array of all tournaments
-
+```ts
+tournaments: Array<Tournament>
+```
+* an array of all tournaments
+---
 ### Methods
 
-* `createTournament(name: string, settings: SettableTournamentValues = {}, id: string | undefined = undefined): Tournament` 
-    * creates a new tournament and returns it
-    * throws an error if `id` is specified and already exists
+```ts
+createTournament(
+    name: string, 
+    settings: SettableTournamentValues = {}, 
+    id: string | undefined = undefined
+): Tournament
+```
+* creates a new tournament and returns it
+* throws an error if `id` is specified and already exists
 
 ## `Tournament` Class
 
 ### Properties
 
+```ts
+id: string
+```
+* unique ID of the tournament
+---
+```ts
+name: string
+```
+* name of the tournament
+---
+```ts
+status: 'setup' | 'stage-one' | 'stage-two' | 'complete'
+```
+* current state of the tournament
+* initialized as `'setup'`
+---
+```ts
+round: number
+```
+* current round of the tournament
+* initialized as `0`
+---
+```ts
+players: Array<Player>
+```
+* array of all players in the tournament
+* initialized as `[]`
+---
+```ts
+matches: Array<Match>
+```
+* array of all matches in the tournament
+* initialized as `[]`
+---
+```ts
+sorting: 'ascending' | 'descending' | 'none'
+```
+* sorting method, if players are rated/seeded
+* initialized as `'none'`
+---
+```ts
+scoring: {
+    bestOf: number,
+    win: number,
+    draw: number,
+    loss: number,
+    bye: number,
+    tiebreaks: Array<
+        'median buchholz' |
+        'solkoff' |
+        'sonneborn berger' |
+        'cumulative' |
+        'versus' |
+        'game win percentage' |
+        'opponent game win percentage' |
+        'opponent match win percentage' |
+        'opponent opponent match win percentage'
+    >
+}
+```
+* details about scoring, including point values for different outcomes and a sorted list of tiebreakers
+* initialized as:
+```ts
+{
+    bestOf: 1,
+    win: 1,
+    draw: 0.5,
+    loss: 0,
+    bye: 1,
+    tiebreaks: []
+}
+```
+---
+```ts
+stageOne: {
+    format: 'single-elimination' | 'double-elimination' | 'stepladder' | 'swiss' | 'round-robin' | 'double-round-robin',
+    consolation: boolean,
+    rounds: number,
+    maxPlayers: number
+}
+```
+* details about the first stage of the tournament
+* `consolation` determines if there is a third place match, if the format is single elimination
+* if `maxPlayers` equals zero, then there is no limit
+* initialized as:
+```ts
+{
+    format: 'single-elimination',
+    consolation: false,
+    rounds: 0,
+    maxPlayers: 0
+}
+```
+---
+```ts
+stageTwo: {
+    format: 'single-elimination' | 'double-elimination' | 'stepladder' | null,
+    consolation: boolean,
+    advance: {
+        value: number,
+        method: 'points' | 'rank'
+    }
+}
+```
+* details about the second stage of the tournament
+* `consolation` determines if there is a third place match, if the format is single elimination
+* `advance` determines how many players qualify for the second stage (greater than or equal for `points`, and less than or equal for `rank`)
+* initialized as:
+```ts
+{
+    format: null,
+    consolation: false,
+    advance: {
+        value: 0,
+        method: 'rank'
+    }
+}
+```
+---
 ### Setter
 
+```ts
+settings = options: SettableTournamentValues
+```
+* only needs to contain properties that are changing
+---
 ### Methods
 
+```ts
+createPlayer(
+    name: string,
+    id: string | undefined = undefined
+): Player
+```
+* creates a new player and returns it
+---
+```ts
+removePlayer(
+    id: string
+): void
+```
+* removes a player from the tournament
+---
 ## `Player` Class
 
 ### Properties
