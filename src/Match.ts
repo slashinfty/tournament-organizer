@@ -1,5 +1,5 @@
-import { MatchValues } from "./interfaces/MatchValues";
-import { SettableMatchValues } from "./interfaces/SettableMatchValues";
+import { MatchValues } from "./interfaces/MatchValues.js";
+import { SettableMatchValues } from "./interfaces/SettableMatchValues.js";
 
 /** Class representing a match */
 export class Match {

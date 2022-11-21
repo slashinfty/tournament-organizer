@@ -176,7 +176,7 @@ createPlayer(
 ): Player
 ```
 * creates a new player and returns it
-* throws an error if `id` is specified and already exists
+* throws an error if `id` is specified and already exists, or if the specified maximum number of players has been reached
 ---
 ```ts
 removePlayer(
