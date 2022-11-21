@@ -189,9 +189,8 @@ export class Tournament {
                         });
                     } while (this.matches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
-                    // handle byes
                     newMatch.values = {
-                        active: match.round === this.round,
+                        active: match.round === this.round && match.player1 !== null && match.player2 !== null,
                         player1: {
                             id: match.player1.toString()
                         },
@@ -201,24 +200,42 @@ export class Tournament {
                     };
                     this.matches.push(newMatch);
                     if (match.round === this.round) {
-                        this.players.find(p => p.id === match.player1.toString()).addMatch({
-                            id: id,
-                            opponent: match.player2.toString(),
-                            pairUpDown: false,
-                            bye: false,
-                            win: 0,
-                            loss: 0,
-                            draw: 0
-                        });
-                        this.players.find(p => p.id === match.player2.toString()).addMatch({
-                            id: id,
-                            opponent: match.player1.toString(),
-                            pairUpDown: false,
-                            bye: false,
-                            win: 0,
-                            loss: 0,
-                            draw: 0
-                        });
+                        if (newMatch.player1.id === null || newMatch.player2.id === null) {
+                            this.players.find(p => p.id === (newMatch.player1.id === null ? newMatch.player2.id : newMatch.player1.id)).addMatch({
+                                id: id,
+                                opponent: null,
+                                pairUpDown: false,
+                                bye: true,
+                                win: Math.ceil(this.scoring.bestOf / 2),
+                                loss: 0,
+                                draw: 0
+                            });
+                            newMatch.values = {
+                                bye: true,
+                                player1: {
+                                    win: Math.ceil(this.scoring.bestOf / 2)
+                                }
+                            };
+                        } else {
+                            this.players.find(p => p.id === match.player1.toString()).addMatch({
+                                id: id,
+                                opponent: match.player2.toString(),
+                                pairUpDown: false,
+                                bye: false,
+                                win: 0,
+                                loss: 0,
+                                draw: 0
+                            });
+                            this.players.find(p => p.id === match.player2.toString()).addMatch({
+                                id: id,
+                                opponent: match.player1.toString(),
+                                pairUpDown: false,
+                                bye: false,
+                                win: 0,
+                                loss: 0,
+                                draw: 0
+                            });
+                        }
                     }
                 });
                 if (format === 'double-round-robin') {
@@ -544,7 +561,24 @@ export class Tournament {
                         id: winID
                     }
                 }
-                // add match to players
+                this.players.find(p => p.id === winID).addMatch({
+                    id: winMatch.id,
+                    opponent: winMatch.player1.id,
+                    pairUpDown: false,
+                    bye: false,
+                    win: 0,
+                    loss: 0,
+                    draw: 0
+                });
+                this.players.find(p => p.id === winMatch.player1.id).addMatch({
+                    id: winMatch.id,
+                    opponent: winID,
+                    pairUpDown: false,
+                    bye: false,
+                    win: 0,
+                    loss: 0,
+                    draw: 0
+                });
             }
         }
         if (match.path.loss !== null) {
@@ -563,7 +597,24 @@ export class Tournament {
                         id: lossID
                     }
                 }
-                // add match to players
+                this.players.find(p => p.id === lossID).addMatch({
+                    id: lossMatch.id,
+                    opponent: lossMatch.player1.id,
+                    pairUpDown: false,
+                    bye: false,
+                    win: 0,
+                    loss: 0,
+                    draw: 0
+                });
+                this.players.find(p => p.id === lossMatch.player1.id).addMatch({
+                    id: lossMatch.id,
+                    opponent: lossID,
+                    pairUpDown: false,
+                    bye: false,
+                    win: 0,
+                    loss: 0,
+                    draw: 0
+                });
             }
         }
     }
