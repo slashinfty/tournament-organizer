@@ -36,7 +36,14 @@ createTournament(
 ```
 * creates a new tournament and returns it
 * throws an error if `id` is specified and already exists
-
+---
+```ts
+reloadTournament(
+    tourney: TournamentValues
+): Tournament
+```
+* takes a saved tournament object, and returns a proper `Tournament` class instance
+---
 ## `Tournament` Class
 
 ### Properties
@@ -184,7 +191,7 @@ removePlayer(
 ): void
 ```
 * removes a player from the tournament
-* throws an error if no player has an ID equaling `id`
+* throws an error if no player has the `id` specified or if the player is already inactive
 ---
 ```ts
 start(): void
@@ -199,15 +206,25 @@ next(): void
 * throws an error if there are active matches, if the tournament is not in the first stage, or if the format is elimination or stepladder
 ---
 ```ts
-result(
+enterResult(
     id: string,
     player1Wins: number,
     player2Wins: number,
-    draws: number = 0,
-    bye: boolean = false
+    draws: number = 0
 ): void
 ```
 * updates the result of a match
+* throws an error if no match has the `id` specified
+* in elimination and stepladder formats, moves players to their appropriate next matches
+---
+```ts
+clearResult(
+    id: string
+): void
+```
+* clears the results of a match
+* throws an error if no match has the `id` specified or if the match is still active
+* in elimination and stepladder formats, it reverses the progression of players in the bracket
 ---
 ```ts
 standings(
@@ -216,6 +233,11 @@ standings(
 ```
 * computes tiebreakers for all players
 * returns an array of players with scores and tiebreaker values
+---
+```ts
+end(): void
+```
+* ends the tournament (sets `status` to `complete`) and marks all players and matches as inactive
 ---
 ## `Player` Class
 

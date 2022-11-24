@@ -35,7 +35,7 @@
   "homepage": "https://github.com/slashinfty/tournament-organizer/wiki",
   "dependencies": {
     "crypto-random-string": "^5.0.0",
-    "tournament-pairings": "^1.4.1"
+    "tournament-pairings": "^1.4.2"
   },
   "devDependencies": {
     "typescript": "^4.9.3"
