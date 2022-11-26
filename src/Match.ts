@@ -56,8 +56,8 @@ export class Match {
     set values(options: SettableMatchValues) {
         this.round = options.round || this.round;
         this.match = options.match || this.match;
-        this.active = options.active || this.active;
-        this.bye = options.bye || this.bye;
+        this.active = options.hasOwnProperty('active') ? options.active : this.active;
+        this.bye = options.hasOwnProperty('bye') ? options.bye : this.bye;
         if (options.hasOwnProperty('player1')) {
             this.player1.id = options.player1.id || this.player1.id;
             this.player1.win = options.player1.win || this.player1.win;

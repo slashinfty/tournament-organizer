@@ -192,6 +192,8 @@ removePlayer(
 ```
 * removes a player from the tournament
 * throws an error if no player has the `id` specified or if the player is already inactive
+* in active elimination and stepladder formats, adjusts paths for any matches that interact with the match the player is in
+* in active round-robin formats, replaces the player in all future matches with a bye
 ---
 ```ts
 start(): void
@@ -242,11 +244,88 @@ end(): void
 ## `Player` Class
 
 ### Properties
-
+```ts
+id: string
+```
+* unique identifier of the player
+---
+```ts
+name: string
+```
+* name of the player
+---
+```ts
+active: boolean
+```
+* if the player is active in the tournament
+* initialized as `true`
+---
+```ts
+value: number
+```
+* a value used for seeding, such as rank or rating
+* initialized as `0`
+---
+```ts
+matches: Array<{
+    id: string,
+    opponent: string | null,
+    pairUpDown: boolean,
+    bye: boolean,
+    win: number,
+    loss: number,
+    draw: number
+}>
+```
+* array of matches that the player is in
+* contains information such as match ID, opponent ID, if the opponent has a different number of match points (in Swiss pairings), if the match is a bye, and the number of games won, lost, and drawn
+* initialized as `[]`
+---
 ### Setter
 
+```ts
+values = options: SettablePlayerValues
+```
+* only needs to contain properties that are changing
+---
 ### Methods
 
+```ts
+addMatch(match: {
+    id: string,
+    opponent: string | null,
+    pairUpDown: boolean,
+    bye: boolean,
+    win: number,
+    loss: number,
+    draw: number
+}): void
+```
+* adds a match to the player
+* throws an error if attempting to duplicate a match
+---
+```ts
+removeMatch(
+    id: string
+): void
+```
+* removes a match from player history
+* throws an error if the match doesn't exist in the array
+---
+```ts
+updateMatch({
+    id: string,
+    values: {
+        opponent?: string | null,
+        pairUpDown?: boolean,
+        bye?: boolean,
+        win?: number,
+        loss?: number,
+        draw?: number
+    }
+}): void
+```
+* 
 ## `Match` Class
 
 ### Properties

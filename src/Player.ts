@@ -30,7 +30,7 @@ export class Player {
     /** Set information about the player (only changes in information need to be included in the object) */
     set values(options: SettablePlayerValues) {
         this.name = options.name || this.name;
-        this.active = options.active || this.active;
+        this.active = options.hasOwnProperty('active') ? options.active : this.active;
         this.value = options.value || this.value;
         if (options.hasOwnProperty('matches')) {
             this.matches = [...this.matches, ...options.matches];
@@ -46,7 +46,7 @@ export class Player {
         win: number,
         loss: number,
         draw: number
-    }) {
+    }): void {
         if (this.matches.find(m => m.id === match.id) !== undefined) {
             throw `Match with ID ${match.id} already exists`;
         }
@@ -54,7 +54,7 @@ export class Player {
     }
 
     /** Remove a match from player history */
-    removeMatch(id: string) {
+    removeMatch(id: string): void {
         const index = this.matches.findIndex(m => m.id === id);
         if (index === -1) {
             throw `Match with ID ${id} does not exist`;
@@ -70,7 +70,7 @@ export class Player {
         win?: number,
         loss?: number,
         draw?: number
-    }) {
+    }): void {
         const match = this.matches.find(m => m.id === id);
         if (match === undefined) {
             throw `Match with ID ${id} does not exist`;
