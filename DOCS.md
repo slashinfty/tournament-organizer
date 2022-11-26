@@ -325,21 +325,209 @@ updateMatch({
     }
 }): void
 ```
-* 
+* updates the details of a match
+* throws an error if the match doesn't exist in the array
+* only needs to contain properties that are changing
+---
 ## `Match` Class
 
 ### Properties
 
+```ts
+id: string
+```
+* unique identifier of the match
+---
+```ts
+round: number
+```
+* round number of the match
+---
+```ts
+match: number
+```
+* match number of the match
+---
+```ts
+active: boolean
+```
+* if the match is active in the tournament
+* initialized as `false`
+---
+```ts
+bye: boolean
+```
+* if the match is a bye
+* initialized as `false`
+---
+```ts
+player1: {
+    id: string | null,
+    win: number,
+    loss: number,
+    draw: number
+}
+```
+* details about player one in the match
+* includes the ID of the player and number wins, losses, and draws
+* initialized as:
+```ts
+{
+    id: null,
+    win: 0,
+    loss: 0,
+    draw: 0
+}
+```
+---
+```ts
+player2: {
+    id: string | null,
+    win: number,
+    loss: number,
+    draw: number
+}
+```
+* details about player two in the match
+* includes the ID of the player and number wins, losses, and draws
+* initialized as:
+```ts
+{
+    id: null,
+    win: 0,
+    loss: 0,
+    draw: 0
+}
+```
+---
+```ts
+path: {
+    win: string | null,
+    loss: string | null
+}
+```
+* details about paths leaving this match
+* each `win` and `loss` are either the ID of a match or `null`
 ### Setter
 
-### Methods
-
+```ts
+values = options: SettableMatchValues
+```
+* only needs to contain properties that are changing
+---
 ## Interfaces
 
 ### `SettableTournamentValues`
 
+```ts
+{
+    name?: string,
+    status?: 'setup' | 'stage-one' | 'stage-two' | 'complete',
+    round?: number,
+    players?: Array<Player>,
+    matches?: Array<Match>,
+    sorting?: 'ascending' | 'descending' | 'none',
+    scoring?: {
+        bestOf?: number,
+        win?: number,
+        draw?: number,
+        loss?: number,
+        bye?: number,
+        tiebreaks?: Array<
+            'median buchholz' |
+            'solkoff' |
+            'sonneborn berger' |
+            'cumulative' |
+            'versus' |
+            'game win percentage' |
+            'opponent game win percentage' |
+            'opponent match win percentage' |
+            'opponent opponent match win percentage'
+        >
+    },
+    stageOne?: {
+        format?: 'single-elimination' | 'double-elimination' | 'stepladder' | 'swiss' | 'round-robin' | 'double-round-robin',
+        consolation?: boolean,
+        rounds?: number,
+        maxPlayers?: number
+    },
+    stageTwo?: {
+        format?: 'single-elimination' | 'double-elimination' | 'stepladder' | null,
+        consolation?: boolean,
+        advance?: {
+            value?: number,
+            method?: 'points' | 'rank'
+        }
+    }
+}
+```
+---
 ### `SettablePlayerValues`
 
+```ts
+{
+    name?: string,
+    active?: boolean,
+    value?: number,
+    matches?: Array<{
+        id: string,
+        opponent: string | null,
+        pairUpDown: boolean,
+        bye: boolean,
+        win: number,
+        loss: number,
+        draw: number
+    }>
+}
+```
+---
 ### `SettableMatchValues`
 
+```ts
+{
+    round?: number,
+    match?: number,
+    active?: boolean,
+    bye?: boolean,
+    player1?: {
+        id?: string | null,
+        win?: number,
+        loss?: number,
+        draw?: number
+    },
+    player2?: {
+        id?: string | null,
+        win?: number,
+        loss?: number,
+        draw?: number
+    },
+    path?: {
+        win?: string | null,
+        loss?: string | null
+    }
+}
+```
+---
 ### `StandingsValues`
+
+```ts
+{
+    player: Player,
+    gamePoints: number,
+    games: number,
+    matchPoints: number,
+    matches: number,
+    tiebreaks: {
+        medianBuchholz: number,
+        solkoff: number,
+        sonnebornBerger: number,
+        cumulative: number,
+        oppCumulative: number,
+        matchWinPct: number,
+        oppMatchWinPct: number,
+        oppOppMatchWinPct: number,
+        gameWinPct: number,
+        oppGameWinPct: number
+    } 
+}
+```
