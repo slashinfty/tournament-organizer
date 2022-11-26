@@ -79,5 +79,8 @@ export class Manager {
     }
 
     // remove tournament
-    
+    removeTournament(id: string): Tournament {
+
+        return;
+    }
 }
