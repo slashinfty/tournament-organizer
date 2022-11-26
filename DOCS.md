@@ -35,6 +35,7 @@ createTournament(
 ): Tournament
 ```
 * creates a new tournament and returns it
+* see [Interfaces](#interfaces) for details about `SettableTournamentValues`
 * throws an error if `id` is specified and already exists
 ---
 ```ts
@@ -173,6 +174,7 @@ stageTwo: {
 settings = options: SettableTournamentValues
 ```
 * only needs to contain properties that are changing
+* see [Interfaces](#interfaces) for details about `SettableTournamentValues`
 ---
 ### Methods
 
@@ -235,6 +237,7 @@ standings(
 ```
 * computes tiebreakers for all players
 * returns an array of players with scores and tiebreaker values
+* see [Interfaces](#interfaces) for details about `StandingsValues`
 ---
 ```ts
 end(): void
@@ -287,6 +290,7 @@ matches: Array<{
 values = options: SettablePlayerValues
 ```
 * only needs to contain properties that are changing
+* see [Interfaces](#interfaces) for details about `SettablePlayerValues`
 ---
 ### Methods
 
@@ -408,12 +412,21 @@ path: {
 ```
 * details about paths leaving this match
 * each `win` and `loss` are either the ID of a match or `null`
+* initialized as:
+```ts
+{
+    win: null,
+    loss: null
+}
+```
+---
 ### Setter
 
 ```ts
 values = options: SettableMatchValues
 ```
 * only needs to contain properties that are changing
+* see [Interfaces](#interfaces) for details about `SettableMatchValues`
 ---
 ## Interfaces
 
