@@ -2,12 +2,13 @@
 
 This is an ESM module. More information is [here](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
 
+---
 ## Installation
 
 ```shell
 npm i tournament-organizer
 ```
-
+---
 ## Importing
 
 ```ts
@@ -15,7 +16,66 @@ import TournamentOrganizer from 'tournament-organizer';
 
 const Manager = new TournamentOrganizer();
 ```
-
+---
+## Quick Glance
+```
+Manager
+├── Properties
+│   └── tournaments
+└── Methods
+    ├── createTournament
+    ├── reloadTournament
+    └── endTournament
+Tournament
+├── Properties
+│   ├── id
+│   ├── name
+│   ├── status
+│   ├── round
+│   ├── players
+│   ├── matches
+│   ├── sorting
+│   ├── scoring
+│   ├── stageOne
+│   └── stageTwo
+├── Setter
+│   └── settings
+└── Methods
+    ├── createPlayer
+    ├── removePlayer
+    ├── start
+    ├── next
+    ├── enterResult
+    ├── clearResult
+    ├── standings
+    └── end
+Player
+├── Properties
+│   ├── id
+│   ├── name
+│   ├── active
+│   ├── value
+│   └── matches
+├── Setter
+│   └── values
+└── Methods
+    ├── addMatch
+    ├── removeMatch
+    └── updateMatch
+Match
+├── Properties
+│   ├── id
+│   ├── round
+│   ├── match
+│   ├── active
+│   ├── bye
+│   ├── player1
+│   ├── player2
+│   └── path
+└── Setter
+    └── values
+```
+---
 ## `Manager` Class
 
 ### Properties
@@ -44,6 +104,14 @@ reloadTournament(
 ): Tournament
 ```
 * takes a saved tournament object, and returns a proper `Tournament` class instance
+---
+```ts
+removeTournament(
+    id: string
+): Tournament
+```
+* ends and removes a tournament from the manager, and returns it
+* throws an error if no tournament has the specified `id`
 ---
 ## `Tournament` Class
 
