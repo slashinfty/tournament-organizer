@@ -366,15 +366,25 @@ values = options: SettablePlayerValues
 addMatch(match: {
     id: string,
     opponent: string | null,
-    pairUpDown: boolean,
-    bye: boolean,
-    win: number,
-    loss: number,
-    draw: number
+    pairUpDown?: boolean,
+    bye?: boolean,
+    win?: number,
+    loss?: number,
+    draw?: number
 }): void
 ```
 * adds a match to the player
 * throws an error if attempting to duplicate a match
+* while `id` and `opponent` are required, the other properties are defaulted to:
+```ts
+{
+    pairUpDown: false,
+    bye: false,
+    win: 0,
+    loss: 0,
+    draw: 0
+}
+```
 ---
 ```ts
 removeMatch(

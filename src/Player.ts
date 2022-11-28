@@ -39,16 +39,23 @@ export class Player {
     addMatch(match: {
         id: string,
         opponent: string | null,
-        pairUpDown: boolean,
-        bye: boolean,
-        win: number,
-        loss: number,
-        draw: number
+        pairUpDown?: boolean,
+        bye?: boolean,
+        win?: number,
+        loss?: number,
+        draw?: number
     }): void {
         if (this.matches.find(m => m.id === match.id) !== undefined) {
             throw `Match with ID ${match.id} already exists`;
         }
-        this.matches.push(match);
+        const newMatch = Object.assign({
+            pairUpDown: false,
+            bye: false,
+            win: 0,
+            loss: 0,
+            draw: 0
+        }, match);
+        this.matches.push(newMatch);
     }
 
     /** Remove a match from player history */
