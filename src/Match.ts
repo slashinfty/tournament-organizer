@@ -54,25 +54,15 @@ export class Match {
 
     /** Set information about the match (only changes in information need to be included in the object) */
     set values(options: SettableMatchValues) {
-        this.round = options.round || this.round;
-        this.match = options.match || this.match;
-        this.active = options.hasOwnProperty('active') ? options.active : this.active;
-        this.bye = options.hasOwnProperty('bye') ? options.bye : this.bye;
         if (options.hasOwnProperty('player1')) {
-            this.player1.id = options.player1.id || this.player1.id;
-            this.player1.win = options.player1.win || this.player1.win;
-            this.player1.loss = options.player1.loss || this.player1.loss;
-            this.player1.draw = options.player1.draw || this.player1.draw;
+            options.player1 = Object.assign(this.player1, options.player1);
         }
         if (options.hasOwnProperty('player2')) {
-            this.player2.id = options.player2.id || this.player2.id;
-            this.player2.win = options.player2.win || this.player2.win;
-            this.player2.loss = options.player2.loss || this.player2.loss;
-            this.player2.draw = options.player2.draw || this.player2.draw;
+            options.player2 = Object.assign(this.player2, options.player2);
         }
         if (options.hasOwnProperty('path')) {
-            this.path.win = options.path.win || this.path.win;
-            this.path.loss = options.path.loss || this.path.loss;
+            options.path = Object.assign(this.path, options.path);
         }
+        Object.assign(this, options);
     }
 }

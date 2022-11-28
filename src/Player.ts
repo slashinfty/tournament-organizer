@@ -29,12 +29,10 @@ export class Player {
 
     /** Set information about the player (only changes in information need to be included in the object) */
     set values(options: SettablePlayerValues) {
-        this.name = options.name || this.name;
-        this.active = options.hasOwnProperty('active') ? options.active : this.active;
-        this.value = options.value || this.value;
         if (options.hasOwnProperty('matches')) {
-            this.matches = [...this.matches, ...options.matches];
+            options.matches = [...this.matches, ...options.matches];
         }
+        Object.assign(this, options);
     }
 
     /** Add a new match for the player */

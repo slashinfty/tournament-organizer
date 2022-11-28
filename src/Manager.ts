@@ -78,9 +78,18 @@ export class Manager {
         return tournament;
     }
 
-    // remove tournament
+    /**
+     * Remove a tournament from the manager
+     * @param id ID of the tournament to be removed
+     * @returns The removed tournament
+     */
     removeTournament(id: string): Tournament {
-
-        return;
+        const tournament = this.tournaments.find(t => t.id === id);
+        if (tournament === undefined) {
+            throw `No tournament with ID ${id} exists`;
+        }
+        tournament.end();
+        this.tournaments.splice(this.tournaments.findIndex(t => t.id === tournament.id), 1);
+        return tournament;
     }
 }

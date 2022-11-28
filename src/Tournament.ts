@@ -77,38 +77,22 @@ export class Tournament {
 
     /** Set tournament options (only changes in options need to be included in the object) */
     set settings(options: SettableTournamentValues) {
-        this.name = options.name || this.name;
-        this.status = options.status || this.status;
-        this.round = options.round || this.round;
         if (options.hasOwnProperty('players')) {
-            this.players = [...this.players, ...options.players];
+            options.players = [...this.players, ...options.players];
         }
         if (options.hasOwnProperty('matches')) {
-            this.matches = [...this.matches, ...options.matches];
+            options.matches = [...this.matches, ...options.matches];
         }
-        this.sorting = options.sorting || this.sorting;
         if (options.hasOwnProperty('scoring')) {
-            this.scoring.bestOf = options.scoring.bestOf || this.scoring.bestOf;
-            this.scoring.win = options.scoring.win || this.scoring.win;
-            this.scoring.draw = options.scoring.draw || this.scoring.draw;
-            this.scoring.loss = options.scoring.loss || this.scoring.loss;
-            this.scoring.bye = options.scoring.bye || this.scoring.bye;
-            this.scoring.tiebreaks = options.scoring.tiebreaks || this.scoring.tiebreaks;
+            options.scoring = Object.assign(this.scoring, options.scoring);
         }
         if (options.hasOwnProperty('stageOne')) {
-            this.stageOne.format = options.stageOne.format || this.stageOne.format;
-            this.stageOne.consolation = options.stageOne.hasOwnProperty('consolation') ? options.stageOne.consolation : this.stageOne.consolation;
-            this.stageOne.rounds = options.stageOne.rounds || this.stageOne.rounds;
-            this.stageOne.maxPlayers = options.stageOne.maxPlayers || this.stageOne.maxPlayers;
+            options.stageOne = Object.assign(this.stageOne, options.stageOne);
         }
         if (options.hasOwnProperty('stageTwo')) {
-            this.stageTwo.format = options.stageTwo.format || this.stageTwo.format;
-            this.stageTwo.consolation = options.stageTwo.hasOwnProperty('consolation') ? options.stageTwo.consolation : this.stageTwo.consolation;
-            if (options.stageTwo.hasOwnProperty('advance')) {
-                this.stageTwo.advance.value = options.stageTwo.advance.value || this.stageTwo.advance.value;
-                this.stageTwo.advance.method = options.stageTwo.advance.method || this.stageTwo.advance.method;
-            }
+            options.stageTwo = Object.assign(this.stageTwo, options.stageTwo);
         }
+        Object.assign(this, options);
     }
 
     #createMatches(players: Array<Player>) {
@@ -144,7 +128,7 @@ export class Tournament {
                         }
                     };
                     this.matches.push(newMatch);
-                    if (match.round === this.round) {
+                    if (newMatch.player1.id !== null && newMatch.player2.id !== null) {
                         this.players.find(p => p.id === match.player1.toString()).addMatch({
                             id: id,
                             opponent: match.player2.toString(),
@@ -292,8 +276,8 @@ export class Tournament {
                     };
                     this.matches.push(newMatch);
                     if (newMatch.player2.id !== null) {
-                        const player1Points = this.players.find(p => p.id === match.player1.toString()).matches.reduce((sum, curr) => curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
-                        const player2Points = this.players.find(p => p.id === match.player2.toString()).matches.reduce((sum, curr) => curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
+                        const player1Points = this.players.find(p => p.id === newMatch.player1.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
+                        const player2Points = this.players.find(p => p.id === newMatch.player2.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
                         this.players.find(p => p.id === match.player1.toString()).addMatch({
                             id: id,
                             opponent: match.player2.toString(),
@@ -769,8 +753,8 @@ export class Tournament {
                 });
             }
         }
+        const lossID = player1Wins > player2Wins ? match.player2.id : match.player1.id;
         if (match.path.loss !== null) {
-            const lossID = player1Wins > player2Wins ? match.player2.id : match.player1.id;
             const lossMatch = this.matches.find(m => m.id === match.path.loss);
             if (lossMatch.player1.id === null) {
                 lossMatch.values = {
@@ -809,6 +793,8 @@ export class Tournament {
                     draw: 0
                 });
             }
+        } else if ((this.status === 'stage-one' && ['single-elimination', 'double-elimination', 'stepladder'].includes(this.stageOne.format)) || this.status === 'stage-two') {
+            this.players.find(p => p.id === lossID).values = { active: false };
         }
     }
 
@@ -832,11 +818,13 @@ export class Tournament {
         }
         const player1 = this.players.find(player => player.id === match.player1.id);
         const player2 = this.players.find(player => player.id === match.player2.id);
+        player1.values = { active: true };
         player1.updateMatch(match.id, {
             win: 0,
             loss: 0,
             draw: 0
         });
+        player2.values = { active: true };
         player2.updateMatch(match.id, {
             win: 0,
             loss: 0,
@@ -844,6 +832,10 @@ export class Tournament {
         });
         if (match.path.win !== null) {
             const winMatch = this.matches.find(m => m.id === match.path.win);
+            if (winMatch.active === true) {
+                this.players.find(player => player.id === winMatch.player1.id).removeMatch(winMatch.id);
+                this.players.find(player => player.id === winMatch.player2.id).removeMatch(winMatch.id);
+            }
             winMatch.values = {
                 active: false,
                 player1: {
@@ -856,6 +848,10 @@ export class Tournament {
         }
         if (match.path.loss !== null) {
             const lossMatch = this.matches.find(m => m.id === match.path.loss);
+            if (lossMatch.active === true) {
+                this.players.find(player => player.id === lossMatch.player1.id).removeMatch(lossMatch.id);
+                this.players.find(player => player.id === lossMatch.player2.id).removeMatch(lossMatch.id);
+            }
             lossMatch.values = {
                 active: false,
                 player1: {
