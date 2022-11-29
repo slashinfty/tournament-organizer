@@ -1384,10 +1384,15 @@ class Elimination extends Tournament {
      * Starts the tournament.
      */
     startEvent(): void {
+
+        // Double elimination requires 4 players
+        if (this.double && this.players.length < 4) {
+            throw `Double elimination tournaments require at least 4 players, and there are currently ${this.players.length} players enrolled`;
+        }
         
         // Need at least 2 players
-        if (this.players.length < 2) {
-            throw `Elimination tournaments require at least 2 players, and there are currently ${this.players.length} players enrolled`;
+        if (!this.double && this.players.length < 2) {
+            throw `Single elimination tournaments require at least 2 players, and there are currently ${this.players.length} players enrolled`;
         }
 
         // Set tournament as active
