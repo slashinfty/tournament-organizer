@@ -269,13 +269,14 @@ removePlayer(
 start(): void
 ```
 * starts the tournament
-* throws an error if there are an insufficient number of players (4 for elimination, 2 for all other formats)
+* throws an error if there are an insufficient number of players (4 for double elimination, 2 for all other formats)
 ---
 ```ts
 next(): void
 ```
 * progresses the tournament to the next round
 * throws an error if there are active matches, if the tournament is not in the first stage, or if the format is elimination or stepladder
+* throws an error if there are an insufficient number of players when attempting to create matches for the second stage of the tournament (4 for double elimination, 2 for single elimination and stepladder)
 ---
 ```ts
 enterResult(
