@@ -38,7 +38,7 @@ export interface TournamentValues {
         consolation: boolean,
         advance: {
             value: number,
-            method: 'points' | 'rank'
+            method: 'points' | 'rank' | 'all'
         }
     }
 }

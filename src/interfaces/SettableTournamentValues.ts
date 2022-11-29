@@ -37,7 +37,7 @@ export interface SettableTournamentValues {
         consolation?: boolean,
         advance?: {
             value?: number,
-            method?: 'points' | 'rank'
+            method?: 'points' | 'rank' | 'all'
         }
     }
 }

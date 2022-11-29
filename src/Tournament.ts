@@ -70,7 +70,7 @@ export class Tournament {
             consolation: false,
             advance: {
                 value: 0,
-                method: 'rank'
+                method: 'all'
             }
         };
     }
@@ -576,7 +576,7 @@ export class Tournament {
                 this.status = 'stage-two';
                 if (this.stageTwo.advance.method === 'points') {
                     this.players.filter(player => player.matches.reduce((sum, match) => match.win > match.loss ? sum + this.scoring.win : match.loss > match.win ? sum + this.scoring.loss : this.scoring.draw, 0) < this.stageTwo.advance.value).forEach(player => player.active = false);
-                } else {
+                } else if (this.stageTwo.advance.method === 'rank') {
                     const standings = this.standings();
                     standings.splice(0, this.stageTwo.advance.value);
                     standings.forEach(s => this.players.find(p => p.id === s.player.id).active = false);

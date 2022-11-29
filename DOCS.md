@@ -217,13 +217,13 @@ stageTwo: {
     consolation: boolean,
     advance: {
         value: number,
-        method: 'points' | 'rank'
+        method: 'points' | 'rank' | 'all'
     }
 }
 ```
 * details about the second stage of the tournament
 * `consolation` determines if there is a third place match, if the format is single elimination
-* `advance` determines how many players qualify for the second stage (greater than or equal for `points`, and less than or equal for `rank`)
+* `advance` determines how many players qualify for the second stage (greater than or equal for `points`, less than or equal for `rank`, and all active players for `all`)
 * initialized as:
 ```ts
 {
@@ -231,7 +231,7 @@ stageTwo: {
     consolation: false,
     advance: {
         value: 0,
-        method: 'rank'
+        method: 'all'
     }
 }
 ```
@@ -548,7 +548,7 @@ values = options: SettableMatchValues
         consolation?: boolean,
         advance?: {
             value?: number,
-            method?: 'points' | 'rank'
+            method?: 'points' | 'rank' | 'all'
         }
     }
 }
