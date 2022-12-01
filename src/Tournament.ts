@@ -115,7 +115,7 @@ export class Tournament {
                     do {
                         id = cryptoRandomString({
                             length: 12,
-                            type: 'base64'
+                            type: 'alphanumeric'
                         });
                     } while (this.matches.some(m => m.id === id) || newMatches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
@@ -161,7 +161,7 @@ export class Tournament {
                     do {
                         id = cryptoRandomString({
                             length: 12,
-                            type: 'base64'
+                            type: 'alphanumeric'
                         });
                     } while (this.matches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
@@ -208,7 +208,7 @@ export class Tournament {
                         do {
                             id = cryptoRandomString({
                                 length: 12,
-                                type: 'base64'
+                                type: 'alphanumeric'
                             });
                         } while (this.matches.some(m => m.id === id));
                         const newMatch = new Match(id, match.round, match.match);
@@ -240,7 +240,7 @@ export class Tournament {
                     do {
                         id = cryptoRandomString({
                             length: 12,
-                            type: 'base64'
+                            type: 'alphanumeric'
                         });
                     } while (this.matches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
@@ -381,7 +381,7 @@ export class Tournament {
             do {
                 ID = cryptoRandomString({
                     length: 12,
-                    type: 'base64'
+                    type: 'alphanumeric'
                 });
             } while (this.players.some(p => p.id === ID));
         } else {
@@ -848,7 +848,7 @@ export class Tournament {
                         } else continue;
                 }
             }
-            return parseInt(b.player.id, 64) - parseInt(a.player.id, 64);
+            return parseInt(b.player.id, 36) - parseInt(a.player.id, 36);
         });
         return players;
     }

@@ -10,7 +10,7 @@ This JavaScript module for Node.js facilitates the organization and execution of
 
 Tournaments can be paired by single elimination, double elimination, stepladder, round-robin, double round-robin, and Swiss. Playoffs can be paired by single elimination, double elimination, and stepladder.
 
-For non-elimination tournaments, the following tiebreakers systems are supported:
+For non-elimination tournaments, the following tiebreaker systems are supported (their details can be found [here](https://en.wikipedia.org/wiki/Tie-breaking_in_Swiss-system_tournaments)):
 * Solkoff
 * Median-Buchholz
 * Sonneborn-Berger

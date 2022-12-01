@@ -27,7 +27,7 @@ export class Manager {
             do {
                 ID = cryptoRandomString({
                     length: 12,
-                    type: 'base64'
+                    type: 'alphanumeric'
                 });
             } while (this.tournaments.some(t => t.id === ID));
         } else {
@@ -49,7 +49,6 @@ export class Manager {
     reloadTournament(tourney: TournamentValues): Tournament {
         const tournament = new Tournament(tourney.id, tourney.name);
         tournament.settings = {
-            status: tourney.status,
             round: tourney.round,
             sorting: tourney.sorting,
             scoring: tourney.scoring,
@@ -75,6 +74,9 @@ export class Manager {
             }
             tournament.matches.push(newMatch);
         });
+        tournament.settings = {
+            status: tourney.status
+        };
         return tournament;
     }
 
