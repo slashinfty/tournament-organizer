@@ -3,12 +3,15 @@
 This is an ESM module. More information is [here](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
 
 ---
+
 ## Installation
 
 ```shell
 npm i tournament-organizer
 ```
+
 ---
+
 ## Importing
 
 ```ts
@@ -16,7 +19,9 @@ import TournamentOrganizer from 'tournament-organizer';
 
 const Manager = new TournamentOrganizer();
 ```
+
 ---
+
 ## Quick Glance
 ```
 Manager
@@ -76,6 +81,7 @@ Match
     └── values
 ```
 ---
+
 ## `Manager` Class
 
 ### Properties
@@ -84,7 +90,9 @@ Match
 tournaments: Array<Tournament>
 ```
 * an array of all tournaments
+
 ---
+
 ### Methods
 
 ```ts
@@ -97,14 +105,18 @@ createTournament(
 * creates a new tournament and returns it
 * see [Interfaces](#interfaces) for details about `SettableTournamentValues`
 * throws an error if `id` is specified and already exists
+
 ---
+
 ```ts
 reloadTournament(
     tourney: TournamentValues
 ): Tournament
 ```
 * takes a saved tournament object, and returns a proper `Tournament` class instance
+
 ---
+
 ```ts
 removeTournament(
     id: string
@@ -112,7 +124,9 @@ removeTournament(
 ```
 * ends and removes a tournament from the manager, and returns it
 * throws an error if no tournament has the specified `id`
+
 ---
+
 ## `Tournament` Class
 
 ### Properties
@@ -121,42 +135,56 @@ removeTournament(
 id: string
 ```
 * unique ID of the tournament
+
 ---
+
 ```ts
 name: string
 ```
 * name of the tournament
+
 ---
+
 ```ts
 status: 'setup' | 'stage-one' | 'stage-two' | 'complete'
 ```
 * current state of the tournament
 * initialized as `'setup'`
+
 ---
+
 ```ts
 round: number
 ```
 * current round of the tournament
 * initialized as `0`
+
 ---
+
 ```ts
 players: Array<Player>
 ```
 * array of all players in the tournament
 * initialized as `[]`
+
 ---
+
 ```ts
 matches: Array<Match>
 ```
 * array of all matches in the tournament
 * initialized as `[]`
+
 ---
+
 ```ts
 sorting: 'ascending' | 'descending' | 'none'
 ```
 * sorting method, if players are rated/seeded
 * initialized as `'none'`
+
 ---
+
 ```ts
 scoring: {
     bestOf: number,
@@ -189,7 +217,9 @@ scoring: {
     tiebreaks: []
 }
 ```
+
 ---
+
 ```ts
 stageOne: {
     format: 'single-elimination' | 'double-elimination' | 'stepladder' | 'swiss' | 'round-robin' | 'double-round-robin',
@@ -210,7 +240,9 @@ stageOne: {
     maxPlayers: 0
 }
 ```
+
 ---
+
 ```ts
 stageTwo: {
     format: 'single-elimination' | 'double-elimination' | 'stepladder' | null,
@@ -235,7 +267,9 @@ stageTwo: {
     }
 }
 ```
+
 ---
+
 ### Setter
 
 ```ts
@@ -243,7 +277,9 @@ settings = options: SettableTournamentValues
 ```
 * only needs to contain properties that are changing
 * see [Interfaces](#interfaces) for details about `SettableTournamentValues`
+
 ---
+
 ### Methods
 
 ```ts
@@ -254,7 +290,9 @@ createPlayer(
 ```
 * creates a new player and returns it
 * throws an error if `id` is specified and already exists, or if the specified maximum number of players has been reached
+
 ---
+
 ```ts
 removePlayer(
     id: string
@@ -264,20 +302,26 @@ removePlayer(
 * throws an error if no player has the `id` specified or if the player is already inactive
 * in active elimination and stepladder formats, adjusts paths for any matches that interact with the match the player is in
 * in active round-robin formats, replaces the player in all future matches with a bye
+
 ---
+
 ```ts
 start(): void
 ```
 * starts the tournament
 * throws an error if there are an insufficient number of players (4 for double elimination, 2 for all other formats)
+
 ---
+
 ```ts
 next(): void
 ```
 * progresses the tournament to the next round
 * throws an error if there are active matches, if the tournament is not in the first stage, or if the format is elimination or stepladder
 * throws an error if there are an insufficient number of players when attempting to create matches for the second stage of the tournament (4 for double elimination, 2 for single elimination and stepladder)
+
 ---
+
 ```ts
 enterResult(
     id: string,
@@ -289,7 +333,9 @@ enterResult(
 * updates the result of a match
 * throws an error if no match has the `id` specified
 * in elimination and stepladder formats, moves players to their appropriate next matches
+
 ---
+
 ```ts
 clearResult(
     id: string
@@ -298,7 +344,9 @@ clearResult(
 * clears the results of a match
 * throws an error if no match has the `id` specified or if the match is still active
 * in elimination and stepladder formats, it reverses the progression of players in the bracket
+
 ---
+
 ```ts
 standings(
     activeOnly: boolean = true
@@ -307,12 +355,16 @@ standings(
 * computes tiebreakers for all players
 * returns an array of players with scores and tiebreaker values
 * see [Interfaces](#interfaces) for details about `StandingsValues`
+
 ---
+
 ```ts
 end(): void
 ```
 * ends the tournament (sets `status` to `complete`) and marks all players and matches as inactive
+
 ---
+
 ## `Player` Class
 
 ### Properties
@@ -320,24 +372,32 @@ end(): void
 id: string
 ```
 * unique identifier of the player
+
 ---
+
 ```ts
 name: string
 ```
 * name of the player
+
 ---
+
 ```ts
 active: boolean
 ```
 * if the player is active in the tournament
 * initialized as `true`
+
 ---
+
 ```ts
 value: number
 ```
 * a value used for seeding, such as rank or rating
 * initialized as `0`
+
 ---
+
 ```ts
 matches: Array<{
     id: string,
@@ -352,7 +412,9 @@ matches: Array<{
 * array of matches that the player is in
 * contains information such as match ID, opponent ID, if the opponent has a different number of match points (in Swiss pairings), if the match is a bye, and the number of games won, lost, and drawn
 * initialized as `[]`
+
 ---
+
 ### Setter
 
 ```ts
@@ -360,7 +422,9 @@ values = options: SettablePlayerValues
 ```
 * only needs to contain properties that are changing
 * see [Interfaces](#interfaces) for details about `SettablePlayerValues`
+
 ---
+
 ### Methods
 
 ```ts
@@ -386,7 +450,9 @@ addMatch(match: {
     draw: 0
 }
 ```
+
 ---
+
 ```ts
 removeMatch(
     id: string
@@ -394,7 +460,9 @@ removeMatch(
 ```
 * removes a match from player history
 * throws an error if the match doesn't exist in the array
+
 ---
+
 ```ts
 updateMatch({
     id: string,
@@ -411,7 +479,9 @@ updateMatch({
 * updates the details of a match
 * throws an error if the match doesn't exist in the array
 * only needs to contain properties that are changing
+
 ---
+
 ## `Match` Class
 
 ### Properties
@@ -420,29 +490,39 @@ updateMatch({
 id: string
 ```
 * unique identifier of the match
+
 ---
+
 ```ts
 round: number
 ```
 * round number of the match
+
 ---
+
 ```ts
 match: number
 ```
 * match number of the match
+
 ---
+
 ```ts
 active: boolean
 ```
 * if the match is active in the tournament
 * initialized as `false`
+
 ---
+
 ```ts
 bye: boolean
 ```
 * if the match is a bye
 * initialized as `false`
+
 ---
+
 ```ts
 player1: {
     id: string | null,
@@ -462,7 +542,9 @@ player1: {
     draw: 0
 }
 ```
+
 ---
+
 ```ts
 player2: {
     id: string | null,
@@ -482,7 +564,9 @@ player2: {
     draw: 0
 }
 ```
+
 ---
+
 ```ts
 path: {
     win: string | null,
@@ -498,7 +582,9 @@ path: {
     loss: null
 }
 ```
+
 ---
+
 ### Setter
 
 ```ts
@@ -506,7 +592,9 @@ values = options: SettableMatchValues
 ```
 * only needs to contain properties that are changing
 * see [Interfaces](#interfaces) for details about `SettableMatchValues`
+
 ---
+
 ## Interfaces
 
 ### `SettableTournamentValues`
@@ -553,7 +641,9 @@ values = options: SettableMatchValues
     }
 }
 ```
+
 ---
+
 ### `SettablePlayerValues`
 
 ```ts
@@ -572,7 +662,9 @@ values = options: SettableMatchValues
     }>
 }
 ```
+
 ---
+
 ### `SettableMatchValues`
 
 ```ts
@@ -599,7 +691,9 @@ values = options: SettableMatchValues
     }
 }
 ```
+
 ---
+
 ### `StandingsValues`
 
 ```ts
