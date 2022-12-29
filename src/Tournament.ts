@@ -370,8 +370,8 @@ export class Tournament {
      * @returns The newly created player
      */
     createPlayer(name: string, id: string | undefined = undefined): Player {
-        if (this.status !== 'setup') {
-            throw `Players can only be added during setup`;
+        if (this.status === 'stage-two' || this.status === 'complete') {
+            throw `Players can only be added during setup or stage one`;
         }
         if (this.stageOne.maxPlayers > 0 && this.players.length === this.stageOne.maxPlayers) {
             throw `Maximum number of players (${this.stageOne.maxPlayers}) are enrolled`;
@@ -789,6 +789,75 @@ export class Tournament {
                 }
             }
         }
+    }
+
+    assignBye(id: string, round: number): void {
+        const player = this.players.find(p => p.id === id);
+        if (player === undefined) {
+            throw `Player with ID ${id} does not exist`;
+        }
+        if (player.active === false) {
+            throw `Player is currently inactive`;
+        }
+        if (player.matches.some(match => this.matches.find(m => m.id === match.id).round === round)) {
+            throw `Player already has a match in round ${round}`;
+        }
+        let matchID: string;
+        do {
+            id = cryptoRandomString({
+                length: 12,
+                type: 'alphanumeric'
+            });
+        } while (this.matches.some(m => m.id === id));
+        const newMatch = new Match(matchID, round, 0);
+        newMatch.values = {
+            bye: true,
+            player1: {
+                id: player.id,
+                win: Math.ceil(this.scoring.bestOf / 2)
+            }
+        };
+        player.addMatch({
+            id: matchID,
+            opponent: null,
+            bye: true,
+            win: Math.ceil(this.scoring.bestOf / 2)
+        });
+    }
+
+    assignLoss(id: string, round: number): void {
+        const player = this.players.find(p => p.id === id);
+        if (player === undefined) {
+            throw `Player with ID ${id} does not exist`;
+        }
+        if (player.active === false) {
+            throw `Player is currently inactive`;
+        }
+        if (player.matches.some(match => this.matches.find(m => m.id === match.id).round === round)) {
+            throw `Player already has a match in round ${round}`;
+        }
+        let matchID: string;
+        do {
+            id = cryptoRandomString({
+                length: 12,
+                type: 'alphanumeric'
+            });
+        } while (this.matches.some(m => m.id === id));
+        const newMatch = new Match(matchID, round, 0);
+        newMatch.values = {
+            player1: {
+                id: player.id,
+                loss: Math.ceil(this.scoring.bestOf / 2)
+            },
+            player2: {
+                win: Math.ceil(this.scoring.bestOf / 2)
+            }
+        };
+        player.addMatch({
+            id: matchID,
+            opponent: null,
+            loss: Math.ceil(this.scoring.bestOf / 2)
+        });
     }
 
     standings(activeOnly: boolean = true): Array<StandingsValues> {

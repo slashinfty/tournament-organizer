@@ -1,4 +1,4 @@
-# Documentation for tournament-organizer
+# Documentation for tournament-organizer v3.X
 
 This is an ESM module. More information is [here](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
 
@@ -52,6 +52,8 @@ Tournament
     ├── next
     ├── enterResult
     ├── clearResult
+    ├── assignBye
+    ├── assignLoss
     ├── standings
     └── end
 Player
@@ -289,7 +291,7 @@ createPlayer(
 ): Player
 ```
 * creates a new player and returns it
-* throws an error if `id` is specified and already exists, or if the specified maximum number of players has been reached
+* throws an error if `id` is specified and already exists, the specified maximum number of players has been reached, or the tournament is in stage two or complete
 
 ---
 
@@ -344,6 +346,30 @@ clearResult(
 * clears the results of a match
 * throws an error if no match has the `id` specified or if the match is still active
 * in elimination and stepladder formats, it reverses the progression of players in the bracket
+
+---
+
+```ts
+assignBye(
+    id: string,
+    round: number
+): void
+```
+* __introduced in v3.1.0__
+* assigns a bye to a player in the specified round
+* throws an error if no player has the `id` specified, the player is already inactive, or the player already has a match in the round
+
+---
+
+```ts
+assignLoss(
+    id: string,
+    round: number
+): void
+```
+* __introduced in v3.1.0__
+* assigns a loss to a player in the specified round
+* throws an error if no player has the `id` specified, the player is already inactive, or the player already has a match in the round
 
 ---
 
