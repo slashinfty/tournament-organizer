@@ -1,4 +1,4 @@
-import cryptoRandomString from 'crypto-random-string';
+import randomstring from 'randomstring';
 import { Match } from './Match.js';
 import { Tournament } from './Tournament.js';
 import { SettableTournamentValues } from './interfaces/SettableTournamentValues.js';
@@ -25,9 +25,9 @@ export class Manager {
         let ID = id;
         if (ID === undefined) {
             do {
-                ID = cryptoRandomString({
+                ID = randomstring.generate({
                     length: 12,
-                    type: 'alphanumeric'
+                    charset: 'alphanumeric'
                 });
             } while (this.tournaments.some(t => t.id === ID));
         } else {

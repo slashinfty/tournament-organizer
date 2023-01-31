@@ -1,18 +1,19 @@
 {
   "name": "tournament-organizer",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "JavaScript library for running tournaments",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.js",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "umd/**/*"
   ],
   "type": "module",
   "engines": {
     "node": ">=14.16"
   },
   "scripts": {
-    "build": "rm -rf dist/* && tsc -p tsconfig.json"
+    "build": "rm -rf dist/* && tsc -p tsconfig.json && rollup --config rollup.config.ts --configPlugin typescript"
   },
   "repository": {
     "type": "git",
@@ -34,10 +35,16 @@
   },
   "homepage": "https://github.com/slashinfty/tournament-organizer/wiki",
   "dependencies": {
-    "crypto-random-string": "^5.0.0",
+    "randomstring": "^1.2.3",
     "tournament-pairings": "^1.5.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/randomstring": "^1.1.8",
+    "rollup": "^3.12.0",
+    "tslib": "^2.5.0",
     "typescript": "^4.9.5"
   }
 }

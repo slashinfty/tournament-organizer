@@ -1,4 +1,4 @@
-import cryptoRandomString from 'crypto-random-string';
+import randomstring from 'randomstring';
 import * as Pairings from 'tournament-pairings';
 import { Match } from './Match.js';
 import { Player } from './Player.js';
@@ -117,9 +117,9 @@ export class Tournament {
                 matches.forEach(match => {
                     let id: string;
                     do {
-                        id = cryptoRandomString({
+                        id = randomstring.generate({
                             length: 12,
-                            type: 'alphanumeric'
+                            charset: 'alphanumeric'
                         });
                     } while (this.matches.some(m => m.id === id) || newMatches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
@@ -163,9 +163,9 @@ export class Tournament {
                 matches.forEach(match => {
                     let id: string;
                     do {
-                        id = cryptoRandomString({
+                        id = randomstring.generate({
                             length: 12,
-                            type: 'alphanumeric'
+                            charset: 'alphanumeric'
                         });
                     } while (this.matches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
@@ -210,9 +210,9 @@ export class Tournament {
                     matches.forEach(match => {
                         let id: string;
                         do {
-                            id = cryptoRandomString({
+                            id = randomstring.generate({
                                 length: 12,
-                                type: 'alphanumeric'
+                                charset: 'alphanumeric'
                             });
                         } while (this.matches.some(m => m.id === id));
                         const newMatch = new Match(id, match.round, match.match);
@@ -243,9 +243,9 @@ export class Tournament {
                     matches.forEach(match => {
                         let id: string;
                         do {
-                            id = cryptoRandomString({
+                            id = randomstring.generate({
                                 length: 12,
-                                type: 'alphanumeric'
+                                charset: 'alphanumeric'
                             });
                         } while (this.matches.some(m => m.id === id));
                         const newMatch = new Match(id, match.round, match.match);
@@ -386,9 +386,9 @@ export class Tournament {
         let ID = id;
         if (ID === undefined) {
             do {
-                ID = cryptoRandomString({
+                ID = randomstring.generate({
                     length: 12,
-                    type: 'alphanumeric'
+                    charset: 'alphanumeric'
                 });
             } while (this.players.some(p => p.id === ID));
         } else {
@@ -811,9 +811,9 @@ export class Tournament {
         }
         let matchID: string;
         do {
-            id = cryptoRandomString({
+            id = randomstring.generate({
                 length: 12,
-                type: 'alphanumeric'
+                charset: 'alphanumeric'
             });
         } while (this.matches.some(m => m.id === id));
         const newMatch = new Match(matchID, round, 0);
@@ -845,9 +845,9 @@ export class Tournament {
         }
         let matchID: string;
         do {
-            id = cryptoRandomString({
+            id = randomstring.generate({
                 length: 12,
-                type: 'alphanumeric'
+                charset: 'alphanumeric'
             });
         } while (this.matches.some(m => m.id === id));
         const newMatch = new Match(matchID, round, 0);
