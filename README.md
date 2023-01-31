@@ -24,6 +24,9 @@ For non-elimination tournaments, the following tiebreaker systems are supported 
 ### About Pairings
 Details can be found in the [`tournament-pairings`](https://github.com/slashinfty/tournament-pairings#algorithms) readme.
 
+### Most Recent Update
+v3.2.0 - chess tournaments can now be run with Swiss pairings, as the `Tournament.colored` property ensures the pairing algorithm accounts for which colors players have previously been assigned and maintains a color balance.
+
 ## Contributing
 Please submit an issue if you encounter a bug or have a feature suggestion.
 

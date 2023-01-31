@@ -26,6 +26,9 @@ export class Tournament {
     /** All matches of the tournament */
     matches: TournamentValues['matches'];
 
+    /** If order of players in matches matters */
+    colored: TournamentValues['colored'];
+
     /** Sorting method, if players are rated/seeded */
     sorting: TournamentValues['sorting'];
 
@@ -50,6 +53,7 @@ export class Tournament {
         this.round = 0;
         this.players = [];
         this.matches = [];
+        this.colored = false;
         this.sorting = 'none';
         this.scoring = {
             bestOf: 1,
@@ -225,64 +229,67 @@ export class Tournament {
                     });
                 }
                 break;
-            case 'swiss':
-                const playerArray = players.map(player => ({
-                    id: player.id,
-                    score: player.matches.reduce((sum, match) => match.win > match.loss ? sum + this.scoring.win : match.loss > match.win ? sum + this.scoring.loss : this.scoring.draw, 0),
-                    pairedUpDown: player.matches.some(match => match.pairUpDown === true),
-                    receivedBye: player.matches.some(match => match.bye === true),
-                    avoid: player.matches.map(match => match.opponent).filter(opp => opp !== null),
-                    rating: player.value
-                }));
-                matches = Pairings.Swiss(playerArray, this.round, this.sorting !== 'none');
-                matches.forEach(match => {
-                    let id: string;
-                    do {
-                        id = cryptoRandomString({
-                            length: 12,
-                            type: 'alphanumeric'
-                        });
-                    } while (this.matches.some(m => m.id === id));
-                    const newMatch = new Match(id, match.round, match.match);
-                    newMatch.values = {
-                        active: match.player2 !== null,
-                        player1: {
-                            id: match.player1.toString()
-                        },
-                        player2: {
-                            id: match.player2 === null ? null : match.player2.toString()
-                        }
-                    };
-                    this.matches.push(newMatch);
-                    if (newMatch.player2.id !== null) {
-                        const player1Points = this.players.find(p => p.id === newMatch.player1.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
-                        const player2Points = this.players.find(p => p.id === newMatch.player2.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
-                        this.players.find(p => p.id === match.player1.toString()).addMatch({
-                            id: id,
-                            opponent: match.player2.toString(),
-                            pairUpDown: player1Points !== player2Points
-                        });
-                        this.players.find(p => p.id === match.player2.toString()).addMatch({
-                            id: id,
-                            opponent: match.player1.toString(),
-                            pairUpDown: player1Points !== player2Points
-                        });
-                    } else {
-                        this.players.find(p => p.id === match.player1.toString()).addMatch({
-                            id: id,
-                            opponent: null,
-                            bye: true,
-                            win: Math.ceil(this.scoring.bestOf / 2)
-                        });
+                case 'swiss':
+                    const playerArray = players.map(player => ({
+                        id: player.id,
+                        score: player.matches.reduce((sum, match) => match.win > match.loss ? sum + this.scoring.win : match.loss > match.win ? sum + this.scoring.loss : this.scoring.draw, 0),
+                        pairedUpDown: player.matches.some(match => match.pairUpDown === true),
+                        receivedBye: player.matches.some(match => match.bye === true),
+                        avoid: player.matches.map(match => match.opponent).filter(opp => opp !== null),
+                        colors: player.matches.map(match => match.color).filter(color => color !== null),
+                        rating: player.value
+                    }));
+                    matches = Pairings.Swiss(playerArray, this.round, this.sorting !== 'none', this.colored);
+                    matches.forEach(match => {
+                        let id: string;
+                        do {
+                            id = cryptoRandomString({
+                                length: 12,
+                                type: 'alphanumeric'
+                            });
+                        } while (this.matches.some(m => m.id === id));
+                        const newMatch = new Match(id, match.round, match.match);
                         newMatch.values = {
-                            bye: true,
+                            active: match.player2 !== null,
                             player1: {
-                                win: Math.ceil(this.scoring.bestOf / 2)
+                                id: match.player1.toString()
+                            },
+                            player2: {
+                                id: match.player2 === null ? null : match.player2.toString()
                             }
                         };
-                    }
-                });
-            break;
+                        this.matches.push(newMatch);
+                        if (newMatch.player2.id !== null) {
+                            const player1Points = this.players.find(p => p.id === newMatch.player1.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
+                            const player2Points = this.players.find(p => p.id === newMatch.player2.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
+                            this.players.find(p => p.id === match.player1.toString()).addMatch({
+                                id: id,
+                                opponent: match.player2.toString(),
+                                pairUpDown: player1Points !== player2Points,
+                                color: this.colored ? 'w' : null
+                            });
+                            this.players.find(p => p.id === match.player2.toString()).addMatch({
+                                id: id,
+                                opponent: match.player1.toString(),
+                                pairUpDown: player1Points !== player2Points,
+                                color: this.colored ? 'b' : null
+                            });
+                        } else {
+                            this.players.find(p => p.id === match.player1.toString()).addMatch({
+                                id: id,
+                                opponent: null,
+                                bye: true,
+                                win: Math.ceil(this.scoring.bestOf / 2)
+                            });
+                            newMatch.values = {
+                                bye: true,
+                                player1: {
+                                    win: Math.ceil(this.scoring.bestOf / 2)
+                                }
+                            };
+                        }
+                    });
+                break;
         }
     }
 

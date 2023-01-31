@@ -39,6 +39,7 @@ Tournament
 │   ├── round
 │   ├── players
 │   ├── matches
+│   ├── colored
 │   ├── sorting
 │   ├── scoring
 │   ├── stageOne
@@ -176,6 +177,16 @@ matches: Array<Match>
 ```
 * array of all matches in the tournament
 * initialized as `[]`
+
+---
+
+```ts
+colored: boolean
+```
+* __introduced in v3.2.0__
+* if order of players in matches matters
+* primarily used for chess tournaments to ensure color balance
+* initialized as `false`
 
 ---
 
@@ -429,14 +440,16 @@ matches: Array<{
     id: string,
     opponent: string | null,
     pairUpDown: boolean,
+    color: 'w' | 'b' | null,
     bye: boolean,
     win: number,
     loss: number,
     draw: number
 }>
 ```
+* __updated in v3.2.0__
 * array of matches that the player is in
-* contains information such as match ID, opponent ID, if the opponent has a different number of match points (in Swiss pairings), if the match is a bye, and the number of games won, lost, and drawn
+* contains information such as match ID, opponent ID, if the opponent has a different number of match points (in Swiss pairings), if the player was first or second seat in the match (in Swiss pairings), if the match is a bye, and the number of games won, lost, and drawn
 * initialized as `[]`
 
 ---
@@ -458,18 +471,21 @@ addMatch(match: {
     id: string,
     opponent: string | null,
     pairUpDown?: boolean,
+    color?: 'w' | 'b' | null,
     bye?: boolean,
     win?: number,
     loss?: number,
     draw?: number
 }): void
 ```
+* __updated in v3.2.0__
 * adds a match to the player
 * throws an error if attempting to duplicate a match
 * while `id` and `opponent` are required, the other properties are defaulted to:
 ```ts
 {
     pairUpDown: false,
+    color: null,
     bye: false,
     win: 0,
     loss: 0,
@@ -495,6 +511,7 @@ updateMatch({
     values: {
         opponent?: string | null,
         pairUpDown?: boolean,
+        color?: 'w' | 'b' | null,
         bye?: boolean,
         win?: number,
         loss?: number,
@@ -502,6 +519,7 @@ updateMatch({
     }
 }): void
 ```
+* __updated in v3.2.0__
 * updates the details of a match
 * throws an error if the match doesn't exist in the array
 * only needs to contain properties that are changing
@@ -632,6 +650,7 @@ values = options: SettableMatchValues
     round?: number,
     players?: Array<Player>,
     matches?: Array<Match>,
+    colored?: boolean,
     sorting?: 'ascending' | 'descending' | 'none',
     scoring?: {
         bestOf?: number,
@@ -681,6 +700,7 @@ values = options: SettableMatchValues
         id: string,
         opponent: string | null,
         pairUpDown: boolean,
+        color: 'w' | 'b' | null,
         bye: boolean,
         win: number,
         loss: number,

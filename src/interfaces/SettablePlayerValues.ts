@@ -6,6 +6,7 @@ export interface SettablePlayerValues {
         id: string,
         opponent: string | null,
         pairUpDown: boolean,
+        color: 'w' | 'b' | null,
         bye: boolean,
         win: number,
         loss: number,

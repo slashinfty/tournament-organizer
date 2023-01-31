@@ -40,6 +40,7 @@ export class Player {
         id: string,
         opponent: string | null,
         pairUpDown?: boolean,
+        color?: 'w' | 'b' | null,
         bye?: boolean,
         win?: number,
         loss?: number,
@@ -50,6 +51,7 @@ export class Player {
         }
         const newMatch = Object.assign({
             pairUpDown: false,
+            color: null,
             bye: false,
             win: 0,
             loss: 0,
@@ -71,6 +73,7 @@ export class Player {
     updateMatch(id: string, values: {
         opponent?: string | null,
         pairUpDown?: boolean,
+        color?: 'w' | 'b' | null,
         bye?: boolean,
         win?: number,
         loss?: number,

@@ -8,6 +8,7 @@ export interface TournamentValues {
     round: number,
     players: Array<Player>,
     matches: Array<Match>,
+    colored: boolean,
     sorting: 'ascending' | 'descending' | 'none',
     scoring: {
         bestOf: number,
