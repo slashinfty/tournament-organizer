@@ -1,19 +1,24 @@
 {
   "name": "tournament-organizer",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "JavaScript library for running tournaments",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": {
+      "browser": "./dist/index.module.js",
+      "umd": "./dist/index.umd.js",
+      "import": "./dist/index.js"
+    }
+  },
   "types": "./dist/index.d.js",
   "files": [
-    "dist/**/*",
-    "umd/**/*"
+    "dist/**/*"
   ],
   "type": "module",
   "engines": {
     "node": ">=14.16"
   },
   "scripts": {
-    "build": "rm -rf dist/* && tsc -p tsconfig.json && rollup --config rollup.config.ts --configPlugin typescript"
+    "build": "rm -rf dist/* && tsc -p tsconfig.json && rollup --config rollup.es.config.ts --configPlugin typescript && rollup --config rollup.umd.config.ts --configPlugin typescript"
   },
   "repository": {
     "type": "git",

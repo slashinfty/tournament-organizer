@@ -6,9 +6,9 @@ const config = {
     input: 'src/index.ts',
     output: {
         dir: 'dist',
-        format: 'umd',
+        format: 'es',
         name: 'tournament-organizer',
-        entryFileNames: '[name]-umd.js',
+        entryFileNames: '[name].module.js',
         globals: {
             crypto: 'require$$0'
         }
