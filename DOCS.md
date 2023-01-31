@@ -16,8 +16,13 @@ npm i tournament-organizer
 
 ```ts
 import TournamentOrganizer from 'tournament-organizer';
+```
 
-const Manager = new TournamentOrganizer();
+You can also use this package in the browser:
+```html
+<script type="module">
+    import TournamentOrganizer from "https://unpkg.com/tournament-organizer/dist/index.module.js";
+</script>
 ```
 
 ---
