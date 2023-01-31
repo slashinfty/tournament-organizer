@@ -1,4 +1,5 @@
 import commonjs from '@rollup/plugin-commonjs';
+import nodePolyfills from 'rollup-plugin-polyfill-node';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 
@@ -15,6 +16,9 @@ const config = {
     },
     plugins: [
         commonjs(),
+        nodePolyfills({
+            sourceMap: true
+        }),
         nodeResolve(),
         typescript()
     ]
