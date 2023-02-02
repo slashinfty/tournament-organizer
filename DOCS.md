@@ -14,15 +14,14 @@ npm i tournament-organizer
 
 ## Importing
 
+In Node.js:
 ```ts
 import TournamentOrganizer from 'tournament-organizer';
 ```
 
-You can also use this package in the browser:
-```html
-<script type="module">
-    import TournamentOrganizer from "https://unpkg.com/tournament-organizer/dist/index.module.js";
-</script>
+In the browser:
+```js
+import TournamentOrganizer from "https://esm.sh/tournament-organizer/dist/index.module.js";
 ```
 
 ---
