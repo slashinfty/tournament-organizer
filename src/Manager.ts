@@ -51,6 +51,7 @@ export class Manager {
         tournament.settings = {
             round: tourney.round,
             sorting: tourney.sorting,
+            colored: tourney.colored,
             scoring: tourney.scoring,
             stageOne: tourney.stageOne,
             stageTwo: tourney.stageTwo
