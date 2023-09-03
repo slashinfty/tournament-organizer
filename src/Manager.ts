@@ -78,6 +78,7 @@ export class Manager {
         tournament.settings = {
             status: tourney.status
         };
+        this.tournaments.push(tournament);
         return tournament;
     }
 
