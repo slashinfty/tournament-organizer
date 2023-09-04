@@ -41,6 +41,9 @@ export class Tournament {
     /** Details regarding playoffs */
     stageTwo: TournamentValues['stageTwo'];
 
+    /** Any extra information */
+    meta: TournamentValues['meta'];
+
     /**
      * Create a new tournament
      * @param id Unique ID of the tournament
@@ -77,6 +80,7 @@ export class Tournament {
                 method: 'all'
             }
         };
+        this.meta = {};
     }
 
     /** Set tournament options (only changes in options need to be included in the object) */

@@ -18,6 +18,9 @@ export class Player {
     /** Array of matches the player is in */
     matches: PlayerValues['matches'];
 
+    /** Any extra information */
+    meta: PlayerValues['meta'];
+
     /** Create a new player */
     constructor(id: string, name: string) {
         this.id = id;
@@ -25,6 +28,7 @@ export class Player {
         this.active = true;
         this.value = 0;
         this.matches = [];
+        this.meta = {};
     }
 
     /** Set information about the player (only changes in information need to be included in the object) */

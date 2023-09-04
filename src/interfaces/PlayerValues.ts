@@ -12,5 +12,8 @@ export interface PlayerValues {
         win: number,
         loss: number,
         draw: number
-    }>
+    }>,
+    meta: {
+        [key: string]: any
+    }
 }

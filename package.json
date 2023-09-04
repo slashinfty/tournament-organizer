@@ -1,6 +1,6 @@
 {
   "name": "tournament-organizer",
-  "version": "3.2.6",
+  "version": "3.3.0",
   "description": "JavaScript library for running tournaments",
   "exports": {
     ".": {

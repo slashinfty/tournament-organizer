@@ -47,7 +47,8 @@ Tournament
 │   ├── sorting
 │   ├── scoring
 │   ├── stageOne
-│   └── stageTwo
+│   ├── stageTwo
+│   └── meta
 ├── Setter
 │   └── settings
 └── Methods
@@ -67,7 +68,8 @@ Player
 │   ├── name
 │   ├── active
 │   ├── value
-│   └── matches
+│   ├── matches
+│   └── meta
 ├── Setter
 │   └── values
 └── Methods
@@ -83,7 +85,8 @@ Match
 │   ├── bye
 │   ├── player1
 │   ├── player2
-│   └── path
+│   ├── path
+│   └── meta
 └── Setter
     └── values
 ```
@@ -287,6 +290,16 @@ stageTwo: {
 
 ---
 
+```ts
+meta: { [key: string]: any }
+```
+* __introduced in v3.3.0__
+* empty object that allows any properties to be added
+* useful for any extra information needing to be saved by implementations
+* initialized as `{}`
+
+---
+
 ### Setter
 
 ```ts
@@ -455,6 +468,16 @@ matches: Array<{
 * array of matches that the player is in
 * contains information such as match ID, opponent ID, if the opponent has a different number of match points (in Swiss pairings), if the player was first or second seat in the match (in Swiss pairings), if the match is a bye, and the number of games won, lost, and drawn
 * initialized as `[]`
+
+---
+
+```ts
+meta: { [key: string]: any }
+```
+* __introduced in v3.3.0__
+* empty object that allows any properties to be added
+* useful for any extra information needing to be saved by implementations
+* initialized as `{}`
 
 ---
 
@@ -633,6 +656,16 @@ path: {
 
 ---
 
+```ts
+meta: { [key: string]: any }
+```
+* __introduced in v3.3.0__
+* empty object that allows any properties to be added
+* useful for any extra information needing to be saved by implementations
+* initialized as `{}`
+
+---
+
 ### Setter
 
 ```ts
@@ -687,6 +720,9 @@ values = options: SettableMatchValues
             value?: number,
             method?: 'points' | 'rank' | 'all'
         }
+    },
+    meta?: {
+        [key: string]: any
     }
 }
 ```
@@ -709,7 +745,10 @@ values = options: SettableMatchValues
         win: number,
         loss: number,
         draw: number
-    }>
+    }>,
+    meta?: {
+        [key: string]: any
+    }
 }
 ```
 
@@ -738,6 +777,9 @@ values = options: SettableMatchValues
     path?: {
         win?: string | null,
         loss?: string | null
+    },
+    meta?: {
+        [key: string]: any
     }
 }
 ```

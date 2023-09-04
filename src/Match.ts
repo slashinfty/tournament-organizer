@@ -27,6 +27,9 @@ export class Match {
     /** Next match for winners and losers */
     path: MatchValues['path'];
 
+    /** Any extra information */
+    meta: MatchValues['meta'];
+
     /** Create a new match */
     constructor(id: string, round: number, match: number) {
         this.id = id;
@@ -50,6 +53,7 @@ export class Match {
             win: null,
             loss: null
         }
+        this.meta = {};
     }
 
     /** Set information about the match (only changes in information need to be included in the object) */

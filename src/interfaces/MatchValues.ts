@@ -19,5 +19,8 @@ export interface MatchValues {
     path: {
         win: string | null,
         loss: string | null
+    },
+    meta: {
+        [key: string]: any
     }
 }

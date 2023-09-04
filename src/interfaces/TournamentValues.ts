@@ -41,5 +41,8 @@ export interface TournamentValues {
             value: number,
             method: 'points' | 'rank' | 'all'
         }
+    },
+    meta: {
+        [key: string]: any
     }
 }
