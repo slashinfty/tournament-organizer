@@ -565,7 +565,7 @@ export class Tournament {
         this.#createMatches(players);
         if (this.stageOne.format === 'swiss' && this.stageOne.rounds === 0) {
             this.stageOne.rounds = Math.ceil(Math.log2(this.players.length));
-        } else {
+        } else if (this.stageOne.format !== 'swiss') {
             this.stageOne.rounds = this.matches.reduce((max, curr) => Math.max(max, curr.round), 0);
         }
     }
