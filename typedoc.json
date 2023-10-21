@@ -1,0 +1,12 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": ["./src"],
+    "entryPointStrategy": "expand",
+    "out": "docs",
+    "githubPages": true,
+    "tsconfig": "tsconfig.json",
+    "readme": "DOCS.md",
+    "plugin": ["typedoc-plugin-merge-modules"],
+    "mergeModulesRenameDefaults": true,
+    "mergeModulesMergeMode": "project"
+}

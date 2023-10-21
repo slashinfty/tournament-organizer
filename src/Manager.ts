@@ -4,18 +4,22 @@ import { Tournament } from './Tournament.js';
 import { SettableTournamentValues } from './interfaces/SettableTournamentValues.js';
 import { TournamentValues } from './interfaces/TournamentValues.js';
 
-/** Class representing a tournament manager */
+/** 
+ * Class representing a tournament manager.
+ */
 export class Manager {
-    /** All tournaments being managed */
+    /** Array of all tournaments being managed. */
     tournaments: Array<Tournament>;
 
-    /** Create a tournament manager */
+    /** Create a tournament manager. */
     constructor() {
         this.tournaments = [];
     }
 
     /**
-     * Create a new tournament
+     * Create a new tournament.
+     * 
+     * Throws an error if ID is specified and already exists.
      * @param name Name of the tournament
      * @param settings Settings of the tournament
      * @param id ID of the tournament (randomly assigned if omitted)
@@ -42,7 +46,7 @@ export class Manager {
     }
 
     /**
-     * Reload an object representing a tournament
+     * Reload an object representing a tournament.
      * @param tourney Plain object of a tournament
      * @returns The newly reloaded tournament
      */
@@ -83,7 +87,9 @@ export class Manager {
     }
 
     /**
-     * Remove a tournament from the manager
+     * Remove a tournament from the manager.
+     * 
+     * Throws an error if no tournament has the specified ID.
      * @param id ID of the tournament to be removed
      * @returns The removed tournament
      */

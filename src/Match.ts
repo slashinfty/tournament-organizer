@@ -1,7 +1,11 @@
 import { MatchValues } from "./interfaces/MatchValues.js";
 import { SettableMatchValues } from "./interfaces/SettableMatchValues.js";
 
-/** Class representing a match */
+/** 
+ * Class representing a match.
+ * 
+ * See {@link MatchValues} for detailed descriptions of properties.
+ */
 export class Match {
     /** Unique ID of the match */
     id: MatchValues['id'];
@@ -30,7 +34,7 @@ export class Match {
     /** Any extra information */
     meta: MatchValues['meta'];
 
-    /** Create a new match */
+    /** Create a new match. */
     constructor(id: string, round: number, match: number) {
         this.id = id;
         this.round = round;

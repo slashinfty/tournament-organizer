@@ -1,3 +1,11 @@
+import { Match } from "../Match.js";
+import { MatchValues } from "./MatchValues.js";
+
+/**
+ * All properties that can be set with {@link Match.values}.
+ * 
+ * See {@link MatchValues} for detailed descriptions of properties.
+ */
 export interface SettableMatchValues {
     round?: number,
     match?: number,

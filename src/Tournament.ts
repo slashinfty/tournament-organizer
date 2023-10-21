@@ -6,7 +6,11 @@ import { StandingsValues } from './interfaces/StandingsValues.js';
 import { TournamentValues } from './interfaces/TournamentValues.js';
 import { SettableTournamentValues } from './interfaces/SettableTournamentValues.js';
 
-/** Class representing a tournament */
+/** 
+ * Class representing a tournament.
+ * 
+ * See {@link TournamentValues} for detailed descriptions of properties.
+ */
 export class Tournament {
     /** Unique ID of the tournament */
     id: TournamentValues['id'];
@@ -45,7 +49,7 @@ export class Tournament {
     meta: TournamentValues['meta'];
 
     /**
-     * Create a new tournament
+     * Create a new tournament.
      * @param id Unique ID of the tournament
      * @param name Name of the tournament
      */
@@ -375,7 +379,9 @@ export class Tournament {
     }
 
     /**
-     * Create a new player
+     * Create a new player.
+     * 
+     * Throws an error if ID is specified and already exists, if the specified maximum number of players has been reached, or if the tournament is in stage two or complete.
      * @param name Alias of the player
      * @param id ID of the player (randomly assigned if omitted)
      * @returns The newly created player
@@ -406,7 +412,13 @@ export class Tournament {
     }
 
     /**
-     * Remove a player
+     * Remove a player.
+     * 
+     * Throws an error if no player has the ID specified or if the player is already inactive.
+     * 
+     * In active elimination and stepladder formats, adjusts paths for any matches that interact with the match the player is in.
+     * 
+     * In active round-robin formats, replaces the player in all future matches with a bye.
      * @param id ID of the player
      */
     removePlayer(id: string): void {
@@ -551,7 +563,11 @@ export class Tournament {
         }
     }
 
-    /** Start the tournament */
+    /** 
+     * Start the tournament.
+     * 
+     * Throws an error if there are an insufficient number of players (4 if double elimination, otherwise 2).
+     */
     start(): void {
         const players = this.players.filter(p => p.active === true);
         if ((this.stageOne.format === 'double-elimination' && players.length < 4) || players.length < 2) {
@@ -570,7 +586,11 @@ export class Tournament {
         }
     }
 
-    /** Progress to the next round in the tournament */
+    /** 
+     * Progress to the next round in the tournament.
+     * 
+     * Throws an error if there are active matches, if the current format is elimination or stepladder, or when attempting to create matches for stage two and there are an insufficient number of players.
+     */
     next(): void {
         if (this.status !== 'stage-one') {
             throw `Can only advance rounds during stage one`;
@@ -641,6 +661,17 @@ export class Tournament {
         }
     }
 
+    /**
+     * Updates the result of a match.
+     * 
+     * Throws an error if no match has the ID specified.
+     * 
+     * In elimination and stepladder formats, moves players to their appropriate next matches.
+     * @param id ID of the match
+     * @param player1Wins Number of wins for player one
+     * @param player2Wins Number of wins for player two
+     * @param draws Number of draws
+     */
     enterResult(id: string, player1Wins: number, player2Wins: number, draws: number = 0): void {
         const match = this.matches.find(m => m.id === id);
         if (match === undefined) {
@@ -736,6 +767,14 @@ export class Tournament {
         }
     }
 
+    /**
+     * Clears the results of a match.
+     * 
+     * Throws an error if no match has the ID specified or if the match is still active.
+     * 
+     * In elimination and stepladder formats, it reverses the progression of players in the bracket.
+     * @param id The ID of the match
+     */
     clearResult(id: string): void {
         const match = this.matches.find(m => m.id === id);
         if (match === undefined) {
@@ -802,6 +841,13 @@ export class Tournament {
         }
     }
 
+    /**
+     * Assigns a bye to a player in a specified round.
+     * 
+     * Throws an error if no player has the ID specified, if the player is already inactive, or if the player already has a match in the round.
+     * @param id The ID of the player
+     * @param round The round number
+     */
     assignBye(id: string, round: number): void {
         const player = this.players.find(p => p.id === id);
         if (player === undefined) {
@@ -836,6 +882,13 @@ export class Tournament {
         });
     }
 
+    /**
+     * Assigns a loss to a player in a specified round.
+     * 
+     * Throws an error if no player has the ID specified, if the player is already inactive, or if the player already has a match in the round.
+     * @param id The ID of the player
+     * @param round The round number
+     */
     assignLoss(id: string, round: number): void {
         const player = this.players.find(p => p.id === id);
         if (player === undefined) {
@@ -871,6 +924,11 @@ export class Tournament {
         });
     }
 
+    /**
+     * Computes tiebreakers for all players and ranks the players by points and tiebreakers.
+     * @param activeOnly If the array contains only active players
+     * @returns A sorted array of players with scores and tiebreaker values
+     */
     standings(activeOnly: boolean = true): Array<StandingsValues> {
         let players = this.#computeScores();
         if (activeOnly === true) {
@@ -933,6 +991,9 @@ export class Tournament {
         return players;
     }
 
+    /**
+     * Ends the tournament and marks all players and matches as inactive.
+     */
     end(): void {
         this.status = 'complete';
         this.players.forEach(player => player.active = false);

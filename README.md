@@ -24,9 +24,6 @@ For non-elimination tournaments, the following tiebreaker systems are supported 
 ### About Pairings
 Details can be found in the [`tournament-pairings`](https://github.com/slashinfty/tournament-pairings#algorithms) readme.
 
-### Most Recent Update
-v3.2.0 - chess tournaments can now be run with Swiss pairings, as the `Tournament.colored` property ensures the pairing algorithm accounts for which colors players have previously been assigned and maintains a color balance.
-
 ## Contributing
 Please submit an issue if you encounter a bug or have a feature suggestion.
 
@@ -34,6 +31,21 @@ If you are interested in contributing, please feel free to fork and clone the re
 
 I am a high school teacher, and would appreciate any and all support in continuing this project.
 
-## Documentation
+## Installation
+```shell
+npm i tournament-organizer
+```
 
-Documentation is available in the [DOCS.md](DOCS.md) file.
+### Import
+In Node.js:
+```ts
+import TournamentOrganizer from 'tournament-organizer';
+```
+
+In the browser:
+```js
+import TournamentOrganizer from "https://esm.sh/tournament-organizer/dist/index.module.js";
+```
+
+## Documentation
+Available online: [https://slashinfty.github.io/tournament-organizer/](https://slashinfty.github.io/tournament-organizer/)

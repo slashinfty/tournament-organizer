@@ -1,7 +1,11 @@
 import { PlayerValues } from './interfaces/PlayerValues.js';
 import { SettablePlayerValues } from './interfaces/SettablePlayerValues.js';
 
-/** Class representing a player */
+/** 
+ * Class representing a player
+ * 
+ * See {@link PlayerValues} for detailed descriptions of properties.
+ */
 export class Player {
     /** Unique ID of the player */
     id: PlayerValues['id'];
@@ -21,7 +25,7 @@ export class Player {
     /** Any extra information */
     meta: PlayerValues['meta'];
 
-    /** Create a new player */
+    /** Create a new player. */
     constructor(id: string, name: string) {
         this.id = id;
         this.name = name;
@@ -31,7 +35,7 @@ export class Player {
         this.meta = {};
     }
 
-    /** Set information about the player (only changes in information need to be included in the object) */
+    /** Set information about the player (only changes in information need to be included in the object). */
     set values(options: SettablePlayerValues) {
         if (options.hasOwnProperty('matches')) {
             options.matches = [...this.matches, ...options.matches];
@@ -39,7 +43,12 @@ export class Player {
         Object.assign(this, options);
     }
 
-    /** Add a new match for the player */
+    /**
+     * Adds a match to the player's record.
+     * 
+     * Throws an error if attempting to duplicate a match.
+     * @param match Object with match details
+     */
     addMatch(match: {
         id: string,
         opponent: string | null,
@@ -64,7 +73,12 @@ export class Player {
         this.matches.push(newMatch);
     }
 
-    /** Remove a match from player history */
+    /**
+     * Removes a match from player history.
+     * 
+     * Throws an error if the match doesn't exist in the player's records.
+     * @param id The ID of the match
+     */
     removeMatch(id: string): void {
         const index = this.matches.findIndex(m => m.id === id);
         if (index === -1) {
@@ -73,7 +87,15 @@ export class Player {
         this.matches.splice(index, 1);
     }
 
-    /** Update the details of a match for a player */
+    /**
+     * Updates the details of a match.
+     * 
+     * Throws an error if the match doesn't exist in the player's records.
+     * 
+     * Only needs to contain properties that are being changed.
+     * @param id The ID of the match
+     * @param values The match details being changed
+     */
     updateMatch(id: string, values: {
         opponent?: string | null,
         pairUpDown?: boolean,

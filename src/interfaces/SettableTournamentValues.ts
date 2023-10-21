@@ -1,6 +1,13 @@
 import { Player } from '../Player.js';
 import { Match } from '../Match.js';
+import { Tournament } from '../Tournament.js';
+import { TournamentValues } from './TournamentValues.js';
 
+/**
+ * All properties that can be set with {@link Tournament.settings}.
+ * 
+ * See {@link TournamentValues} for detailed descriptions of properties.
+ */
 export interface SettableTournamentValues {
     name?: string,
     status?: 'setup' | 'stage-one' | 'stage-two' | 'complete',

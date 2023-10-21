@@ -1,3 +1,11 @@
+import { Player } from "../Player.js";
+import { PlayerValues } from "./PlayerValues.js";
+
+/**
+ * All properties that can be set with {@link Player.values}.
+ * 
+ * See {@link PlayerValues} for detailed descriptions of properties.
+ */
 export interface SettablePlayerValues {
     name?: string,
     active?: boolean,
