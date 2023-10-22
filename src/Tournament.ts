@@ -381,14 +381,14 @@ export class Tournament {
     /**
      * Create a new player.
      * 
-     * Throws an error if ID is specified and already exists, if the specified maximum number of players has been reached, or if the tournament is in stage two or complete.
+     * Throws an error if ID is specified and already exists, if the specified maximum number of players has been reached, if the tournament is in stage one and not Swiss format, or if the tournament is in stage two or complete.
      * @param name Alias of the player
      * @param id ID of the player (randomly assigned if omitted)
      * @returns The newly created player
      */
     createPlayer(name: string, id: string | undefined = undefined): Player {
-        if (this.status === 'stage-two' || this.status === 'complete') {
-            throw `Players can only be added during setup or stage one`;
+        if ((this.status === 'stage-one' && this.stageOne.format !== 'swiss') || this.status === 'stage-two' || this.status === 'complete') {
+            throw `Players can only be added during setup or stage one (if Swiss format)`;
         }
         if (this.stageOne.maxPlayers > 0 && this.players.length === this.stageOne.maxPlayers) {
             throw `Maximum number of players (${this.stageOne.maxPlayers}) are enrolled`;
