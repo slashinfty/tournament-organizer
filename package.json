@@ -39,7 +39,7 @@
   "bugs": {
     "url": "https://github.com/slashinfty/tournament-organizer/issues"
   },
-  "homepage": "https://github.com/slashinfty/tournament-organizer/blob/main/DOCS.md",
+  "homepage": "https://slashinfty.github.io/tournament-organizer/",
   "dependencies": {
     "randomstring": "^1.3.0",
     "tournament-pairings": "^1.5.2"
