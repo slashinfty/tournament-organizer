@@ -49,3 +49,7 @@ import TournamentOrganizer from "https://esm.sh/tournament-organizer/dist/index.
 
 ## Documentation
 Available online: [https://slashinfty.github.io/tournament-organizer/](https://slashinfty.github.io/tournament-organizer/)
+
+## Discussion
+
+You can discuss this repository more in my [Discord](https://discord.gg/Q8t9gcZ77s).
