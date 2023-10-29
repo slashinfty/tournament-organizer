@@ -111,6 +111,7 @@ export interface TournamentValues {
      *     format: 'single-elimination',
      *     consolation: false,
      *     rounds: 0,
+     *     initialRound: 1,
      *     maxPlayers: 0
      * }
      * ```
@@ -128,6 +129,10 @@ export interface TournamentValues {
          * Number of rounds in the first stage.
          */
         rounds: number,
+        /**
+         * Number of the first round.
+         */
+        initialRound: number,
         /**
          * Maximum number of players who can be enrolled. There is no maximum if this is zero.
          */

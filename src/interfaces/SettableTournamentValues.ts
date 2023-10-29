@@ -38,6 +38,7 @@ export interface SettableTournamentValues {
         format?: 'single-elimination' | 'double-elimination' | 'stepladder' | 'swiss' | 'round-robin' | 'double-round-robin',
         consolation?: boolean,
         rounds?: number,
+        initialRound?: number,
         maxPlayers?: number
     },
     stageTwo?: {

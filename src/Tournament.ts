@@ -74,6 +74,7 @@ export class Tournament {
             format: 'single-elimination',
             consolation: false,
             rounds: 0,
+            initialRound: 1,
             maxPlayers: 0
         };
         this.stageTwo = {
@@ -577,7 +578,7 @@ export class Tournament {
             players.sort((a, b) => this.sorting === 'ascending' ? a.value - b.value : b.value - a.value);
         }
         this.status = 'stage-one';
-        this.round++;
+        this.round = this.stageOne.initialRound;
         this.#createMatches(players);
         if (this.stageOne.format === 'swiss' && this.stageOne.rounds === 0) {
             this.stageOne.rounds = Math.ceil(Math.log2(this.players.length));
@@ -602,7 +603,7 @@ export class Tournament {
             throw `Can not advance rounds with active matches`;
         }
         this.round++;
-        if (this.round > this.stageOne.rounds) {
+        if (this.round > (this.stageOne.rounds - this.stageOne.initialRound - 1)) {
             if (this.stageTwo.format !== null) {
                 this.status = 'stage-two';
                 if (this.stageTwo.advance.method === 'points') {
