@@ -603,7 +603,7 @@ export class Tournament {
             throw `Can not advance rounds with active matches`;
         }
         this.round++;
-        if (this.round > (this.stageOne.rounds - this.stageOne.initialRound - 1)) {
+        if (this.round > this.stageOne.rounds + this.stageOne.initialRound - 1) {
             if (this.stageTwo.format !== null) {
                 this.status = 'stage-two';
                 if (this.stageTwo.advance.method === 'points') {
