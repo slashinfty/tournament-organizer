@@ -13,7 +13,7 @@ import TournamentOrganizer from 'tournament-organizer';
 
 In the browser:
 ```js
-import TournamentOrganizer from "https://esm.sh/tournament-organizer/dist/index.module.js";
+import TournamentOrganizer from "https://unpkg.com/tournament-organizer/dist/index.module.js";
 ```
 
 ## About
