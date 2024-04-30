@@ -860,15 +860,15 @@ export class Tournament {
         if (player.matches.some(match => this.matches.find(m => m.id === match.id).round === round)) {
             throw `Player already has a match in round ${round}`;
         }
-        let matchID: string;
+        let byeID: string;
         do {
-            id = randomstring.generate({
+            byeID = randomstring.generate({
                 length: 12,
                 charset: 'alphanumeric'
             });
-        } while (this.matches.some(m => m.id === id));
-        const newMatch = new Match(matchID, round, 0);
-        newMatch.values = {
+        } while (this.matches.some(m => m.id === byeID));
+        const bye = new Match(byeID, round, 0);
+        bye.values = {
             bye: true,
             player1: {
                 id: player.id,
@@ -876,17 +876,20 @@ export class Tournament {
             }
         };
         player.addMatch({
-            id: matchID,
+            id: byeID,
             opponent: null,
             bye: true,
             win: Math.ceil(this.scoring.bestOf / 2)
         });
+        this.matches.push(bye);
     }
 
     /**
      * Assigns a loss to a player in a specified round.
      * 
-     * Throws an error if no player has the ID specified, if the player is already inactive, or if the player already has a match in the round.
+     * Throws an error if no player has the ID specified or if the player is already inactive.
+     * 
+     * If the player has a match in the specified round, it is removed, they are assigned a loss, and the opponent is assigned a bye.
      * @param id The ID of the player
      * @param round The round number
      */
@@ -899,17 +902,24 @@ export class Tournament {
             throw `Player is currently inactive`;
         }
         if (player.matches.some(match => this.matches.find(m => m.id === match.id).round === round)) {
-            throw `Player already has a match in round ${round}`;
+            const currentMatch = this.matches.filter(match => match.round === round).find(match => match.player1.id === player.id || match.player2.id === player.id);
+            this.matches.splice(this.matches.findIndex(match => match.id === currentMatch.id), 1);
+            player.removeMatch(currentMatch.id);
+            const opponent = this.players.find(p => p.id === (currentMatch.player1.id === player.id ? currentMatch.player2.id : currentMatch.player1.id));
+            if (opponent !== undefined) {
+                opponent.removeMatch(currentMatch.id);
+                this.assignBye(opponent.id, round);
+            }
         }
-        let matchID: string;
+        let lossID: string;
         do {
-            id = randomstring.generate({
+            lossID = randomstring.generate({
                 length: 12,
                 charset: 'alphanumeric'
             });
-        } while (this.matches.some(m => m.id === id));
-        const newMatch = new Match(matchID, round, 0);
-        newMatch.values = {
+        } while (this.matches.some(m => m.id === lossID));
+        const loss = new Match(lossID, round, 0);
+        loss.values = {
             player1: {
                 id: player.id,
                 loss: Math.ceil(this.scoring.bestOf / 2)
@@ -919,10 +929,11 @@ export class Tournament {
             }
         };
         player.addMatch({
-            id: matchID,
+            id: lossID,
             opponent: null,
             loss: Math.ceil(this.scoring.bestOf / 2)
         });
+        this.matches.push(loss);
     }
 
     /**
