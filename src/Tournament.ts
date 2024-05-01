@@ -845,11 +845,14 @@ export class Tournament {
     /**
      * Assigns a bye to a player in a specified round.
      * 
-     * Throws an error if no player has the ID specified, if the player is already inactive, or if the player already has a match in the round.
+     * Throws an error if it is not actively Swiss pairings, no player has the ID specified, if the player is already inactive, or if the player already has a match in the round.
      * @param id The ID of the player
      * @param round The round number
      */
     assignBye(id: string, round: number): void {
+        if (this.status !== 'stage-one' || this.stageOne.format !== 'swiss') {
+            throw `Can only assign losses during Swiss pairings`;
+        }
         const player = this.players.find(p => p.id === id);
         if (player === undefined) {
             throw `Player with ID ${id} does not exist`;
@@ -887,13 +890,16 @@ export class Tournament {
     /**
      * Assigns a loss to a player in a specified round.
      * 
-     * Throws an error if no player has the ID specified or if the player is already inactive.
+     * Throws an error if it is not actively Swiss pairings, no player has the ID specified, or if the player is already inactive.
      * 
      * If the player has a match in the specified round, it is removed, they are assigned a loss, and the opponent is assigned a bye.
      * @param id The ID of the player
      * @param round The round number
      */
     assignLoss(id: string, round: number): void {
+        if (this.status !== 'stage-one' || this.stageOne.format !== 'swiss') {
+            throw `Can only assign losses during Swiss pairings`;
+        }
         const player = this.players.find(p => p.id === id);
         if (player === undefined) {
             throw `Player with ID ${id} does not exist`;
