@@ -1,5 +1,4 @@
 node_modules
-dist
 umd
 package-lock.json
 test.js

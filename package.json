@@ -20,12 +20,14 @@
     }
   },
   "types": "./dist/index.d.js",
+  "files": [
+    "dist/**/*"
+  ],
   "type": "module",
   "engines": {
     "node": ">=14.16"
   },
   "scripts": {
-    "postinstall" : "npm run build",
     "build": "rm -rf dist/* && tsc -p tsconfig.json && rollup --config rollup.es.config.ts --configPlugin typescript && rollup --config rollup.umd.config.ts --configPlugin typescript",
     "docs": "typedoc --options typedoc.json"
   },
