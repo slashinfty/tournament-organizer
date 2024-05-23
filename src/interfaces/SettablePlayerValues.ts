@@ -1,4 +1,4 @@
-import { Player } from "../Player.js";
+import { Player } from "../components/Player.js";
 import { PlayerValues } from "./PlayerValues.js";
 
 /**

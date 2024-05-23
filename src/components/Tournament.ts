@@ -2,9 +2,9 @@ import randomstring from 'randomstring';
 import * as Pairings from 'tournament-pairings';
 import { Match } from './Match.js';
 import { Player } from './Player.js';
-import { StandingsValues } from './interfaces/StandingsValues.js';
-import { TournamentValues } from './interfaces/TournamentValues.js';
-import { SettableTournamentValues } from './interfaces/SettableTournamentValues.js';
+import { StandingsValues } from '../interfaces/StandingsValues.js';
+import { TournamentValues } from '../interfaces/TournamentValues.js';
+import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
 
 /** 
  * Class representing a tournament.
@@ -665,7 +665,7 @@ export class Tournament {
     /**
      * Updates the result of a match.
      * 
-     * Throws an error if no match has the ID specified.
+     * Throws an error if no match has the ID specified or any player scores more than half the best of value
      * 
      * In elimination and stepladder formats, moves players to their appropriate next matches.
      * @param id ID of the match
@@ -677,6 +677,9 @@ export class Tournament {
         const match = this.matches.find(m => m.id === id);
         if (match === undefined) {
             throw `Match with ID ${id} does not exist`;
+        }
+        if (player1Wins > Math.round(this.scoring.bestOf / 2) || player2Wins > Math.round(this.scoring.bestOf / 2)) {
+            throw `Players can not win more than ${Math.round(this.scoring.bestOf / 2)} games in a match`;
         }
         match.values = {
             active: false,

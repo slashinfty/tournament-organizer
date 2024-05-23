@@ -1,6 +1,6 @@
-import { Player } from '../Player.js';
-import { Match } from '../Match.js';
-import { Tournament } from '../Tournament.js';
+import { Player } from '../components/Player.js';
+import { Match } from '../components/Match.js';
+import { Tournament } from '../components/Tournament.js';
 import { TournamentValues } from './TournamentValues.js';
 
 /**

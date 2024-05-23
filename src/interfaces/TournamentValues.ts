@@ -1,5 +1,5 @@
-import { Player } from '../Player.js';
-import { Match } from '../Match.js';
+import { Player } from '../components/Player.js';
+import { Match } from '../components/Match.js';
 
 /**
  * Properties of tournaments

@@ -1,4 +1,4 @@
-import { Match } from "../Match.js";
+import { Match } from "../components/Match.js";
 import { MatchValues } from "./MatchValues.js";
 
 /**

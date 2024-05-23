@@ -1,5 +1,5 @@
-import { PlayerValues } from './interfaces/PlayerValues.js';
-import { SettablePlayerValues } from './interfaces/SettablePlayerValues.js';
+import { PlayerValues } from '../interfaces/PlayerValues.js';
+import { SettablePlayerValues } from '../interfaces/SettablePlayerValues.js';
 
 /** 
  * Class representing a player
