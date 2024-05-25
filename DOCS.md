@@ -19,6 +19,7 @@ import TournamentOrganizer from "https://unpkg.com/tournament-organizer/dist/ind
 The following imports are also available:
 ```ts
 import {
+    Manager,
     Match,
     Player,
     Tournament
