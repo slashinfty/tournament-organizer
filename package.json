@@ -9,7 +9,7 @@
       "import": "./dist/index.js"
     },
     "./interfaces": "./dist/interfaces/index.js",
-    "./components": "./dist/components.index.js"
+    "./components": "./dist/components/index.js"
   },
   "types": "./dist/index.d.js",
   "files": [
