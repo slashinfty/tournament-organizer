@@ -116,7 +116,12 @@ export class Tournament {
             case 'double-elimination':
             case 'stepladder':
                 if (format === 'single-elimination') {
-                    matches = Pairings.SingleElimination(players.map(p => p.id), this.round, this.stageOne.consolation, this.status === 'stage-one' ? this.sorting !== 'none' : true);
+                    if (this.status === 'stage-one') {
+                        matches = Pairings.SingleElimination(players.map(p => p.id), this.round, this.stageOne.consolation, this.sorting !== 'none');
+                    } else {
+                        matches = Pairings.SingleElimination(players.map(p => p.id), this.round, this.stageTwo.consolation, true);
+                    }
+                    
                 } else if (format === 'double-elimination') {
                     matches = Pairings.DoubleElimination(players.map(p => p.id), this.round, this.status === 'stage-one' ? this.sorting !== 'none' : true);
                 } else if (format === 'stepladder') {
