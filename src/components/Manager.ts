@@ -2,7 +2,7 @@ import randomstring from 'randomstring';
 import { Match } from './Match.js';
 import { Tournament } from './Tournament.js';
 import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
-import { TournamentValues } from '../interfaces/TournamentValues.js';
+import { LoadableTournamentValues } from '../interfaces/LoadableTournamentValues.js';
 
 /** 
  * Class representing a tournament manager.
@@ -50,7 +50,7 @@ export class Manager {
      * @param tourney Plain object of a tournament
      * @returns The newly reloaded tournament
      */
-    reloadTournament(tourney: TournamentValues): Tournament {
+    reloadTournament(tourney: LoadableTournamentValues): Tournament {
         const tournament = new Tournament(tourney.id, tourney.name);
         tournament.settings = {
             round: tourney.round,
