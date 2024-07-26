@@ -26,6 +26,7 @@ import {
 } from 'tournament-organizer/components';
 
 import {
+    LoadableTournamentValues,
     MatchValues,
     PlayerValues,
     SettableMatchValues,

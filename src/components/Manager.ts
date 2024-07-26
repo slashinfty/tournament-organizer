@@ -1,8 +1,8 @@
 import randomstring from 'randomstring';
+import { LoadableTournamentValues } from '../interfaces/LoadableTournamentValues.js';
 import { Match } from './Match.js';
 import { Tournament } from './Tournament.js';
 import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
-import { LoadableTournamentValues } from '../interfaces/LoadableTournamentValues.js';
 
 /** 
  * Class representing a tournament manager.
