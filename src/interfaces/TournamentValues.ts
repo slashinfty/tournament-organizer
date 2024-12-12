@@ -38,11 +38,11 @@ export interface TournamentValues {
      */
     matches: Array<Match>,
     /**
-     * If the order of players in matches matters. Used in tournaments that require color balance.
+     * If the order of players in matches matters.
      * 
      * Initialized as `false`
      */
-    colored: boolean,
+    seating: boolean,
     /**
      * Method of sorting players, if they are rated/seeded.
      * 

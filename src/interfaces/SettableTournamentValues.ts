@@ -14,7 +14,7 @@ export interface SettableTournamentValues {
     round?: number,
     players?: Array<Player>,
     matches?: Array<Match>,
-    colored?: boolean,
+    seating?: boolean,
     sorting?: 'ascending' | 'descending' | 'none',
     scoring?: {
         bestOf?: number,

@@ -31,7 +31,7 @@ export class Tournament {
     matches: TournamentValues['matches'];
 
     /** If order of players in matches matters */
-    colored: TournamentValues['colored'];
+    seating: TournamentValues['seating'];
 
     /** Sorting method, if players are rated/seeded */
     sorting: TournamentValues['sorting'];
@@ -60,7 +60,7 @@ export class Tournament {
         this.round = 0;
         this.players = [];
         this.matches = [];
-        this.colored = false;
+        this.seating = false;
         this.sorting = 'none';
         this.scoring = {
             bestOf: 1,
@@ -250,10 +250,10 @@ export class Tournament {
                         pairedUpDown: player.matches.some(match => match.pairUpDown === true),
                         receivedBye: player.matches.some(match => match.bye === true),
                         avoid: player.matches.map(match => match.opponent).filter(opp => opp !== null),
-                        colors: player.matches.map(match => match.color).filter(color => color !== null),
+                        seating: player.matches.map(match => match.seating).filter(seat => seat !== null),
                         rating: player.value
                     }));
-                    matches = Pairings.Swiss(playerArray, this.round, this.sorting !== 'none', this.colored);
+                    matches = Pairings.Swiss(playerArray, this.round, this.sorting !== 'none', this.seating);
                     matches.forEach(match => {
                         let id: string;
                         do {
@@ -280,13 +280,13 @@ export class Tournament {
                                 id: id,
                                 opponent: match.player2.toString(),
                                 pairUpDown: player1Points !== player2Points,
-                                color: this.colored ? 'w' : null
+                                seating: this.seating ? 1 : null
                             });
                             this.players.find(p => p.id === match.player2.toString()).addMatch({
                                 id: id,
                                 opponent: match.player1.toString(),
                                 pairUpDown: player1Points !== player2Points,
-                                color: this.colored ? 'b' : null
+                                seating: this.seating ? -1 : null
                             });
                         } else {
                             this.players.find(p => p.id === match.player1.toString()).addMatch({

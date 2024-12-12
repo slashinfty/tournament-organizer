@@ -41,9 +41,9 @@ export interface PlayerValues {
          */
         pairUpDown: boolean,
         /**
-         * If the player is player one (`'w'`) or player two (`'b'`) in the match (used in Swiss pairings if `colored: true`).
+         * If the player is player one (`1`) or player two (`-1`) in the match (used in Swiss pairings if `seating: true`).
          */
-        color: 'w' | 'b' | null,
+        seating: 1 | -1 | null,
         /**
          * If the match is a bye.
          */
