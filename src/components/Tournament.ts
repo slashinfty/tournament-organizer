@@ -246,7 +246,7 @@ export class Tournament {
                 case 'swiss':
                     const playerArray = players.map(player => ({
                         id: player.id,
-                        score: player.matches.reduce((sum, match) => sum += match.bye ? this.scoring.bye : match.win > match.loss ? this.scoring.win : match.loss > match.win ? this.scoring.loss : this.scoring.draw, 0),
+                        score: player.matches.reduce((sum, match) => sum + (match.bye ? this.scoring.bye : match.win > match.loss ? this.scoring.win : match.loss > match.win ? this.scoring.loss : this.scoring.draw), 0),
                         pairedUpDown: player.matches.some(match => match.pairUpDown === true),
                         receivedBye: player.matches.some(match => match.bye === true),
                         avoid: player.matches.map(match => match.opponent).filter(opp => opp !== null),
