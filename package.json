@@ -2,6 +2,7 @@
   "name": "tournament-organizer",
   "version": "3.8.1",
   "description": "JavaScript library for running tournaments",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "browser": "./dist/index.module.js",
