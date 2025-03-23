@@ -34,4 +34,43 @@ describe('Manager', function () {
         assert.strictEqual(tournament.matches[2].player1.id, tournament.matches[0].player1.id, 'Final match player1 is the winner from round 1 first match');
         assert.strictEqual(tournament.matches[2].player2.id, tournament.matches[1].player1.id, 'Final match player2 is the winner from round 1 second match');
     });
+
+    it('can export tournament to store it somewhere, and reload it', function () {
+        const organizer = new TournamentOrganizer();
+
+        const tournament = organizer.createTournament('test', {
+            players: [
+                new Player('1', 'A'),
+                new Player('2', 'B'),
+                new Player('3', 'C'),
+                new Player('4', 'D'),
+            ],
+        });
+
+        tournament.start();
+
+        tournament.meta['tournamentMeta'] = 'tournamentMetaOk';
+        tournament.matches[0].meta['matchMeta'] = 'matchMetaOk';
+        tournament.players[0].meta['playerMeta'] = 'playerMetaOk';
+
+        assert.strictEqual(tournament.matches.length, 3);
+        assert.strictEqual(tournament.players.length, 4);
+        assert.strictEqual(tournament.meta['tournamentMeta'], 'tournamentMetaOk');
+        assert.strictEqual(tournament.matches[0].meta['matchMeta'], 'matchMetaOk');
+        assert.strictEqual(tournament.players[0].meta['playerMeta'], 'playerMetaOk');
+
+        // Simulate storing tournament to database or any storage
+        const json = JSON.stringify(tournament);
+
+        // Simulate reloading tournament from database or any storage
+        const organizer2 = new TournamentOrganizer();
+
+        const tournament2 = organizer2.reloadTournament(JSON.parse(json));
+
+        assert.strictEqual(tournament2.matches.length, 3);
+        assert.strictEqual(tournament2.players.length, 4);
+        assert.strictEqual(tournament2.meta['tournamentMeta'], 'tournamentMetaOk', 'Meta properties on tournament should not be lost');
+        assert.strictEqual(tournament2.matches[0].meta['matchMeta'], 'matchMetaOk', 'Meta properties on matches should not be lost');
+        assert.strictEqual(tournament2.players[0].meta['playerMeta'], 'playerMetaOk', 'Meta properties on players should not be lost');
+    });
 });
