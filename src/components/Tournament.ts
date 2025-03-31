@@ -193,6 +193,14 @@ export class Tournament {
                         }
                     };
                     this.matches.push(newMatch);
+                    if (newMatch.player1.id === null || newMatch.player2.id === null) {
+                        newMatch.values = {
+                            bye: true,
+                            player1: {
+                                win: Math.ceil(this.scoring.bestOf / 2)
+                            }
+                        };
+                    }
                     if (match.round === this.round) {
                         if (newMatch.player1.id === null || newMatch.player2.id === null) {
                             this.players.find(p => p.id === (newMatch.player1.id === null ? newMatch.player2.id : newMatch.player1.id)).addMatch({
@@ -201,12 +209,6 @@ export class Tournament {
                                 bye: true,
                                 win: Math.ceil(this.scoring.bestOf / 2)
                             });
-                            newMatch.values = {
-                                bye: true,
-                                player1: {
-                                    win: Math.ceil(this.scoring.bestOf / 2)
-                                }
-                            };
                         } else {
                             this.players.find(p => p.id === newMatch.player1.id).addMatch({
                                 id: id,
