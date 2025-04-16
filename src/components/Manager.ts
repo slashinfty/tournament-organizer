@@ -58,14 +58,16 @@ export class Manager {
             seating: tourney.seating,
             scoring: tourney.scoring,
             stageOne: tourney.stageOne,
-            stageTwo: tourney.stageTwo
+            stageTwo: tourney.stageTwo,
+            meta: tourney.meta
         };
         tourney.players.forEach(player => {
             const newPlayer = tournament.createPlayer(player.name, player.id);
             newPlayer.values = {
                 active: player.active,
                 value: player.value,
-                matches: player.matches
+                matches: player.matches,
+                meta: player.meta
             }
         });
         tourney.matches.forEach(match => {
@@ -75,7 +77,8 @@ export class Manager {
                 bye: match.bye,
                 player1: match.player1,
                 player2: match.player2,
-                path: match.path
+                path: match.path,
+                meta: match.meta
             }
             tournament.matches.push(newMatch);
         });
