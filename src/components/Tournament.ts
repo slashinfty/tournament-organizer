@@ -893,7 +893,8 @@ export class Tournament {
                 });
             }
         } else if (this.isElimination()) {
-            if (this.getCurrentFormat() === 'double-elimination' && match.getPath().win === null && match.getMatchNumber() === 1) {
+            if (this.getCurrentFormat() === 'double-elimination' && match.getPath().win === null && match.getMatchNumber() === 1 &&
+            this.getPlayer(match.getPlayer1().id).getMatches().filter(m => m.loss > m.win).length === this.getPlayer(match.getPlayer2().id).getMatches().filter(m => m.loss > m.win).length) {
                 let id: string;
                 do {
                     id = randomstring.generate({
