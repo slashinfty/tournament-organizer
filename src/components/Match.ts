@@ -8,69 +8,132 @@ import { SettableMatchValues } from "../interfaces/SettableMatchValues.js";
  */
 export class Match {
     /** Unique ID of the match */
-    id: MatchValues['id'];
+    #id: MatchValues['id'];
 
     /** Round number for the match */
-    round: MatchValues['round'];
+    #round: MatchValues['round'];
 
     /** Match number for the match */
-    match: MatchValues['match'];
+    #match: MatchValues['match'];
 
     /** If the match is active */
-    active: MatchValues['active'];
+    #active: MatchValues['active'];
 
-    /** If the match is a bye */
-    bye: MatchValues['bye'];
+    /** If the match is an assigned bye */
+    #bye: MatchValues['bye'];
+
+    /** If the match is an assigned loss */
+    #loss: MatchValues['loss'];
 
     /** Details for player one */
-    player1: MatchValues['player1'];
+    #player1: MatchValues['player1'];
 
     /** Details for player two */
-    player2: MatchValues['player2'];
+    #player2: MatchValues['player2'];
 
     /** Next match for winners and losers */
-    path: MatchValues['path'];
+    #path: MatchValues['path'];
 
     /** Any extra information */
-    meta: MatchValues['meta'];
+    #meta: MatchValues['meta'];
 
     /** Create a new match. */
     constructor(id: string, round: number, match: number) {
-        this.id = id;
-        this.round = round;
-        this.match = match;
-        this.active = false;
-        this.bye = false;
-        this.player1 = {
+        this.#id = id;
+        this.#round = round;
+        this.#match = match;
+        this.#active = false;
+        this.#bye = false;
+        this.#loss = false;
+        this.#player1 = {
             id: null,
             win: 0,
             loss: 0,
             draw: 0
         };
-        this.player2 = {
+        this.#player2 = {
             id: null,
             win: 0,
             loss: 0,
             draw: 0
         }
-        this.path = {
+        this.#path = {
             win: null,
             loss: null
         }
-        this.meta = {};
+        this.#meta = {};
     }
 
     /** Set information about the match (only changes in information need to be included in the object) */
-    set values(options: SettableMatchValues) {
+    set(options: SettableMatchValues) {
         if (options.hasOwnProperty('player1')) {
-            options.player1 = Object.assign(this.player1, options.player1);
+            options.player1 = Object.assign(this.#player1, options.player1);
         }
         if (options.hasOwnProperty('player2')) {
-            options.player2 = Object.assign(this.player2, options.player2);
+            options.player2 = Object.assign(this.#player2, options.player2);
         }
         if (options.hasOwnProperty('path')) {
-            options.path = Object.assign(this.path, options.path);
+            options.path = Object.assign(this.#path, options.path);
+        }
+        if (options.hasOwnProperty('meta')) {
+            options.meta = Object.assign(this.#meta, options.meta);
         }
         Object.assign(this, options);
+    }
+
+    getId(): MatchValues['id'] {
+        return this.#id;
+    }
+
+    getRoundNumber(): MatchValues['round'] {
+        return this.#round;
+    }
+
+    getMatchNumber(): MatchValues['match'] {
+        return this.#match;
+    }
+
+    isActive(): MatchValues['active'] {
+        return this.#active;
+    }
+
+    isPaired(): Boolean {
+        return this.#player1.id !== null && (this.#player2.id !== null || this.#bye || this.#loss);
+    }
+
+    hasEnded(): Boolean {
+        return this.#active &&
+            (this.#player1.win > 0 || this.#player1.loss > 0 || this.#player1.draw > 0) &&
+            (this.#player2.win > 0 || this.#player2.loss > 0 || this.#player2.draw > 0)
+    }
+
+    isBye(): MatchValues['bye'] {
+        return this.#bye;
+    }
+
+    getPlayer1(): MatchValues['player1'] {
+        return this.#player1;
+    }
+
+    getPlayer2(): MatchValues['player2'] {
+        return this.#player2;
+    }
+
+    getWinner(): MatchValues['player1'] | null {
+        if (this.hasEnded() === false) return null;
+        return this.#player1.win > this.#player2.win ? this.#player1 : this.#player2.win > this.#player1.win ? this.#player2 : null;
+    }
+
+    getLoser(): MatchValues['player1'] | null {
+        if (this.hasEnded() === false) return null;
+        return this.#player1.loss > this.#player2.loss ? this.#player1 : this.#player2.loss > this.#player1.loss ? this.#player2 : null;
+    }
+
+    getPath(): MatchValues['path'] {
+        return this.#path;
+    }
+
+    getMeta(): MatchValues['meta'] {
+        return this.#meta;
     }
 }

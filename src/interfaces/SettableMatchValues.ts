@@ -11,6 +11,7 @@ export interface SettableMatchValues {
     match?: number,
     active?: boolean,
     bye?: boolean,
+    loss?: boolean,
     player1?: {
         id?: string | null,
         win?: number,

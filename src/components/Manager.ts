@@ -33,14 +33,14 @@ export class Manager {
                     length: 12,
                     charset: 'alphanumeric'
                 });
-            } while (this.tournaments.some(t => t.id === ID));
+            } while (this.tournaments.some(t => t.getId() === ID));
         } else {
-            if (this.tournaments.some(t => t.id === ID)) {
-                throw `Tournament with ID ${ID} already exists`;
+            if (this.tournaments.some(t => t.getId() === ID)) {
+                throw new Error(`Tournament with ID ${ID} already exists`);
             }
         }
         const tournament = new Tournament(ID, name);
-        tournament.settings = settings;
+        tournament.set(settings);
         this.tournaments.push(tournament);
         return tournament;
     }
@@ -50,9 +50,9 @@ export class Manager {
      * @param tourney Plain object of a tournament
      * @returns The newly reloaded tournament
      */
-    reloadTournament(tourney: LoadableTournamentValues): Tournament {
+    loadTournament(tourney: LoadableTournamentValues): Tournament {
         const tournament = new Tournament(tourney.id, tourney.name);
-        tournament.settings = {
+        tournament.set({
             round: tourney.round,
             sorting: tourney.sorting,
             seating: tourney.seating,
@@ -60,31 +60,29 @@ export class Manager {
             stageOne: tourney.stageOne,
             stageTwo: tourney.stageTwo,
             meta: tourney.meta
-        };
+        });
         tourney.players.forEach(player => {
             const newPlayer = tournament.createPlayer(player.name, player.id);
-            newPlayer.values = {
+            newPlayer.set({
                 active: player.active,
                 value: player.value,
                 matches: player.matches,
                 meta: player.meta
-            }
+            });
         });
         tourney.matches.forEach(match => {
             const newMatch = new Match(match.id, match.round, match.match);
-            newMatch.values = {
+            newMatch.set({
                 active: match.active,
                 bye: match.bye,
                 player1: match.player1,
                 player2: match.player2,
                 path: match.path,
                 meta: match.meta
-            }
-            tournament.matches.push(newMatch);
+            });
+            tournament.set({ matches: [...tournament.getMatches(), newMatch] });
         });
-        tournament.settings = {
-            status: tourney.status
-        };
+        tournament.set({ status: tourney.status });
         this.tournaments.push(tournament);
         return tournament;
     }
@@ -97,12 +95,12 @@ export class Manager {
      * @returns The removed tournament
      */
     removeTournament(id: string): Tournament {
-        const tournament = this.tournaments.find(t => t.id === id);
+        const tournament = this.tournaments.find(t => t.getId() === id);
         if (tournament === undefined) {
-            throw `No tournament with ID ${id} exists`;
+            throw new Error(`No tournament with ID ${id} exists`);
         }
-        tournament.end();
-        this.tournaments.splice(this.tournaments.findIndex(t => t.id === tournament.id), 1);
+        tournament.endTournament();
+        this.tournaments.splice(this.tournaments.findIndex(t => t.getId() === tournament.getId()), 1);
         return tournament;
     }
 }
