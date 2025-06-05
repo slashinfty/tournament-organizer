@@ -102,7 +102,7 @@ export class Match {
     }
 
     hasEnded(): Boolean {
-        return this.#active &&
+        return !this.#active &&
             (this.#player1.win > 0 || this.#player1.loss > 0 || this.#player1.draw > 0) &&
             (this.#player2.win > 0 || this.#player2.loss > 0 || this.#player2.draw > 0)
     }
