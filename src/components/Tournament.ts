@@ -92,6 +92,9 @@ export class Tournament {
 
     /** Set tournament options (only changes in options need to be included in the object) */
     set(options: SettableTournamentValues) {
+        if (options.hasOwnProperty('matches')) {
+            options.matches = [...this.#matches, ...options.matches];
+        }
         if (options.hasOwnProperty('scoring')) {
             options.scoring = Object.assign(this.#scoring, options.scoring);
         }

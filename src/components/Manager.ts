@@ -70,6 +70,7 @@ export class Manager {
                 meta: player.meta
             });
         });
+        const newMatches = [];
         tourney.matches.forEach(match => {
             const newMatch = new Match(match.id, match.round, match.match);
             newMatch.set({
@@ -80,9 +81,12 @@ export class Manager {
                 path: match.path,
                 meta: match.meta
             });
-            tournament.set({ matches: [...tournament.getMatches(), newMatch] });
+            newMatches.push(newMatch);
         });
-        tournament.set({ status: tourney.status });
+        tournament.set({ 
+            matches: newMatches,
+            status: tourney.status
+        });
         this.tournaments.push(tournament);
         return tournament;
     }
