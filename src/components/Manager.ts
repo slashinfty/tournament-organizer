@@ -9,11 +9,23 @@ import { SettableTournamentValues } from '../interfaces/SettableTournamentValues
  */
 export class Manager {
     /** Array of all tournaments being managed. */
-    tournaments: Array<Tournament>;
+    #tournaments: Array<Tournament>;
 
     /** Create a tournament manager. */
     constructor() {
-        this.tournaments = [];
+        this.#tournaments = [];
+    }
+
+    getTournaments(): Array<Tournament> {
+        return this.#tournaments;
+    }
+
+    getTournament(id: string): Tournament {
+        const tournament = this.#tournaments.find(t => t.getId() === id);
+        if (tournament === undefined) {
+            throw new Error(`No tournament with ID ${id} exists`);
+        }
+        return tournament;
     }
 
     /**
@@ -33,15 +45,15 @@ export class Manager {
                     length: 12,
                     charset: 'alphanumeric'
                 });
-            } while (this.tournaments.some(t => t.getId() === ID));
+            } while (this.#tournaments.some(t => t.getId() === ID));
         } else {
-            if (this.tournaments.some(t => t.getId() === ID)) {
+            if (this.#tournaments.some(t => t.getId() === ID)) {
                 throw new Error(`Tournament with ID ${ID} already exists`);
             }
         }
         const tournament = new Tournament(ID, name);
         tournament.set(settings);
-        this.tournaments.push(tournament);
+        this.#tournaments.push(tournament);
         return tournament;
     }
 
@@ -87,7 +99,7 @@ export class Manager {
             matches: newMatches,
             status: tourney.status
         });
-        this.tournaments.push(tournament);
+        this.#tournaments.push(tournament);
         return tournament;
     }
 
@@ -99,12 +111,9 @@ export class Manager {
      * @returns The removed tournament
      */
     removeTournament(id: string): Tournament {
-        const tournament = this.tournaments.find(t => t.getId() === id);
-        if (tournament === undefined) {
-            throw new Error(`No tournament with ID ${id} exists`);
-        }
+        const tournament = this.getTournament(id);
         tournament.endTournament();
-        this.tournaments.splice(this.tournaments.findIndex(t => t.getId() === tournament.getId()), 1);
+        this.#tournaments.splice(this.#tournaments.findIndex(t => t.getId() === tournament.getId()), 1);
         return tournament;
     }
 }

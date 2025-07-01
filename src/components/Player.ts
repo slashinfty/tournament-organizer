@@ -37,13 +37,11 @@ export class Player {
 
     /** Set information about the player (only changes in information need to be included in the object). */
     set(options: SettablePlayerValues): void {
-        if (options.hasOwnProperty('matches')) {
-            options.matches = [...this.#matches, ...options.matches];
-        }
-        if (options.hasOwnProperty('meta')) {
-            options.meta = Object.assign(this.#meta, options.meta);
-        }
-        Object.assign(this, options);
+        if (options.hasOwnProperty('name')) this.#name = options.name;
+        if (options.hasOwnProperty('active')) this.#active = options.active;
+        if (options.hasOwnProperty('value')) this.#value = options.value;
+        if (options.hasOwnProperty('matches')) this.#matches = [...this.#matches, ...options.matches];
+        if (options.hasOwnProperty('meta')) Object.assign(this.#meta, options.meta);
     }
 
     getId(): PlayerValues['id'] {
@@ -68,6 +66,17 @@ export class Player {
 
     getMeta(): PlayerValues['meta'] {
         return this.#meta;
+    }
+
+    getValues(): PlayerValues {
+        return {
+            id: this.#id,
+            name: this.#name,
+            active: this.#active,
+            value: this.#value,
+            matches: this.#matches,
+            meta: this.#meta
+        }
     }
 
     /**

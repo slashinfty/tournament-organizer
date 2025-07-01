@@ -7,6 +7,7 @@ import { PlayerValues } from '../interfaces/PlayerValues.js';
 import { StandingsValues } from '../interfaces/StandingsValues.js';
 import { TournamentValues } from '../interfaces/TournamentValues.js';
 import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
+import { ExportedTournamentValues } from '../interfaces/ExportedTournamentValues.js';
 
 /** 
  * Class representing a tournament.
@@ -92,22 +93,16 @@ export class Tournament {
 
     /** Set tournament options (only changes in options need to be included in the object) */
     set(options: SettableTournamentValues) {
-        if (options.hasOwnProperty('matches')) {
-            options.matches = [...this.#matches, ...options.matches];
-        }
-        if (options.hasOwnProperty('scoring')) {
-            options.scoring = Object.assign(this.#scoring, options.scoring);
-        }
-        if (options.hasOwnProperty('stageOne')) {
-            options.stageOne = Object.assign(this.#stageOne, options.stageOne);
-        }
-        if (options.hasOwnProperty('stageTwo')) {
-            options.stageTwo = Object.assign(this.#stageTwo, options.stageTwo);
-        }
-        if (options.hasOwnProperty('meta')) {
-            options.meta = Object.assign(this.#meta, options.meta);
-        }
-        Object.assign(this, options);
+        if (options.hasOwnProperty('name')) this.#name = options.name;
+        if (options.hasOwnProperty('status')) this.#status = options.status;
+        if (options.hasOwnProperty('round')) this.#round = options.round;
+        if (options.hasOwnProperty('matches')) this.#matches = [...this.#matches, ...options.matches];
+        if (options.hasOwnProperty('seating')) this.#seating = options.seating;
+        if (options.hasOwnProperty('sorting')) this.#sorting = options.sorting;
+        if (options.hasOwnProperty('scoring')) Object.assign(this.#scoring, options.scoring);
+        if (options.hasOwnProperty('stageOne')) Object.assign(this.#stageOne, options.stageOne);
+        if (options.hasOwnProperty('stageTwo')) Object.assign(this.#stageTwo, options.stageTwo);
+        if (options.hasOwnProperty('meta')) Object.assign(this.#meta, options.meta);
     }
 
     #createMatches(players: Array<Player>) {
@@ -150,20 +145,22 @@ export class Tournament {
                     });
                     newMatches.push(newMatch);
                     if (newMatch.getPlayer1().id !== null && newMatch.getPlayer2().id !== null) {
-                        this.#players.find(p => p.getId() === match.player1.toString()).addMatch({
+                        this.getPlayer(match.player1.toString()).addMatch({
                             id: id,
-                            opponent: match.player2.toString()
+                            opponent: match.player2.toString(),
+                            seating: this.#seating ? 1 : null
                         });
-                        this.#players.find(p => p.getId() === match.player2.toString()).addMatch({
+                        this.getPlayer(match.player2.toString()).addMatch({
                             id: id,
-                            opponent: match.player1.toString()
+                            opponent: match.player1.toString(),
+                            seating: this.#seating ? -1 : null
                         });
                     }
                 });
                 newMatches.forEach(match => {
-                    const origMatch = matches.find(m => m.round === match.round && m.match === match.match);
-                    const winPath = origMatch.hasOwnProperty('win') ? newMatches.find(m => m.round === origMatch.win.round && m.match === origMatch.win.match).id : null;
-                    const lossPath = origMatch.hasOwnProperty('loss') ? newMatches.find(m => m.round === origMatch.loss.round && m.match === origMatch.loss.match).id : null;
+                    const origMatch = matches.find(m => m.round === match.getRoundNumber() && m.match === match.getMatchNumber());
+                    const winPath = origMatch.hasOwnProperty('win') ? newMatches.find(m => m.getRoundNumber() === origMatch.win.round && m.getMatchNumber() === origMatch.win.match).getId() : null;
+                    const lossPath = origMatch.hasOwnProperty('loss') ? newMatches.find(m => m.getRoundNumber() === origMatch.loss.round && m.getMatchNumber() === origMatch.loss.match).getId() : null;
                     match.values = {
                         path: {
                             win: winPath,
@@ -205,20 +202,22 @@ export class Tournament {
                     }
                     if (match.round === this.#round) {
                         if (newMatch.getPlayer1().id === null || newMatch.getPlayer2().id === null) {
-                            this.#players.find(p => p.getId() === (newMatch.getPlayer1().id === null ? newMatch.getPlayer2().id : newMatch.getPlayer1().id)).addMatch({
+                            this.getPlayer(newMatch.getPlayer1().id === null ? newMatch.getPlayer2().id : newMatch.getPlayer1().id).addMatch({
                                 id: id,
                                 opponent: null,
                                 bye: true,
                                 win: Math.ceil(this.#scoring.bestOf / 2)
                             });
                         } else {
-                            this.#players.find(p => p.getId() === newMatch.getPlayer1().id).addMatch({
+                            this.getPlayer(newMatch.getPlayer1().id).addMatch({
                                 id: id,
-                                opponent: newMatch.getPlayer2().id
+                                opponent: newMatch.getPlayer2().id,
+                                seating: this.#seating ? 1 : null
                             });
-                            this.#players.find(p => p.getId() === newMatch.getPlayer2().id).addMatch({
+                            this.getPlayer(newMatch.getPlayer2().id).addMatch({
                                 id: id,
-                                opponent: newMatch.getPlayer1().id
+                                opponent: newMatch.getPlayer1().id,
+                                seating: this.#seating ? -1 : null
                             });
                         }
                     }
@@ -443,6 +442,18 @@ export class Tournament {
         return parseInt(b.player.getId(), 36) - parseInt(a.player.getId(), 36);
     }
 
+    #eliminationSeating(p1: Player, p2: Player): [PlayerValues['id'], PlayerValues['id']] {
+        const p1SeatSum = p1.getMatches().reduce((sum, match) => sum + match.seating, 0);
+        const p1LastSeat = p1.getMatches().slice(-1)[0].seating;
+        const p2SeatSum = p2.getMatches().reduce((sum, match) => sum + match.seating, 0);
+        const p2LastSeat = p2.getMatches().slice(-1)[0].seating;
+        if ((p2LastSeat === -1 && p1LastSeat === 1) || (p2SeatSum < p1SeatSum)) {
+            return [p2.getId(), p1.getId()];
+        } else {
+            return [p1.getId(), p2.getId()];
+        }
+    }
+
     getId(): TournamentValues['id'] {
         return this.#id;
     }
@@ -527,14 +538,14 @@ export class Tournament {
         }
     }
 
-    getValues(): TournamentValues {
+    getValues(): ExportedTournamentValues {
         return {
             id: this.#id,
             name: this.#name,
             status: this.#status,
             round: this.#round,
-            players: this.#players,
-            matches: this.#matches,
+            players: this.#players.map(player => player.getValues()),
+            matches: this.#matches.map(match => match.getValues()),
             seating: this.#seating,
             sorting: this.#sorting,
             scoring: this.#scoring,
@@ -783,18 +794,20 @@ export class Tournament {
                         });
                         match.set({
                             bye: true,
-                            player1: { win: match.getPlayer2().id === null ? Math.ceil(this.#scoring.bestOf / 2) : 0  },
+                            player1: { win: match.getPlayer2().id === null ? Math.ceil(this.#scoring.bestOf / 2) : 0 },
                             player2: { win: match.getPlayer1().id === null ? Math.ceil(this.#scoring.bestOf / 2) : 0 }
                         })
                     } else {
                         match.set({ active: true });
                         this.getPlayer(match.getPlayer1().id).addMatch({
                             id: match.getId(),
-                            opponent: match.getPlayer2().id
+                            opponent: match.getPlayer2().id,
+                            seating: this.#seating ? 1 : null
                         });
                         this.getPlayer(match.getPlayer2().id).addMatch({
                             id: match.getId(),
-                            opponent: match.getPlayer1().id
+                            opponent: match.getPlayer1().id,
+                            seating: this.#seating ? -1 : null
                         });
                     }
                 });
@@ -850,26 +863,35 @@ export class Tournament {
             draw: draws
         });
         if (match.getPath().win !== null) {
-            const winID = player1Wins > player2Wins ? match.getPlayer1().id : match.getPlayer2().id;
             const winMatch = this.getMatch(match.getPath().win);
             if (winMatch.getPlayer1().id === null) {
                 winMatch.set({
-                    player1: { id: winID }
+                    player1: { id: match.getWinner().id }
                 });
             } else {
-                winMatch.set({
-                    player2: { id: winID }
-                })
+                if (this.#seating) {
+                    const [seat1, seat2] = this.#eliminationSeating(this.getPlayer(winMatch.getPlayer1().id), this.getPlayer(match.getWinner().id));
+                    winMatch.set({
+                        player1: { id: seat1 },
+                        player2: { id: seat2 }
+                    });
+                } else {
+                    winMatch.set({
+                        player2: { id: match.getWinner().id }
+                    });
+                }
             }
-            if (winMatch.getPlayer1().id !== null && winMatch.getPlayer2().id !== null) {
+            if (winMatch.getPlayer1().id !== null && winMatch.getPlayer2().id !== null) { 
                 winMatch.set({ active: true });
                 this.getPlayer(winMatch.getPlayer1().id).addMatch({
                     id: winMatch.getId(),
-                    opponent: winMatch.getPlayer2().id
+                    opponent: winMatch.getPlayer2().id,
+                    seating: this.#seating ? 1 : null
                 });
                 this.getPlayer(winMatch.getPlayer2().id).addMatch({
                     id: winMatch.getId(),
-                    opponent: winMatch.getPlayer1().id
+                    opponent: winMatch.getPlayer1().id,
+                    seating: this.#seating ? -1 : null
                 });
             }
         }
@@ -880,19 +902,29 @@ export class Tournament {
                     player1: { id: match.getLoser().id }
                 });
             } else {
-                lossMatch.set({
-                    player2: { id: match.getLoser().id }
-                });
+                if (this.#seating) {
+                    const [seat1, seat2] = this.#eliminationSeating(this.getPlayer(lossMatch.getPlayer1().id), this.getPlayer(match.getLoser().id));
+                    lossMatch.set({
+                        player1: { id: seat1 },
+                        player2: { id: seat2 }
+                    });
+                } else {
+                    lossMatch.set({
+                        player2: { id: match.getLoser().id }
+                    });
+                }
             }
             if (lossMatch.getPlayer1().id !== null && lossMatch.getPlayer2().id !== null) {
                 lossMatch.set({ active: true });
                 this.getPlayer(lossMatch.getPlayer1().id).addMatch({
                     id: lossMatch.getId(),
-                    opponent: lossMatch.getPlayer2().id
+                    opponent: lossMatch.getPlayer2().id,
+                    seating: this.#seating ? 1 : null
                 });
                 this.getPlayer(lossMatch.getPlayer2().id).addMatch({
                     id: lossMatch.getId(),
-                    opponent: lossMatch.getPlayer1().id
+                    opponent: lossMatch.getPlayer1().id,
+                    seating: this.#seating ? -1 : null
                 });
             }
         } else if (this.isElimination()) {
@@ -908,17 +940,19 @@ export class Tournament {
                 const newMatch = new Match(id, match.getRoundNumber(), 0);
                 newMatch.set({
                     active: true,
-                    player1: { id: match.getWinner().id },
-                    player2: { id: match.getLoser().id }
+                    player1: { id: match.getPlayer2().id },
+                    player2: { id: match.getPlayer1().id }
                 });
                 this.#matches.push(newMatch);
                 this.getPlayer(newMatch.getPlayer1().id).addMatch({
                     id: id,
-                    opponent: newMatch.getPlayer2().id
+                    opponent: newMatch.getPlayer2().id,
+                    seating: this.#seating ? 1 : null
                 });
                 this.getPlayer(newMatch.getPlayer2().id).addMatch({
                     id: id,
-                    opponent: newMatch.getPlayer1().id
+                    opponent: newMatch.getPlayer1().id,
+                    seating: this.#seating ? -1 : null
                 });
             } else {
                 this.getPlayer(match.getLoser().id).set({ active: false });

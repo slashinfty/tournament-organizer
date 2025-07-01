@@ -66,19 +66,15 @@ export class Match {
 
     /** Set information about the match (only changes in information need to be included in the object) */
     set(options: SettableMatchValues) {
-        if (options.hasOwnProperty('player1')) {
-            options.player1 = Object.assign(this.#player1, options.player1);
-        }
-        if (options.hasOwnProperty('player2')) {
-            options.player2 = Object.assign(this.#player2, options.player2);
-        }
-        if (options.hasOwnProperty('path')) {
-            options.path = Object.assign(this.#path, options.path);
-        }
-        if (options.hasOwnProperty('meta')) {
-            options.meta = Object.assign(this.#meta, options.meta);
-        }
-        Object.assign(this, options);
+        if (options.hasOwnProperty('round')) this.#round = options.round;
+        if (options.hasOwnProperty('match')) this.#match = options.match;
+        if (options.hasOwnProperty('active')) this.#active = options.active;
+        if (options.hasOwnProperty('bye')) this.#bye = options.bye;
+        if (options.hasOwnProperty('loss')) this.#loss = options.loss;
+        if (options.hasOwnProperty('player1')) Object.assign(this.#player1, options.player1);
+        if (options.hasOwnProperty('player2')) Object.assign(this.#player2, options.player2);
+        if (options.hasOwnProperty('path')) Object.assign(this.#path, options.path);
+        if (options.hasOwnProperty('meta')) Object.assign(this.#meta, options.meta);
     }
 
     getId(): MatchValues['id'] {
@@ -135,5 +131,20 @@ export class Match {
 
     getMeta(): MatchValues['meta'] {
         return this.#meta;
+    }
+
+    getValues(): MatchValues {
+        return {
+            id: this.#id,
+            round: this.#round,
+            match: this.#match,
+            active: this.#active,
+            bye: this.#bye,
+            loss: this.#loss,
+            player1: this.#player1,
+            player2: this.#player2,
+            path: this.#path,
+            meta: this.#meta
+        }
     }
 }
