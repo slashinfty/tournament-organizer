@@ -161,12 +161,12 @@ export class Tournament {
                     const origMatch = matches.find(m => m.round === match.getRoundNumber() && m.match === match.getMatchNumber());
                     const winPath = origMatch.hasOwnProperty('win') ? newMatches.find(m => m.getRoundNumber() === origMatch.win.round && m.getMatchNumber() === origMatch.win.match).getId() : null;
                     const lossPath = origMatch.hasOwnProperty('loss') ? newMatches.find(m => m.getRoundNumber() === origMatch.loss.round && m.getMatchNumber() === origMatch.loss.match).getId() : null;
-                    match.values = {
+                    match.set({
                         path: {
                             win: winPath,
                             loss: lossPath
                         }
-                    };
+                    });
                 });
                 this.#matches = [...this.#matches, ...newMatches];
                 break;
@@ -757,8 +757,8 @@ export class Tournament {
         if (this.#status !== 'stage-one') {
             throw new Error(`Can only advance rounds during stage one`);
         }
-        if (['single-elimination', 'double-elimination', 'stepladder'].includes(this.#stageOne.format)) {
-            throw new Error(`Can not advance rounds in elimination or stepladder`);
+        if (this.isElimination()) {
+            throw new Error(`Can not advance rounds in an elimination format`);
         }
         if (this.getActiveMatches().length > 0) {
             throw new Error(`Can not advance rounds with active matches`);
@@ -836,6 +836,9 @@ export class Tournament {
         const match = this.getMatch(id);
         if (player1Wins > Math.round(this.#scoring.bestOf / 2) || player2Wins > Math.round(this.#scoring.bestOf / 2)) {
             throw new Error(`Players can not win more than ${Math.round(this.#scoring.bestOf / 2)} games in a match`);
+        }
+        if (this.isElimination() && player1Wins === player2Wins) {
+            throw new Error('Players can not draw a match during an elimination format');
         }
         match.set({
             active: false,
@@ -970,6 +973,9 @@ export class Tournament {
      */
     clearResult(id: string): void {
         const match = this.getMatch(id);
+        if (match.isActive()) {
+            throw new Error('Can not clear an active match');
+        }
         match.set({
             active: true,
             player1: {
