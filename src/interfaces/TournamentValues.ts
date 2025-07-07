@@ -39,7 +39,8 @@ export interface TournamentValues {
     matches: Array<Match>,
     /**
      * If the order of players in matches matters.
-     * 
+     * If enabled, this will switch players' seating before a match begins
+     * to help balance color assignments and prevent players from playing the same color too often.
      * Initialized as `false`
      */
     seating: boolean,

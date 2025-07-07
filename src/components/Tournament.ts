@@ -33,7 +33,12 @@ export class Tournament {
     /** All matches of the tournament */
     #matches: TournamentValues['matches'];
 
-    /** If order of players in matches matters */
+    /**
+     * If the order of players in matches matters.
+     * If enabled, this will switch players' seating before a match begins
+     * to help balance color assignments and prevent players from playing the same color too often.
+     * Initialized as `false`
+     */
     #seating: TournamentValues['seating'];
 
     /** Sorting method, if players are rated/seeded */
