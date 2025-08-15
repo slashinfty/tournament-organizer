@@ -1,22 +1,24 @@
-A Node.js [ESM module](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) for organizing tournaments, written in TypeScript.
+All methods require `type: "module"` as this package is an ECMAScript module.
 
-## Installation
+## Using Node.js
+Installation:
 ```shell
 npm i tournament-organizer
 ```
 
-### Importing
-In Node.js:
+Importing:
 ```ts
 import TournamentOrganizer from 'tournament-organizer';
 ```
 
-In the browser:
+## Using a CDN
+Importing:
 ```js
-import TournamentOrganizer from "https://unpkg.com/tournament-organizer/dist/index.module.js";
+import TournamentOrganizer from "https://cdn.jsdelivr.net/npm/tournament-organizer/dist/index.js";
 ```
 
-The following imports are also available:
+## Additional Imports
+By default, the above import statements import the `Manager` class. There are additional imports available:
 ```ts
 import {
     Manager,
@@ -26,6 +28,7 @@ import {
 } from 'tournament-organizer/components';
 
 import {
+    ExportedTournamentValues,
     LoadableTournamentValues,
     MatchValues,
     PlayerValues,
@@ -36,6 +39,3 @@ import {
     TournamentValues
 } from 'tournament-organizer/interfaces';
 ```
-
-## About
-For more information, visit the [repository](https://github.com/slashinfty/tournament-organizer).
