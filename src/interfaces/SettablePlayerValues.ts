@@ -2,7 +2,7 @@ import { Player } from "../components/Player.js";
 import { PlayerValues } from "./PlayerValues.js";
 
 /**
- * All properties that can be set with {@link Player.values}.
+ * All properties that can be set with {@link Player.set}.
  * 
  * See {@link PlayerValues} for detailed descriptions of properties.
  */

@@ -2,7 +2,7 @@ import { Match } from "../components/Match.js";
 import { MatchValues } from "./MatchValues.js";
 
 /**
- * All properties that can be set with {@link Match.values}.
+ * All properties that can be set with {@link Match.set}.
  * 
  * See {@link MatchValues} for detailed descriptions of properties.
  */

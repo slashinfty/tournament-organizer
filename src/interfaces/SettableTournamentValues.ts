@@ -4,7 +4,7 @@ import { Tournament } from '../components/Tournament.js';
 import { TournamentValues } from './TournamentValues.js';
 
 /**
- * All properties that can be set with {@link Tournament.settings}.
+ * All properties that can be set with {@link Tournament.set}.
  * 
  * See {@link TournamentValues} for detailed descriptions of properties.
  */

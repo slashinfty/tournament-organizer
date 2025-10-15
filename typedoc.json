@@ -5,25 +5,7 @@
     "out": "docs",
     "githubPages": true,
     "tsconfig": "tsconfig.json",
-    "readme": "./docs-src/index.md",
-    "theme": "pages-plugin",
-    "pages": {
-        "groups": [
-            {
-                "title": "Documentation",
-                "pages": [
-                    {
-                        "title": "Tournament Organizer Install",
-                        "source": "./docs-src/install.md"
-                    },
-                    {
-                        "title": "Tournament Organizer Guide",
-                        "source": "./docs-src/guide.md"
-                    }
-                ]
-            }
-        ]
-    },
+    "readme": "./docs.md",
     "plugin": ["typedoc-plugin-merge-modules"],
     "mergeModulesRenameDefaults": true,
     "mergeModulesMergeMode": "project"

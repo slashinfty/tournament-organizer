@@ -1,27 +1,36 @@
 import randomstring from 'randomstring';
+
 import { LoadableTournamentValues } from '../interfaces/LoadableTournamentValues.js';
+import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
+
 import { Match } from './Match.js';
 import { Tournament } from './Tournament.js';
-import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
 
 /** 
  * Class representing a tournament manager.
  */
 export class Manager {
     /** Array of all tournaments being managed. */
-    #tournaments: Array<Tournament>;
+    private tournaments: Array<Tournament>;
 
     /** Create a tournament manager. */
     constructor() {
-        this.#tournaments = [];
+        this.tournaments = [];
     }
 
+    /**
+     * @returns An array of tournaments being managed
+     */
     getTournaments(): Array<Tournament> {
-        return this.#tournaments;
+        return this.tournaments;
     }
 
+    /**
+     * @param id The ID of a tournament
+     * @returns The tournament with the corresponding ID
+     */
     getTournament(id: string): Tournament {
-        const tournament = this.#tournaments.find(t => t.getId() === id);
+        const tournament = this.tournaments.find(t => t.getId() === id);
         if (tournament === undefined) {
             throw new Error(`No tournament with ID ${id} exists`);
         }
@@ -45,15 +54,15 @@ export class Manager {
                     length: 12,
                     charset: 'alphanumeric'
                 });
-            } while (this.#tournaments.some(t => t.getId() === ID));
+            } while (this.tournaments.some(t => t.getId() === ID));
         } else {
-            if (this.#tournaments.some(t => t.getId() === ID)) {
+            if (this.tournaments.some(t => t.getId() === ID)) {
                 throw new Error(`Tournament with ID ${ID} already exists`);
             }
         }
         const tournament = new Tournament(ID, name);
         tournament.set(settings);
-        this.#tournaments.push(tournament);
+        this.tournaments.push(tournament);
         return tournament;
     }
 
@@ -99,7 +108,7 @@ export class Manager {
             matches: newMatches,
             status: tourney.status
         });
-        this.#tournaments.push(tournament);
+        this.tournaments.push(tournament);
         return tournament;
     }
 
@@ -113,7 +122,7 @@ export class Manager {
     removeTournament(id: string): Tournament {
         const tournament = this.getTournament(id);
         tournament.endTournament();
-        this.#tournaments.splice(this.#tournaments.findIndex(t => t.getId() === tournament.getId()), 1);
+        this.tournaments.splice(this.tournaments.findIndex(t => t.getId() === tournament.getId()), 1);
         return tournament;
     }
 }
