@@ -1,6 +1,6 @@
 import { LoadableTournamentValues } from '../interfaces/LoadableTournamentValues.js';
-import { Tournament } from './Tournament.js';
 import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
+import { Tournament } from './Tournament.js';
 /**
  * Class representing a tournament manager.
  */

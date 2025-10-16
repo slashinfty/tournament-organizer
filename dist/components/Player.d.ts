@@ -43,6 +43,10 @@ export declare class Player {
      */
     getMatches(): PlayerValues['matches'];
     /**
+     * @returns An array of IDs of the player's opponents
+     */
+    getOpponents(): Array<PlayerValues['id']>;
+    /**
      * @returns Any extra information
      */
     getMeta(): PlayerValues['meta'];

@@ -79,6 +79,10 @@ export declare class Match {
      */
     getLoser(): MatchValues['player1'] | null;
     /**
+     * @returns If the match is a draw
+     */
+    isDraw(): Boolean;
+    /**
      * @returns The next match for winners and losers
      */
     getPath(): MatchValues['path'];

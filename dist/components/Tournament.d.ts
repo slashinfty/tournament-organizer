@@ -1,11 +1,11 @@
-import { Match } from './Match.js';
-import { Player } from './Player.js';
 import { MatchValues } from '../interfaces/MatchValues.js';
 import { PlayerValues } from '../interfaces/PlayerValues.js';
 import { StandingsValues } from '../interfaces/StandingsValues.js';
 import { TournamentValues } from '../interfaces/TournamentValues.js';
 import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
 import { ExportedTournamentValues } from '../interfaces/ExportedTournamentValues.js';
+import { Match } from './Match.js';
+import { Player } from './Player.js';
 /**
  * Class representing a tournament.
  *
@@ -59,6 +59,7 @@ export declare class Tournament {
      * Sort players by points and tiebreaks
      * @param a The points and tiebreaks of one player
      * @param b The points and tiebreaks of another player
+     * @param r The maximum round number to consider for versus tiebreaks
      * @returns A positive or negative number for sorting
      */
     private sortForStandings;

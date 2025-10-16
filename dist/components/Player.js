@@ -69,6 +69,12 @@ export class Player {
         return this.matches;
     }
     /**
+     * @returns An array of IDs of the player's opponents
+     */
+    getOpponents() {
+        return this.matches.map(match => match.opponent).filter(opp => opp !== null);
+    }
+    /**
      * @returns Any extra information
      */
     getMeta() {

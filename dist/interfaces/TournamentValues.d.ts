@@ -88,7 +88,7 @@ export interface TournamentValues {
         /**
          * Array of tiebreakers being used.
          */
-        tiebreaks: Array<'median buchholz' | 'solkoff' | 'sonneborn berger' | 'cumulative' | 'versus' | 'game win percentage' | 'opponent game win percentage' | 'opponent match win percentage' | 'opponent opponent match win percentage'>;
+        tiebreaks: Array<'median buchholz' | 'solkoff' | 'sonneborn berger' | 'cumulative' | 'neighboring points' | 'versus' | 'mutual versus' | 'game win percentage' | 'opponent game win percentage' | 'opponent match win percentage' | 'opponent opponent match win percentage'>;
     };
     /**
      * Details about the first stage of the tournament.
