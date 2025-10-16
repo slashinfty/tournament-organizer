@@ -1,3 +1,4 @@
+import { MatchValues } from '../interfaces/MatchValues.js';
 import { PlayerValues } from '../interfaces/PlayerValues.js';
 import { SettablePlayerValues } from '../interfaces/SettablePlayerValues.js';
 
@@ -77,6 +78,13 @@ export class Player {
      */
     getMatches(): PlayerValues['matches'] {
         return this.matches;
+    }
+
+    /**
+     * @returns An array of IDs of the player's opponents
+     */
+    getOpponents(): Array<PlayerValues['id']> {
+        return this.matches.map(match => match.opponent).filter(opp => opp !== null);
     }
 
     /**

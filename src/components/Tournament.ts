@@ -334,6 +334,7 @@ export class Tournament {
                 sonnebornBerger: 0,
                 cumulative: 0,
                 oppCumulative: 0,
+                neighboringPoints: 0,
                 matchWinPct: 0,
                 oppMatchWinPct: 0,
                 oppOppMatchWinPct: 0,
@@ -351,7 +352,7 @@ export class Tournament {
                 const matchB = this.getMatch(b.id);
                 return matchA.getRoundNumber() - matchB.getRoundNumber();
             });
-            player.player.getMatches().filter(match => this.matches.find(m => m.getId() === match.id && m.isActive() === false) && this.getMatch(match.id).getRoundNumber() <= maxRound).forEach(match => {
+            player.player.getMatches().filter(match => this.getMatches().find(m => m.getId() === match.id && m.isActive() === false) && this.getMatch(match.id).getRoundNumber() <= maxRound).forEach(match => {
                 player.gamePoints += ((match.bye ? this.getScoring().bye : this.getScoring().win) * match.win) + (this.getScoring().loss * match.loss) + (this.getScoring().draw * match.draw);
                 player.games += match.win + match.loss + match.draw;
                 player.matchPoints += match.bye ? this.getScoring().bye : match.win > match.loss ? this.getScoring().win : match.loss > match.win ? this.getScoring().loss : this.getScoring().draw;
@@ -367,6 +368,11 @@ export class Tournament {
             if (opponents.length === 0) {
                 continue;
             }
+            const neighbors = opponents.filter(opponent => opponent.matchPoints === player.matchPoints);
+            player.tiebreaks.neighboringPoints = neighbors.reduce((sum, opp) => {
+                const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
+                return match.win > match.loss ? this.getScoring().win : match.loss > match.win ? this.getScoring().loss : this.getScoring().draw;
+            }, 0);
             player.tiebreaks.oppMatchWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.matchWinPct, 0) / opponents.length;
             player.tiebreaks.oppGameWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.gameWinPct, 0) / opponents.length;
             const oppMatchPoints = opponents.map(opp => opp.matchPoints);
@@ -400,9 +406,10 @@ export class Tournament {
      * Sort players by points and tiebreaks
      * @param a The points and tiebreaks of one player
      * @param b The points and tiebreaks of another player
+     * @param r The maximum round number to consider for versus tiebreaks
      * @returns A positive or negative number for sorting
      */
-    private sortForStandings(a: StandingsValues, b: StandingsValues): number {
+    private sortForStandings(a: StandingsValues, b: StandingsValues, r: TournamentValues['round']): number {
         if (a.matchPoints !== b.matchPoints) {
             return b.matchPoints - a.matchPoints;
         }
@@ -426,8 +433,12 @@ export class Tournament {
                     } else if (a.tiebreaks.oppCumulative !== b.tiebreaks.oppCumulative) {
                         return b.tiebreaks.oppCumulative - a.tiebreaks.oppCumulative;
                     } else continue;
+                case 'neighboring points':
+                    if (a.tiebreaks.neighboringPoints !== b.tiebreaks.neighboringPoints) {
+                        return b.tiebreaks.neighboringPoints - a.tiebreaks.neighboringPoints;
+                    } else continue;
                 case 'versus':
-                    const matchIDs = a.player.getMatches().filter(m => m.opponent === b.player.getId()).map(m => m.id);
+                    const matchIDs = a.player.getMatches().filter(m => m.opponent === b.player.getId() && this.getMatch(m.id).getRoundNumber() <= r).map(m => m.id);
                     if (matchIDs.length === 0) {
                         continue;
                     }
@@ -435,6 +446,20 @@ export class Tournament {
                     const pointsB = b.player.getMatches().filter(m => matchIDs.some(i => i === m.id)).reduce((sum, curr) => curr.win > curr.loss ? sum + this.getScoring().win : curr.loss > curr.win ? sum + this.getScoring().loss : sum + this.getScoring().draw, 0);
                     if (pointsA !== pointsB) {
                         return pointsB - pointsA;
+                    } else continue;
+                case 'mutual versus':
+                    const opponentsA = a.player.getOpponents().filter(opp => this.getMatch(a.player.getMatches().find(match => match.opponent === opp).id).getRoundNumber() <= r);
+                    const opponentsB = b.player.getOpponents().filter(opp => this.getMatch(b.player.getMatches().find(match => match.opponent === opp).id).getRoundNumber() <= r);
+                    const sharedOpponents = opponentsA.filter(opp => opponentsB.includes(opp));
+                    if (sharedOpponents.length === 0) {
+                        continue;
+                    }
+                    const matchesA = sharedOpponents.map(opp => this.getMatch(a.player.getMatches().find(match => match.opponent === opp).id));
+                    const matchesB = sharedOpponents.map(opp => this.getMatch(b.player.getMatches().find(match => match.opponent === opp).id));
+                    const matchPointsA = matchesA.reduce((sum, match) => match.isDraw() ? sum + this.getScoring().draw : match.getWinner().id === a.player.getId() ? this.getScoring().win : this.getScoring().loss, 0);
+                    const matchPointsB = matchesB.reduce((sum, match) => match.isDraw() ? sum + this.getScoring().draw : match.getWinner().id === b.player.getId() ? this.getScoring().win : this.getScoring().loss, 0);
+                    if (matchPointsA !== matchPointsB) {
+                        return matchPointsB - matchPointsA;
                     } else continue;
                 case 'game win percentage':
                     if (a.tiebreaks.gameWinPct !== b.tiebreaks.gameWinPct) {
@@ -1211,10 +1236,10 @@ export class Tournament {
      * @returns A sorted array of players with scores and tiebreaker values
      */
     getStandings(): Array<StandingsValues> {
+        const maximumRound = Math.max(...this.getMatches().map(match => match.getRoundNumber()));
         if (['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageOne().format) || ((this.getStatus() === 'stage-two' || this.getStatus() === 'complete') && ['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageTwo().format))) {
-            const maximumRound = Math.max(...this.getMatches().map(match => match.getRoundNumber()));
             let players = this.computeScores(maximumRound);
-            const activePlayers = players.filter(p => p.player.isActive()).sort((a, b) => this.sortForStandings(a, b));
+            const activePlayers = players.filter(p => p.player.isActive()).sort((a, b) => this.sortForStandings(a, b, maximumRound));
             players = players.filter(p => !activePlayers.includes(p));
             let eliminatedPlayers = [];
             const initialEliminationRound = this.getMatches().filter(m => m.getPath().win !== null).reduce((min, match) => Math.min(min, match.getRoundNumber()), !['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageOne().format) ? this.getStageOne().rounds + 1 : maximumRound);
@@ -1236,13 +1261,13 @@ export class Tournament {
                     eliminationMatches.filter(m => m.getRoundNumber() === i && m.hasEnded()).sort((a, b) => a.getMatchNumber() - b.getMatchNumber()).forEach(match => {
                         currentRoundEliminatedPlayers.push(players.find(p => p.player.getId() === match.getLoser().id));
                     });
-                    eliminatedPlayers = [...eliminatedPlayers, ...currentRoundEliminatedPlayers.sort((a, b) => this.sortForStandings(a, b))];
+                    eliminatedPlayers = [...eliminatedPlayers, ...currentRoundEliminatedPlayers.sort((a, b) => this.sortForStandings(a, b, maximumRound))];
                 }
             }
             players = players.filter(p => !eliminatedPlayers.includes(p));
-            return [...activePlayers, ...eliminatedPlayers, ...players.sort((a, b) => this.sortForStandings(a, b))];
+            return [...activePlayers, ...eliminatedPlayers, ...players.sort((a, b) => this.sortForStandings(a, b, maximumRound))];
         } else {
-            return this.computeScores(Math.max(...this.matches.map(match => match.getRoundNumber()))).sort((a, b) => this.sortForStandings(a, b));
+            return this.computeScores(maximumRound).sort((a, b) => this.sortForStandings(a, b, maximumRound));
         }
     }
 
@@ -1254,7 +1279,7 @@ export class Tournament {
         if (this.getStatus() === 'stage-one') {
             return this.getStandings();
         } else {
-            return this.computeScores(this.getStageOne().rounds).sort((a, b) => this.sortForStandings(a, b));
+            return this.computeScores(this.getStageOne().rounds).sort((a, b) => this.sortForStandings(a, b, this.getStageOne().rounds));
         }
     }
 

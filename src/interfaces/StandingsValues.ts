@@ -33,7 +33,7 @@ export interface StandingsValues {
          */
         medianBuchholz: number,
         /**
-         * A player's Solkoff score.
+         * A player's Solkoff (or Buchholz) score.
          */
         solkoff: number,
         /**
@@ -48,6 +48,10 @@ export interface StandingsValues {
          * A player's cumulative opponent's score.
          */
         oppCumulative: number,
+        /**
+         * A player's match point total versus players with the same number of match points.
+         */
+        neighboringPoints: number,
         /**
          * A player's match win percentage.
          */

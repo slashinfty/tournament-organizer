@@ -1,3 +1,4 @@
+import { Manager } from '../components/Manager.js';
 import { MatchValues } from './MatchValues.js';
 import { PlayerValues } from './PlayerValues.js';
 import { TournamentValues } from './TournamentValues.js';

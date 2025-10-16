@@ -166,6 +166,13 @@ export class Match {
     }
 
     /**
+     * @return If the match is a draw
+     */
+    isDraw(): Boolean {
+        return this.hasEnded() === true && this.player1.win === this.player2.win && this.player1.loss === this.player2.loss;
+    }
+
+    /**
      * @returns The next match for winners and losers
      */
     getPath(): MatchValues['path'] {

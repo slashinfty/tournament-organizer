@@ -26,7 +26,9 @@ export interface SettableTournamentValues {
             'solkoff' |
             'sonneborn berger' |
             'cumulative' |
+            'neighboring points' |
             'versus' |
+            'mutual versus' |
             'game win percentage' |
             'opponent game win percentage' |
             'opponent match win percentage' |
