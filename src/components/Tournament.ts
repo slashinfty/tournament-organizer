@@ -1,4 +1,3 @@
-import randomstring from 'randomstring';
 import * as Pairings from 'tournament-pairings';
 
 import { MatchValues } from '../interfaces/MatchValues.js';
@@ -134,10 +133,7 @@ export class Tournament {
                 matches.forEach(match => {
                     let id: string;
                     do {
-                        id = randomstring.generate({
-                            length: 12,
-                            charset: 'alphanumeric'
-                        });
+                        id = crypto.randomUUID();
                     } while (this.matches.some(m => m.getId() === id) || newMatches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
                     newMatch.set({
@@ -182,10 +178,7 @@ export class Tournament {
                 matches.forEach(match => {
                     let id: string;
                     do {
-                        id = randomstring.generate({
-                            length: 12,
-                            charset: 'alphanumeric'
-                        });
+                        id = crypto.randomUUID();
                     } while (this.matches.some(m => m.getId() === id));
                     const newMatch = new Match(id, match.round, match.match);
                     newMatch.set({
@@ -233,10 +226,7 @@ export class Tournament {
                     matches.forEach(match => {
                         let id: string;
                         do {
-                            id = randomstring.generate({
-                                length: 12,
-                                charset: 'alphanumeric'
-                            });
+                            id = crypto.randomUUID();
                         } while (this.matches.some(m => m.getId() === id));
                         const newMatch = new Match(id, match.round, match.match);
                         newMatch.set({
@@ -266,10 +256,7 @@ export class Tournament {
                     matches.forEach(match => {
                         let id: string;
                         do {
-                            id = randomstring.generate({
-                                length: 12,
-                                charset: 'alphanumeric'
-                            });
+                            id = crypto.randomUUID();
                         } while (this.matches.some(m => m.getId() === id));
                         const newMatch = new Match(id, match.round, match.match);
                         newMatch.set({
@@ -705,10 +692,7 @@ export class Tournament {
         let ID = id;
         if (ID === undefined) {
             do {
-                ID = randomstring.generate({
-                    length: 12,
-                    charset: 'alphanumeric'
-                });
+                ID = crypto.randomUUID();
             } while (this.players.some(p => p.getId() === ID));
         } else {
             if (this.players.some(p => p.getId() === ID)) {
@@ -1067,10 +1051,7 @@ export class Tournament {
             this.getPlayer(match.getPlayer1().id).getMatches().filter(m => m.loss > m.win).length === this.getPlayer(match.getPlayer2().id).getMatches().filter(m => m.loss > m.win).length) {
                 let id: string;
                 do {
-                    id = randomstring.generate({
-                        length: 12,
-                        charset: 'alphanumeric'
-                    });
+                    id = crypto.randomUUID();
                 } while (this.matches.some(m => m.getId() === id));
                 const newMatch = new Match(id, match.getRoundNumber(), 2);
                 newMatch.set({
@@ -1181,10 +1162,7 @@ export class Tournament {
         }
         let byeID: string;
         do {
-            byeID = randomstring.generate({
-                length: 12,
-                charset: 'alphanumeric'
-            });
+            byeID = crypto.randomUUID();
         } while (this.matches.some(m => m.getId() === byeID));
         const bye = new Match(byeID, round, 0);
         bye.set({
@@ -1233,10 +1211,7 @@ export class Tournament {
         }
         let lossID: string;
         do {
-            lossID = randomstring.generate({
-                length: 12,
-                charset: 'alphanumeric'
-            });
+            lossID = crypto.randomUUID();
         } while (this.matches.some(m => m.getId() === lossID));
         const loss = new Match(lossID, round, 0);
         loss.set({
