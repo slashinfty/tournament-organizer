@@ -322,8 +322,11 @@ export class Tournament {
                 medianBuchholz: 0,
                 solkoff: 0,
                 sonnebornBerger: 0,
+                koyaSystem: 0,
                 cumulative: 0,
                 oppCumulative: 0,
+                earnedWins: 0,
+                earnedLosses: 0,
                 neighboringPoints: 0,
                 matchWinPct: 0,
                 oppMatchWinPct: 0,
@@ -347,6 +350,10 @@ export class Tournament {
                 player.games += match.win + match.loss + match.draw;
                 player.matchPoints += match.bye ? this.getScoring().bye : match.win > match.loss ? this.getScoring().win : match.loss > match.win ? this.getScoring().loss : this.getScoring().draw;
                 player.tiebreaks.cumulative += player.matchPoints;
+                if (match.bye === false && match.win > match.loss)
+                    player.tiebreaks.earnedWins++;
+                if (match.opponent !== null && match.loss > match.win)
+                    player.tiebreaks.earnedLosses--;
                 player.matches++;
             });
             player.tiebreaks.gameWinPct = player.games === 0 ? 0 : player.gamePoints / (player.games * this.getScoring().win);
@@ -361,7 +368,7 @@ export class Tournament {
             const neighbors = opponents.filter(opponent => opponent.matchPoints === player.matchPoints);
             player.tiebreaks.neighboringPoints = neighbors.reduce((sum, opp) => {
                 const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
-                return match.win > match.loss ? this.getScoring().win : match.loss > match.win ? this.getScoring().loss : this.getScoring().draw;
+                return match.win > match.loss ? sum + this.getScoring().win : match.loss > match.win ? sum + this.getScoring().loss : sum + this.getScoring().draw;
             }, 0);
             player.tiebreaks.oppMatchWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.matchWinPct, 0) / opponents.length;
             player.tiebreaks.oppGameWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.gameWinPct, 0) / opponents.length;
@@ -374,10 +381,17 @@ export class Tournament {
             }
             player.tiebreaks.sonnebornBerger = opponents.reduce((sum, opp) => {
                 const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
-                if (this.matches.find(m => m.getId() === match.id).isActive() === true) {
+                if (this.getMatches().find(m => m.getId() === match.id).isActive() === true) {
                     return sum;
                 }
-                return match.win > match.loss ? sum + opp.matchPoints : sum + (0.5 * opp.matchPoints);
+                return match.win > match.loss ? sum + opp.matchPoints : match.win < match.loss ? sum : sum + (0.5 * opp.matchPoints);
+            }, 0);
+            player.tiebreaks.koyaSystem = opponents.reduce((sum, opp) => {
+                const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
+                if (this.getMatches().find(m => m.getId() === match.id).isActive() === true || opp.matchPoints < 0.5 * this.getScoring().win * opp.matches) {
+                    return sum;
+                }
+                return match.win > match.loss ? sum + this.getScoring().win : match.win < match.loss ? sum + this.getScoring().loss : sum + this.getScoring().draw;
             }, 0);
             player.tiebreaks.oppCumulative = opponents.reduce((sum, opp) => sum + opp.tiebreaks.cumulative, 0);
         }
@@ -422,12 +436,30 @@ export class Tournament {
                     }
                     else
                         continue;
+                case 'koya system':
+                    if (a.tiebreaks.koyaSystem !== b.tiebreaks.koyaSystem) {
+                        return b.tiebreaks.koyaSystem - a.tiebreaks.koyaSystem;
+                    }
+                    else
+                        continue;
                 case 'cumulative':
                     if (a.tiebreaks.cumulative !== b.tiebreaks.cumulative) {
                         return b.tiebreaks.cumulative - a.tiebreaks.cumulative;
                     }
                     else if (a.tiebreaks.oppCumulative !== b.tiebreaks.oppCumulative) {
                         return b.tiebreaks.oppCumulative - a.tiebreaks.oppCumulative;
+                    }
+                    else
+                        continue;
+                case 'earned wins':
+                    if (a.tiebreaks.earnedWins !== b.tiebreaks.earnedWins) {
+                        return b.tiebreaks.earnedWins - a.tiebreaks.earnedWins;
+                    }
+                    else
+                        continue;
+                case 'earned losses':
+                    if (a.tiebreaks.earnedLosses !== b.tiebreaks.earnedLosses) {
+                        return b.tiebreaks.earnedLosses - a.tiebreaks.earnedLosses;
                     }
                     else
                         continue;

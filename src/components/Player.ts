@@ -1,4 +1,3 @@
-import { MatchValues } from '../interfaces/MatchValues.js';
 import { PlayerValues } from '../interfaces/PlayerValues.js';
 import { SettablePlayerValues } from '../interfaces/SettablePlayerValues.js';
 

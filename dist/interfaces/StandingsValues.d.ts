@@ -40,6 +40,10 @@ export interface StandingsValues {
          */
         sonnebornBerger: number;
         /**
+         *
+         */
+        koyaSystem: number;
+        /**
          * A player's cumulative score.
          */
         cumulative: number;
@@ -47,6 +51,14 @@ export interface StandingsValues {
          * A player's cumulative opponent's score.
          */
         oppCumulative: number;
+        /**
+         *
+         */
+        earnedWins: number;
+        /**
+         *
+         */
+        earnedLosses: number;
         /**
          * A player's match point total versus players with the same number of match points.
          */

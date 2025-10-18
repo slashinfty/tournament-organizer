@@ -93,7 +93,10 @@ export interface TournamentValues {
             'median buchholz' |
             'solkoff' |
             'sonneborn berger' |
+            'koya system' |
             'cumulative' |
+            'earned wins' |
+            'earned losses' |
             'neighboring points' |
             'versus' |
             'mutual versus' |

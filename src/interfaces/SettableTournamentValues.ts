@@ -25,7 +25,10 @@ export interface SettableTournamentValues {
             'median buchholz' |
             'solkoff' |
             'sonneborn berger' |
+            'koya system' |
             'cumulative' |
+            'earned wins' |
+            'earned losses' |
             'neighboring points' |
             'versus' |
             'mutual versus' |
