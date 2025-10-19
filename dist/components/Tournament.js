@@ -312,9 +312,12 @@ export class Tournament {
                 koyaSystem: 0,
                 cumulative: 0,
                 oppCumulative: 0,
-                earnedWins: 0,
-                earnedLosses: 0,
-                neighboringPoints: 0,
+                earnedMatchWins: 0,
+                earnedMatchLosses: 0,
+                earnedGameWins: 0,
+                earnedGameLosses: 0,
+                gameWinDifferential: 0,
+                neighborhoodRecord: 0,
                 matchWinPct: 0,
                 oppMatchWinPct: 0,
                 oppOppMatchWinPct: 0,
@@ -337,10 +340,15 @@ export class Tournament {
                 player.games += match.win + match.loss + match.draw;
                 player.matchPoints += match.bye ? this.getScoring().bye : match.win > match.loss ? this.getScoring().win : match.loss > match.win ? this.getScoring().loss : this.getScoring().draw;
                 player.tiebreaks.cumulative += player.matchPoints;
-                if (match.bye === false && match.win > match.loss)
-                    player.tiebreaks.earnedWins++;
-                if (match.opponent !== null && match.loss > match.win)
-                    player.tiebreaks.earnedLosses--;
+                if (match.opponent !== null) {
+                    if (match.win > match.loss)
+                        player.tiebreaks.earnedMatchWins++;
+                    if (match.loss > match.win)
+                        player.tiebreaks.earnedMatchLosses--;
+                    player.tiebreaks.earnedGameWins += match.win;
+                    player.tiebreaks.earnedGameLosses -= match.loss;
+                    player.tiebreaks.gameWinDifferential += match.win - match.loss;
+                }
                 player.matches++;
             });
             player.tiebreaks.gameWinPct = player.games === 0 ? 0 : player.gamePoints / (player.games * this.getScoring().win);
@@ -353,9 +361,9 @@ export class Tournament {
                 continue;
             }
             const neighbors = opponents.filter(opponent => opponent.matchPoints === player.matchPoints);
-            player.tiebreaks.neighboringPoints = neighbors.reduce((sum, opp) => {
+            player.tiebreaks.neighborhoodRecord = neighbors.reduce((sum, opp) => {
                 const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
-                return match.win > match.loss ? sum + this.getScoring().win : match.loss > match.win ? sum + this.getScoring().loss : sum + this.getScoring().draw;
+                return match.win > match.loss ? sum + 1 : match.loss > match.win ? sum - 1 : sum;
             }, 0);
             player.tiebreaks.oppMatchWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.matchWinPct, 0) / opponents.length;
             player.tiebreaks.oppGameWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.gameWinPct, 0) / opponents.length;
@@ -438,21 +446,39 @@ export class Tournament {
                     }
                     else
                         continue;
-                case 'earned wins':
-                    if (a.tiebreaks.earnedWins !== b.tiebreaks.earnedWins) {
-                        return b.tiebreaks.earnedWins - a.tiebreaks.earnedWins;
+                case 'earned match wins':
+                    if (a.tiebreaks.earnedMatchWins !== b.tiebreaks.earnedMatchWins) {
+                        return b.tiebreaks.earnedMatchWins - a.tiebreaks.earnedMatchWins;
                     }
                     else
                         continue;
-                case 'earned losses':
-                    if (a.tiebreaks.earnedLosses !== b.tiebreaks.earnedLosses) {
-                        return b.tiebreaks.earnedLosses - a.tiebreaks.earnedLosses;
+                case 'earned match losses':
+                    if (a.tiebreaks.earnedMatchLosses !== b.tiebreaks.earnedMatchLosses) {
+                        return b.tiebreaks.earnedMatchLosses - a.tiebreaks.earnedMatchLosses;
                     }
                     else
                         continue;
-                case 'neighboring points':
-                    if (a.tiebreaks.neighboringPoints !== b.tiebreaks.neighboringPoints) {
-                        return b.tiebreaks.neighboringPoints - a.tiebreaks.neighboringPoints;
+                case 'earned game wins':
+                    if (a.tiebreaks.earnedGameWins !== b.tiebreaks.earnedGameWins) {
+                        return b.tiebreaks.earnedGameWins - a.tiebreaks.earnedGameWins;
+                    }
+                    else
+                        continue;
+                case 'earned game losses':
+                    if (a.tiebreaks.earnedGameLosses !== b.tiebreaks.earnedGameLosses) {
+                        return b.tiebreaks.earnedGameLosses - a.tiebreaks.earnedGameLosses;
+                    }
+                    else
+                        continue;
+                case 'game win differential':
+                    if (a.tiebreaks.gameWinDifferential !== b.tiebreaks.gameWinDifferential) {
+                        return b.tiebreaks.gameWinDifferential - a.tiebreaks.gameWinDifferential;
+                    }
+                    else
+                        continue;
+                case 'neighborhood record':
+                    if (a.tiebreaks.neighborhoodRecord !== b.tiebreaks.neighborhoodRecord) {
+                        return b.tiebreaks.neighborhoodRecord - a.tiebreaks.neighborhoodRecord;
                     }
                     else
                         continue;

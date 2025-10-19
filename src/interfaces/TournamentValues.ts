@@ -95,9 +95,12 @@ export interface TournamentValues {
             'sonneborn berger' |
             'koya system' |
             'cumulative' |
-            'earned wins' |
-            'earned losses' |
-            'neighboring points' |
+            'earned match wins' |
+            'earned match losses' |
+            'earned game wins' |
+            'earned game losses' |
+            'game win differential' |
+            'neighborhood record' |
             'versus' |
             'mutual versus' |
             'game win percentage' |

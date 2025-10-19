@@ -68,12 +68,18 @@ The following tiebreakers are supported:
 * Cumulative
     * Sum of a player's running match points (progressive)
     * Includes a second tiebreaker of the sum of opponents' cumulative scores
-* Earned Wins
+* Earned Match Wins
     * Number of match wins earned against opponents
-* Earned Losses
+* Earned Match Losses
     * Number of match losses earned against opponents
+* Earned Game Wins
+    * Number of game wins earned against opponents
+* Earned Game Losses
+    * Number of game losses earned against opponents
+* Game Win Differential
+    * Difference between number of earned game wins and earned game losses
 * Neighboring Points
-    * Match points versus opponents with match points equal to the player's total match points
+    * Record versus opponents with match points equal to the player's total match points
 * Versus
     * Records versus opponents who are tied with the player
 * Mutual Versus

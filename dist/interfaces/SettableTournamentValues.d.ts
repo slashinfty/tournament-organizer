@@ -17,7 +17,7 @@ export interface SettableTournamentValues {
         draw?: number;
         loss?: number;
         bye?: number;
-        tiebreaks?: Array<'median buchholz' | 'solkoff' | 'sonneborn berger' | 'koya system' | 'cumulative' | 'earned wins' | 'earned losses' | 'neighboring points' | 'versus' | 'mutual versus' | 'game win percentage' | 'opponent game win percentage' | 'opponent match win percentage' | 'opponent opponent match win percentage'>;
+        tiebreaks?: Array<'median buchholz' | 'solkoff' | 'sonneborn berger' | 'koya system' | 'cumulative' | 'earned match wins' | 'earned match losses' | 'earned game wins' | 'earned game losses' | 'game win differential' | 'neighborhood record' | 'versus' | 'mutual versus' | 'game win percentage' | 'opponent game win percentage' | 'opponent match win percentage' | 'opponent opponent match win percentage'>;
     };
     stageOne?: {
         format?: 'single-elimination' | 'double-elimination' | 'stepladder' | 'swiss' | 'round-robin' | 'double-round-robin';

@@ -40,7 +40,7 @@ export interface StandingsValues {
          */
         sonnebornBerger: number;
         /**
-         *
+         * A player's Koya system score.
          */
         koyaSystem: number;
         /**
@@ -52,17 +52,29 @@ export interface StandingsValues {
          */
         oppCumulative: number;
         /**
-         *
+         * A player's number of earned match wins.
          */
-        earnedWins: number;
+        earnedMatchWins: number;
         /**
-         *
+         * A player's number of earned match losses.
          */
-        earnedLosses: number;
+        earnedMatchLosses: number;
         /**
-         * A player's match point total versus players with the same number of match points.
+         * A player's number of earned game wins.
          */
-        neighboringPoints: number;
+        earnedGameWins: number;
+        /**
+         * A player's number of earned game losses.
+         */
+        earnedGameLosses: number;
+        /**
+         * A player's difference between earned game wins and earned game losses.
+         */
+        gameWinDifferential: number;
+        /**
+         * A player's record versus players with the same number of match points.
+         */
+        neighborhoodRecord: number;
         /**
          * A player's match win percentage.
          */
