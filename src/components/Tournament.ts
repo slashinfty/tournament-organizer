@@ -411,12 +411,13 @@ export class Tournament {
 
     /**
      * Sort players by points and tiebreaks
+     * @hidden
      * @param a The points and tiebreaks of one player
      * @param b The points and tiebreaks of another player
      * @param r The maximum round number to consider for versus tiebreaks
      * @returns A positive or negative number for sorting
      */
-    private sortForStandings(a: StandingsValues, b: StandingsValues, r: TournamentValues['round']): number {
+    sortForStandings(a: StandingsValues, b: StandingsValues, r: TournamentValues['round']): number {
         if (a.matchPoints !== b.matchPoints) {
             return b.matchPoints - a.matchPoints;
         }
@@ -1268,9 +1269,12 @@ export class Tournament {
                 eliminationMatches.filter(m => m.getRoundNumber() === finalsRoundNumber).sort((a, b) => a.getMatchNumber() - b.getMatchNumber()).forEach(match => {
                     if (match.hasEnded()) {
                         const winningPlayer = players.find(p => p.player.getId() === match.getWinner().id);
+                        if (winningPlayer !== undefined && !eliminatedPlayers.includes(winningPlayer)) {
+                            eliminatedPlayers.push(winningPlayer);
+                        }
                         const losingPlayer = players.find(p => p.player.getId() === match.getLoser().id);
-                        if (!eliminatedPlayers.includes(winningPlayer) && !eliminatedPlayers.includes(losingPlayer)) {
-                            eliminatedPlayers.push(winningPlayer, losingPlayer);
+                        if (losingPlayer !== undefined && !eliminatedPlayers.includes(losingPlayer)) {
+                            eliminatedPlayers.push(losingPlayer);
                         }
                     }
                 });
@@ -1307,7 +1311,7 @@ export class Tournament {
      */
     endTournament(): void {
         this.status = 'complete';
-        this.players.forEach(player => player.set({ active: false }));
-        this.matches.forEach(match => match.set({ active: false }));
+        this.getPlayers().forEach(player => player.set({ active: false }));
+        this.getMatches().forEach(match => match.set({ active: false }));
     }
 }

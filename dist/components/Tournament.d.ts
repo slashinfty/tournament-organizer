@@ -57,12 +57,13 @@ export declare class Tournament {
     private computeScores;
     /**
      * Sort players by points and tiebreaks
+     * @hidden
      * @param a The points and tiebreaks of one player
      * @param b The points and tiebreaks of another player
      * @param r The maximum round number to consider for versus tiebreaks
      * @returns A positive or negative number for sorting
      */
-    private sortForStandings;
+    sortForStandings(a: StandingsValues, b: StandingsValues, r: TournamentValues['round']): number;
     /**
      * Adjusts seating for elimination if seating matters
      * @param p1 First player in a match
