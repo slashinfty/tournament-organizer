@@ -1,3 +1,4 @@
+import { ExportedTournamentValues } from './ExportedTournamentValues.js';
 import { LoadableTournamentValues } from './LoadableTournamentValues.js';
 import { MatchValues } from './MatchValues.js';
 import { PlayerValues } from './PlayerValues.js';
@@ -8,6 +9,7 @@ import { StandingsValues } from './StandingsValues.js';
 import { TournamentValues } from './TournamentValues.js';
 
 export {
+    ExportedTournamentValues,
     LoadableTournamentValues,
     MatchValues,
     PlayerValues,

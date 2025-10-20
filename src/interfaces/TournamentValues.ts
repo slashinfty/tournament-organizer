@@ -1,5 +1,5 @@
-import { Player } from '../components/Player.js';
 import { Match } from '../components/Match.js';
+import { Player } from '../components/Player.js';
 
 /**
  * Properties of tournaments
@@ -93,8 +93,16 @@ export interface TournamentValues {
             'median buchholz' |
             'solkoff' |
             'sonneborn berger' |
+            'koya system' |
             'cumulative' |
+            'earned match wins' |
+            'earned match losses' |
+            'earned game wins' |
+            'earned game losses' |
+            'game win differential' |
+            'neighborhood record' |
             'versus' |
+            'mutual versus' |
             'game win percentage' |
             'opponent game win percentage' |
             'opponent match win percentage' |

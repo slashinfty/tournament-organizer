@@ -1,10 +1,14 @@
-import randomstring from 'randomstring';
 import * as Pairings from 'tournament-pairings';
-import { Match } from './Match.js';
-import { Player } from './Player.js';
+
+import { MatchValues } from '../interfaces/MatchValues.js';
+import { PlayerValues } from '../interfaces/PlayerValues.js';
 import { StandingsValues } from '../interfaces/StandingsValues.js';
 import { TournamentValues } from '../interfaces/TournamentValues.js';
 import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
+import { ExportedTournamentValues } from '../interfaces/ExportedTournamentValues.js';
+
+import { Match } from './Match.js';
+import { Player } from './Player.js';
 
 /** 
  * Class representing a tournament.
@@ -13,40 +17,40 @@ import { SettableTournamentValues } from '../interfaces/SettableTournamentValues
  */
 export class Tournament {
     /** Unique ID of the tournament */
-    id: TournamentValues['id'];
+    private id: TournamentValues['id'];
 
     /** Name of the tournament */
-    name: TournamentValues['name'];
+    private name: TournamentValues['name'];
 
     /** Current state of the tournament */
-    status: TournamentValues['status'];
+    private status: TournamentValues['status'];
 
     /** Current round of the tournament */
-    round: TournamentValues['round'];
+    private round: TournamentValues['round'];
 
     /** All players in the tournament */
-    players: TournamentValues['players'];
+    private players: TournamentValues['players'];
 
     /** All matches of the tournament */
-    matches: TournamentValues['matches'];
+    private matches: TournamentValues['matches'];
 
     /** If order of players in matches matters */
-    seating: TournamentValues['seating'];
+    private seatings: TournamentValues['seating'];
 
     /** Sorting method, if players are rated/seeded */
-    sorting: TournamentValues['sorting'];
+    private sorting: TournamentValues['sorting'];
 
     /** Details regarding scoring */
-    scoring: TournamentValues['scoring'];
+    private scoring: TournamentValues['scoring'];
 
     /** Details regarding the tournament */
-    stageOne: TournamentValues['stageOne'];
+    private stageOne: TournamentValues['stageOne'];
 
     /** Details regarding playoffs */
-    stageTwo: TournamentValues['stageTwo'];
+    private stageTwo: TournamentValues['stageTwo'];
 
     /** Any extra information */
-    meta: TournamentValues['meta'];
+    private meta: TournamentValues['meta'];
 
     /**
      * Create a new tournament.
@@ -60,7 +64,7 @@ export class Tournament {
         this.round = 0;
         this.players = [];
         this.matches = [];
-        this.seating = false;
+        this.seatings = false;
         this.sorting = 'none';
         this.scoring = {
             bestOf: 1,
@@ -89,27 +93,25 @@ export class Tournament {
     }
 
     /** Set tournament options (only changes in options need to be included in the object) */
-    set settings(options: SettableTournamentValues) {
-        if (options.hasOwnProperty('players')) {
-            options.players = [...this.players, ...options.players];
-        }
-        if (options.hasOwnProperty('matches')) {
-            options.matches = [...this.matches, ...options.matches];
-        }
-        if (options.hasOwnProperty('scoring')) {
-            options.scoring = Object.assign(this.scoring, options.scoring);
-        }
-        if (options.hasOwnProperty('stageOne')) {
-            options.stageOne = Object.assign(this.stageOne, options.stageOne);
-        }
-        if (options.hasOwnProperty('stageTwo')) {
-            options.stageTwo = Object.assign(this.stageTwo, options.stageTwo);
-        }
-        Object.assign(this, options);
+    set(options: SettableTournamentValues) {
+        if (options.hasOwnProperty('name')) this.name = options.name;
+        if (options.hasOwnProperty('status')) this.status = options.status;
+        if (options.hasOwnProperty('round')) this.round = options.round;
+        if (options.hasOwnProperty('matches')) this.matches = [...this.matches, ...options.matches];
+        if (options.hasOwnProperty('seating')) this.seatings = options.seating;
+        if (options.hasOwnProperty('sorting')) this.sorting = options.sorting;
+        if (options.hasOwnProperty('scoring')) Object.assign(this.scoring, options.scoring);
+        if (options.hasOwnProperty('stageOne')) Object.assign(this.stageOne, options.stageOne);
+        if (options.hasOwnProperty('stageTwo')) Object.assign(this.stageTwo, options.stageTwo);
+        if (options.hasOwnProperty('meta')) Object.assign(this.meta, options.meta);
     }
 
-    #createMatches(players: Array<Player>) {
-        const format = this.status === 'stage-one' ? this.stageOne.format : this.stageTwo.format
+    /**
+     * Create matches using the pairings library
+     * @param players The players who can be assigned to new matches
+     */
+    private createMatches(players: Array<Player>): void {
+        const format = this.status === 'stage-one' ? this.getStageOne().format : this.getStageTwo().format
         let matches = [];
         switch (format) {
             case 'single-elimination':
@@ -117,27 +119,24 @@ export class Tournament {
             case 'stepladder':
                 if (format === 'single-elimination') {
                     if (this.status === 'stage-one') {
-                        matches = Pairings.SingleElimination(players.map(p => p.id), this.round, this.stageOne.consolation, this.sorting !== 'none');
+                        matches = Pairings.SingleElimination(players.map(p => p.getId()), this.round, this.getStageOne().consolation, this.getSorting() !== 'none');
                     } else {
-                        matches = Pairings.SingleElimination(players.map(p => p.id), this.round, this.stageTwo.consolation, true);
+                        matches = Pairings.SingleElimination(players.map(p => p.getId()), this.round, this.getStageTwo().consolation, true);
                     }
                     
                 } else if (format === 'double-elimination') {
-                    matches = Pairings.DoubleElimination(players.map(p => p.id), this.round, this.status === 'stage-one' ? this.sorting !== 'none' : true);
+                    matches = Pairings.DoubleElimination(players.map(p => p.getId()), this.round, this.status === 'stage-one' ? this.getSorting() !== 'none' : true);
                 } else if (format === 'stepladder') {
-                    matches = Pairings.Stepladder(players.map(p => p.id), this.round, this.status === 'stage-one' ? this.sorting !== 'none' : true);
+                    matches = Pairings.Stepladder(players.map(p => p.getId()), this.round, this.status === 'stage-one' ? this.getSorting() !== 'none' : true);
                 }
                 const newMatches = [];
                 matches.forEach(match => {
                     let id: string;
                     do {
-                        id = randomstring.generate({
-                            length: 12,
-                            charset: 'alphanumeric'
-                        });
-                    } while (this.matches.some(m => m.id === id) || newMatches.some(m => m.id === id));
+                        id = crypto.randomUUID();
+                    } while (this.matches.some(m => m.getId() === id) || newMatches.some(m => m.id === id));
                     const newMatch = new Match(id, match.round, match.match);
-                    newMatch.values = {
+                    newMatch.set({
                         active: match.player1 !== null && match.player2 !== null,
                         player1: {
                             id: match.player1 === null ? null : match.player1.toString()
@@ -145,45 +144,44 @@ export class Tournament {
                         player2: {
                             id: match.player2 === null ? null : match.player2.toString()
                         }
-                    };
+                    });
                     newMatches.push(newMatch);
-                    if (newMatch.player1.id !== null && newMatch.player2.id !== null) {
-                        this.players.find(p => p.id === match.player1.toString()).addMatch({
+                    if (newMatch.getPlayer1().id !== null && newMatch.getPlayer2().id !== null) {
+                        this.getPlayer(match.player1.toString()).addMatch({
                             id: id,
-                            opponent: match.player2.toString()
+                            opponent: match.player2.toString(),
+                            seating: this.seatings ? 1 : null
                         });
-                        this.players.find(p => p.id === match.player2.toString()).addMatch({
+                        this.getPlayer(match.player2.toString()).addMatch({
                             id: id,
-                            opponent: match.player1.toString()
+                            opponent: match.player1.toString(),
+                            seating: this.seatings ? -1 : null
                         });
                     }
                 });
                 newMatches.forEach(match => {
-                    const origMatch = matches.find(m => m.round === match.round && m.match === match.match);
-                    const winPath = origMatch.hasOwnProperty('win') ? newMatches.find(m => m.round === origMatch.win.round && m.match === origMatch.win.match).id : null;
-                    const lossPath = origMatch.hasOwnProperty('loss') ? newMatches.find(m => m.round === origMatch.loss.round && m.match === origMatch.loss.match).id : null;
-                    match.values = {
+                    const origMatch = matches.find(m => m.round === match.getRoundNumber() && m.match === match.getMatchNumber());
+                    const winPath = origMatch.hasOwnProperty('win') ? newMatches.find(m => m.getRoundNumber() === origMatch.win.round && m.getMatchNumber() === origMatch.win.match).getId() : null;
+                    const lossPath = origMatch.hasOwnProperty('loss') ? newMatches.find(m => m.getRoundNumber() === origMatch.loss.round && m.getMatchNumber() === origMatch.loss.match).getId() : null;
+                    match.set({
                         path: {
                             win: winPath,
                             loss: lossPath
                         }
-                    };
+                    });
                 });
                 this.matches = [...this.matches, ...newMatches];
                 break;
             case 'round-robin':
             case 'double-round-robin':
-                matches = Pairings.RoundRobin(players.map(p => p.id), this.round, this.status === 'stage-one' ? this.sorting !== 'none' : true);
+                matches = Pairings.RoundRobin(players.map(p => p.getId()), this.round, this.status === 'stage-one' ? this.getSorting() !== 'none' : true);
                 matches.forEach(match => {
                     let id: string;
                     do {
-                        id = randomstring.generate({
-                            length: 12,
-                            charset: 'alphanumeric'
-                        });
-                    } while (this.matches.some(m => m.id === id));
+                        id = crypto.randomUUID();
+                    } while (this.matches.some(m => m.getId() === id));
                     const newMatch = new Match(id, match.round, match.match);
-                    newMatch.values = {
+                    newMatch.set({
                         active: match.round === this.round && match.player1 !== null && match.player2 !== null,
                         player1: {
                             id: match.player1 === null ? null : match.player1.toString()
@@ -191,48 +189,47 @@ export class Tournament {
                         player2: {
                             id: match.player2 === null ? null : match.player2.toString()
                         }
-                    };
+                    });
                     this.matches.push(newMatch);
-                    if (newMatch.player1.id === null || newMatch.player2.id === null) {
-                        newMatch.values = {
+                    if (newMatch.getPlayer1().id === null || newMatch.getPlayer2().id === null) {
+                        newMatch.set({
                             bye: true,
                             player1: {
-                                win: Math.ceil(this.scoring.bestOf / 2)
+                                win: Math.ceil(this.getScoring().bestOf / 2)
                             }
-                        };
+                        });
                     }
                     if (match.round === this.round) {
-                        if (newMatch.player1.id === null || newMatch.player2.id === null) {
-                            this.players.find(p => p.id === (newMatch.player1.id === null ? newMatch.player2.id : newMatch.player1.id)).addMatch({
+                        if (newMatch.getPlayer1().id === null || newMatch.getPlayer2().id === null) {
+                            this.getPlayer(newMatch.getPlayer1().id === null ? newMatch.getPlayer2().id : newMatch.getPlayer1().id).addMatch({
                                 id: id,
                                 opponent: null,
                                 bye: true,
-                                win: Math.ceil(this.scoring.bestOf / 2)
+                                win: Math.ceil(this.getScoring().bestOf / 2)
                             });
                         } else {
-                            this.players.find(p => p.id === newMatch.player1.id).addMatch({
+                            this.getPlayer(newMatch.getPlayer1().id).addMatch({
                                 id: id,
-                                opponent: newMatch.player2.id
+                                opponent: newMatch.getPlayer2().id,
+                                seating: this.seatings ? 1 : null
                             });
-                            this.players.find(p => p.id === newMatch.player2.id).addMatch({
+                            this.getPlayer(newMatch.getPlayer2().id).addMatch({
                                 id: id,
-                                opponent: newMatch.player1.id
+                                opponent: newMatch.getPlayer1().id,
+                                seating: this.seatings ? -1 : null
                             });
                         }
                     }
                 });
                 if (format === 'double-round-robin') {
-                    matches = Pairings.RoundRobin(players.map(p => p.id), this.matches.reduce((max, curr) => Math.max(max, curr.round), 0) + 1, this.status === 'stage-one' ? this.sorting !== 'none' : true);
+                    matches = Pairings.RoundRobin(players.map(p => p.getId()), Math.max(...this.getMatches().map(match => match.getRoundNumber())) + 1, this.status === 'stage-one' ? this.getSorting() !== 'none' : true);
                     matches.forEach(match => {
                         let id: string;
                         do {
-                            id = randomstring.generate({
-                                length: 12,
-                                charset: 'alphanumeric'
-                            });
-                        } while (this.matches.some(m => m.id === id));
+                            id = crypto.randomUUID();
+                        } while (this.matches.some(m => m.getId() === id));
                         const newMatch = new Match(id, match.round, match.match);
-                        newMatch.values = {
+                        newMatch.set({
                             active: match.round === this.round,
                             player1: {
                                 id: match.player2 === null ? null : match.player2.toString()
@@ -240,32 +237,29 @@ export class Tournament {
                             player2: {
                                 id: match.player1 === null ? null : match.player1.toString()
                             }
-                        };
+                        });
                         this.matches.push(newMatch);
                     });
                 }
                 break;
                 case 'swiss':
                     const playerArray = players.map(player => ({
-                        id: player.id,
-                        score: player.matches.reduce((sum, match) => sum + (match.bye ? this.scoring.bye : match.win > match.loss ? this.scoring.win : match.loss > match.win ? this.scoring.loss : this.scoring.draw), 0),
-                        pairedUpDown: player.matches.some(match => match.pairUpDown === true),
-                        receivedBye: player.matches.some(match => match.bye === true),
-                        avoid: player.matches.map(match => match.opponent).filter(opp => opp !== null),
-                        seating: player.matches.map(match => match.seating).filter(seat => seat !== null),
-                        rating: player.value
+                        id: player.getId(),
+                        score: player.getMatches().reduce((sum, match) => sum + (match.bye ? this.getScoring().bye : match.win > match.loss ? this.getScoring().win : match.loss > match.win ? this.getScoring().loss : this.getScoring().draw), 0),
+                        pairedUpDown: player.getMatches().some(match => match.pairUpDown === true),
+                        receivedBye: player.getMatches().some(match => match.bye === true),
+                        avoid: player.getMatches().map(match => match.opponent).filter(opp => opp !== null),
+                        seating: player.getMatches().map(match => match.seating).filter(seat => seat !== null),
+                        rating: player.getValue()
                     }));
-                    matches = Pairings.Swiss(playerArray, this.round, this.sorting !== 'none', this.seating);
+                    matches = Pairings.Swiss(playerArray, this.round, this.getSorting() !== 'none', this.seatings);
                     matches.forEach(match => {
                         let id: string;
                         do {
-                            id = randomstring.generate({
-                                length: 12,
-                                charset: 'alphanumeric'
-                            });
-                        } while (this.matches.some(m => m.id === id));
+                            id = crypto.randomUUID();
+                        } while (this.matches.some(m => m.getId() === id));
                         const newMatch = new Match(id, match.round, match.match);
-                        newMatch.values = {
+                        newMatch.set({
                             active: match.player2 !== null,
                             player1: {
                                 id: match.player1.toString()
@@ -273,43 +267,48 @@ export class Tournament {
                             player2: {
                                 id: match.player2 === null ? null : match.player2.toString()
                             }
-                        };
+                        });
                         this.matches.push(newMatch);
-                        if (newMatch.player2.id !== null) {
-                            const player1Points = this.players.find(p => p.id === newMatch.player1.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
-                            const player2Points = this.players.find(p => p.id === newMatch.player2.id).matches.reduce((sum, curr) => this.matches.find(m => m.id === curr.id).active === true ? sum : curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
-                            this.players.find(p => p.id === match.player1.toString()).addMatch({
+                        if (newMatch.getPlayer2().id !== null) {
+                            const player1Points = this.getPlayer(newMatch.getPlayer1().id).getMatches().reduce((sum, curr) => this.getMatch(curr.id).isActive() === true ? sum : curr.win > curr.loss ? sum + this.getScoring().win : curr.loss > curr.win ? sum + this.getScoring().loss : sum + this.getScoring().draw, 0);
+                            const player2Points = this.getPlayer(newMatch.getPlayer2().id).getMatches().reduce((sum, curr) => this.getMatch(curr.id).isActive() === true ? sum : curr.win > curr.loss ? sum + this.getScoring().win : curr.loss > curr.win ? sum + this.getScoring().loss : sum + this.getScoring().draw, 0);
+                            this.getPlayer(match.player1.toString()).addMatch({
                                 id: id,
                                 opponent: match.player2.toString(),
                                 pairUpDown: player1Points !== player2Points,
-                                seating: this.seating ? 1 : null
+                                seating: this.seatings ? 1 : null
                             });
-                            this.players.find(p => p.id === match.player2.toString()).addMatch({
+                            this.getPlayer(match.player2.toString()).addMatch({
                                 id: id,
                                 opponent: match.player1.toString(),
                                 pairUpDown: player1Points !== player2Points,
-                                seating: this.seating ? -1 : null
+                                seating: this.seatings ? -1 : null
                             });
                         } else {
-                            this.players.find(p => p.id === match.player1.toString()).addMatch({
+                            this.getPlayer(match.player1.toString()).addMatch({
                                 id: id,
                                 opponent: null,
                                 bye: true,
-                                win: Math.ceil(this.scoring.bestOf / 2)
+                                win: Math.ceil(this.getScoring().bestOf / 2)
                             });
-                            newMatch.values = {
+                            newMatch.set({
                                 bye: true,
                                 player1: {
-                                    win: Math.ceil(this.scoring.bestOf / 2)
+                                    win: Math.ceil(this.getScoring().bestOf / 2)
                                 }
-                            };
+                            });
                         }
                     });
                 break;
         }
     }
 
-    #computeScores(): Array<StandingsValues> {
+    /**
+     * Compute points and tiebreakers
+     * @param maxRound The maximum round for scores and tiebreaks to be computed through
+     * @returns A standings array
+     */
+    private computeScores(maxRound: number): Array<StandingsValues> {
         const playerScores = this.players.map(player => ({
             player: player,
             gamePoints: 0,
@@ -320,8 +319,15 @@ export class Tournament {
                 medianBuchholz: 0,
                 solkoff: 0,
                 sonnebornBerger: 0,
+                koyaSystem: 0,
                 cumulative: 0,
                 oppCumulative: 0,
+                earnedMatchWins: 0,
+                earnedMatchLosses: 0,
+                earnedGameWins: 0,
+                earnedGameLosses: 0,
+                gameWinDifferential: 0,
+                neighborhoodRecord: 0,
                 matchWinPct: 0,
                 oppMatchWinPct: 0,
                 oppOppMatchWinPct: 0,
@@ -331,59 +337,362 @@ export class Tournament {
         }));
         for (let i = 0; i < playerScores.length; i++) {
             const player = playerScores[i];
-            if (player.player.matches.length === 0) {
+            if (player.player.getMatches().length === 0) {
                 continue;
             }
-            player.player.matches.sort((a, b) => {
-                const matchA = this.matches.find(m => m.id === a.id);
-                const matchB = this.matches.find(m => m.id === b.id);
-                return matchA.round - matchB.round;
+            player.player.getMatches().sort((a, b) => {
+                const matchA = this.getMatch(a.id);
+                const matchB = this.getMatch(b.id);
+                return matchA.getRoundNumber() - matchB.getRoundNumber();
             });
-            player.player.matches.filter(match => this.matches.find(m => m.id === match.id && m.active === false)).forEach(match => {
-                player.gamePoints += ((match.bye ? this.scoring.bye : this.scoring.win) * match.win) + (this.scoring.loss * match.loss) + (this.scoring.draw * match.draw);
+            player.player.getMatches().filter(match => this.getMatches().find(m => m.getId() === match.id && m.isActive() === false) && this.getMatch(match.id).getRoundNumber() <= maxRound).forEach(match => {
+                player.gamePoints += ((match.bye ? this.getScoring().bye : this.getScoring().win) * match.win) + (this.getScoring().loss * match.loss) + (this.getScoring().draw * match.draw);
                 player.games += match.win + match.loss + match.draw;
-                player.matchPoints += match.bye ? this.scoring.bye : match.win > match.loss ? this.scoring.win : match.loss > match.win ? this.scoring.loss : this.scoring.draw;
+                player.matchPoints += match.bye ? this.getScoring().bye : match.win > match.loss ? this.getScoring().win : match.loss > match.win ? this.getScoring().loss : this.getScoring().draw;
                 player.tiebreaks.cumulative += player.matchPoints;
+                if (match.opponent !== null) {
+                    if (match.win > match.loss) player.tiebreaks.earnedMatchWins++;
+                    if (match.loss > match.win) player.tiebreaks.earnedMatchLosses--;
+                    player.tiebreaks.earnedGameWins += match.win;
+                    player.tiebreaks.earnedGameLosses -= match.loss;
+                    player.tiebreaks.gameWinDifferential += match.win - match.loss;
+                }
                 player.matches++;
             });
-            player.tiebreaks.gameWinPct = player.games === 0 ? 0 : player.gamePoints / (player.games * this.scoring.win);
-            player.tiebreaks.matchWinPct = player.matches === 0 ? 0 : player.matchPoints / (player.matches * this.scoring.win);
+            player.tiebreaks.gameWinPct = player.games === 0 ? 0 : player.gamePoints / (player.games * this.getScoring().win);
+            player.tiebreaks.matchWinPct = player.matches === 0 ? 0 : player.matchPoints / (player.matches * this.getScoring().win);
         }
         for (let i = 0; i < playerScores.length; i++) {
             const player = playerScores[i];
-            const opponents = playerScores.filter(p => player.player.matches.some(match => match.opponent === p.player.id));
+            const opponents = playerScores.filter(p => player.player.getMatches().some(match => match.opponent === p.player.getId() && this.getMatch(match.id).getRoundNumber() <= maxRound));
             if (opponents.length === 0) {
                 continue;
             }
+            const neighbors = opponents.filter(opponent => opponent.matchPoints === player.matchPoints);
+            player.tiebreaks.neighborhoodRecord = neighbors.reduce((sum, opp) => {
+                const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
+                return match.win > match.loss ? sum + 1 : match.loss > match.win ? sum - 1 : sum;
+            }, 0);
             player.tiebreaks.oppMatchWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.matchWinPct, 0) / opponents.length;
             player.tiebreaks.oppGameWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.gameWinPct, 0) / opponents.length;
             const oppMatchPoints = opponents.map(opp => opp.matchPoints);
             player.tiebreaks.solkoff = oppMatchPoints.reduce((sum, curr) => sum + curr, 0);
             if (oppMatchPoints.length > 2) {
-                const max = oppMatchPoints.reduce((max, curr) => Math.max(max, curr), 0);
-                const min = oppMatchPoints.reduce((min, curr) => Math.min(min, curr), max);
-                oppMatchPoints.splice(oppMatchPoints.indexOf(max), 1);
-                oppMatchPoints.splice(oppMatchPoints.indexOf(min), 1);
+                oppMatchPoints.splice(oppMatchPoints.indexOf(Math.max(...oppMatchPoints)), 1);
+                oppMatchPoints.splice(oppMatchPoints.indexOf(Math.min(...oppMatchPoints)), 1);
                 player.tiebreaks.medianBuchholz = oppMatchPoints.reduce((sum, curr) => sum + curr, 0);
             }
             player.tiebreaks.sonnebornBerger = opponents.reduce((sum, opp) => {
-                const match = player.player.matches.find(m => m.opponent === opp.player.id);
-                if (this.matches.find(m => m.id === match.id).active === true) {
+                const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
+                if (this.getMatches().find(m => m.getId() === match.id).isActive() === true) {
                     return sum;
                 }
-                return match.win > match.loss ? sum + opp.matchPoints : sum + (0.5 * opp.matchPoints);
+                return match.win > match.loss ? sum + opp.matchPoints : match.win < match.loss ? sum : sum + (0.5 * opp.matchPoints);
+            }, 0);
+            player.tiebreaks.koyaSystem = opponents.reduce((sum, opp) => {
+                const match = player.player.getMatches().find(m => m.opponent === opp.player.getId());
+                if (this.getMatches().find(m => m.getId() === match.id).isActive() === true || opp.matchPoints < 0.5 * this.getScoring().win * opp.matches) {
+                    return sum;
+                }
+                return match.win > match.loss ? sum + this.getScoring().win : match.win < match.loss ? sum + this.getScoring().loss : sum + this.getScoring().draw;
             }, 0);
             player.tiebreaks.oppCumulative = opponents.reduce((sum, opp) => sum + opp.tiebreaks.cumulative, 0);
         }
         for (let i = 0; i < playerScores.length; i++) {
             const player = playerScores[i];
-            const opponents = playerScores.filter(p => player.player.matches.some(match => match.opponent === p.player.id));
+            const opponents = playerScores.filter(p => player.player.getMatches().some(match => match.opponent === p.player.getId() && this.getMatch(match.id).getRoundNumber() <= maxRound));
             if (opponents.length === 0) {
                 continue;
             }
             player.tiebreaks.oppOppMatchWinPct = opponents.reduce((sum, opp) => sum + opp.tiebreaks.oppMatchWinPct, 0) / opponents.length;
         }
         return playerScores;
+    }
+
+    /**
+     * Sort players by points and tiebreaks
+     * @hidden
+     * @param a The points and tiebreaks of one player
+     * @param b The points and tiebreaks of another player
+     * @param r The maximum round number to consider for versus tiebreaks
+     * @returns A positive or negative number for sorting
+     */
+    sortForStandings(a: StandingsValues, b: StandingsValues, r: TournamentValues['round']): number {
+        if (a.matchPoints !== b.matchPoints) {
+            return b.matchPoints - a.matchPoints;
+        }
+        for (let i = 0; i < this.getScoring().tiebreaks.length; i++) {
+            switch (this.getScoring().tiebreaks[i]) {
+                case 'median buchholz':
+                    if (a.tiebreaks.medianBuchholz !== b.tiebreaks.medianBuchholz) {
+                        return b.tiebreaks.medianBuchholz - a.tiebreaks.medianBuchholz;
+                    } else continue;
+                case 'solkoff':
+                    if (a.tiebreaks.solkoff !== b.tiebreaks.solkoff) {
+                        return b.tiebreaks.solkoff - a.tiebreaks.solkoff;
+                    } else continue;
+                case 'sonneborn berger':
+                    if (a.tiebreaks.sonnebornBerger !== b.tiebreaks.sonnebornBerger) {
+                        return b.tiebreaks.sonnebornBerger - a.tiebreaks.sonnebornBerger;
+                    } else continue;
+                case 'koya system':
+                    if (a.tiebreaks.koyaSystem !== b.tiebreaks.koyaSystem) {
+                        return b.tiebreaks.koyaSystem - a.tiebreaks.koyaSystem;
+                    } else continue;
+                case 'cumulative':
+                    if (a.tiebreaks.cumulative !== b.tiebreaks.cumulative) {
+                        return b.tiebreaks.cumulative - a.tiebreaks.cumulative;
+                    } else if (a.tiebreaks.oppCumulative !== b.tiebreaks.oppCumulative) {
+                        return b.tiebreaks.oppCumulative - a.tiebreaks.oppCumulative;
+                    } else continue;
+                case 'earned match wins':
+                    if (a.tiebreaks.earnedMatchWins !== b.tiebreaks.earnedMatchWins) {
+                        return b.tiebreaks.earnedMatchWins - a.tiebreaks.earnedMatchWins;
+                    } else continue;
+                case 'earned match losses':
+                    if (a.tiebreaks.earnedMatchLosses !== b.tiebreaks.earnedMatchLosses) {
+                        return b.tiebreaks.earnedMatchLosses - a.tiebreaks.earnedMatchLosses;
+                    } else continue;
+                case 'earned game wins':
+                    if (a.tiebreaks.earnedGameWins !== b.tiebreaks.earnedGameWins) {
+                        return b.tiebreaks.earnedGameWins - a.tiebreaks.earnedGameWins;
+                    } else continue;
+                case 'earned game losses':
+                    if (a.tiebreaks.earnedGameLosses !== b.tiebreaks.earnedGameLosses) {
+                        return b.tiebreaks.earnedGameLosses - a.tiebreaks.earnedGameLosses;
+                    } else continue;
+                case 'game win differential':
+                    if (a.tiebreaks.gameWinDifferential !== b.tiebreaks.gameWinDifferential) {
+                        return b.tiebreaks.gameWinDifferential - a.tiebreaks.gameWinDifferential;
+                    } else continue;
+                case 'neighborhood record':
+                    if (a.tiebreaks.neighborhoodRecord !== b.tiebreaks.neighborhoodRecord) {
+                        return b.tiebreaks.neighborhoodRecord - a.tiebreaks.neighborhoodRecord;
+                    } else continue;
+                case 'versus':
+                    const matchIDs = a.player.getMatches().filter(m => m.opponent === b.player.getId() && this.getMatch(m.id).getRoundNumber() <= r).map(m => m.id);
+                    if (matchIDs.length === 0) {
+                        continue;
+                    }
+                    const pointsA = a.player.getMatches().filter(m => matchIDs.some(i => i === m.id)).reduce((sum, curr) => curr.win > curr.loss ? sum + this.getScoring().win : curr.loss > curr.win ? sum + this.getScoring().loss : sum + this.getScoring().draw, 0);
+                    const pointsB = b.player.getMatches().filter(m => matchIDs.some(i => i === m.id)).reduce((sum, curr) => curr.win > curr.loss ? sum + this.getScoring().win : curr.loss > curr.win ? sum + this.getScoring().loss : sum + this.getScoring().draw, 0);
+                    if (pointsA !== pointsB) {
+                        return pointsB - pointsA;
+                    } else continue;
+                case 'mutual versus':
+                    const opponentsA = a.player.getOpponents().filter(opp => this.getMatch(a.player.getMatches().find(match => match.opponent === opp).id).getRoundNumber() <= r);
+                    const opponentsB = b.player.getOpponents().filter(opp => this.getMatch(b.player.getMatches().find(match => match.opponent === opp).id).getRoundNumber() <= r);
+                    const sharedOpponents = opponentsA.filter(opp => opponentsB.includes(opp));
+                    if (sharedOpponents.length === 0) {
+                        continue;
+                    }
+                    const matchesA = sharedOpponents.map(opp => this.getMatch(a.player.getMatches().find(match => match.opponent === opp).id));
+                    const matchesB = sharedOpponents.map(opp => this.getMatch(b.player.getMatches().find(match => match.opponent === opp).id));
+                    const matchPointsA = matchesA.reduce((sum, match) => match.isDraw() ? sum + this.getScoring().draw : match.getWinner().id === a.player.getId() ? this.getScoring().win : this.getScoring().loss, 0);
+                    const matchPointsB = matchesB.reduce((sum, match) => match.isDraw() ? sum + this.getScoring().draw : match.getWinner().id === b.player.getId() ? this.getScoring().win : this.getScoring().loss, 0);
+                    if (matchPointsA !== matchPointsB) {
+                        return matchPointsB - matchPointsA;
+                    } else continue;
+                case 'game win percentage':
+                    if (a.tiebreaks.gameWinPct !== b.tiebreaks.gameWinPct) {
+                        return b.tiebreaks.gameWinPct - a.tiebreaks.gameWinPct;
+                    } else continue;
+                case 'opponent game win percentage':
+                    if (a.tiebreaks.oppGameWinPct !== b.tiebreaks.oppGameWinPct) {
+                        return b.tiebreaks.oppGameWinPct - a.tiebreaks.oppGameWinPct;
+                    } else continue;
+                case 'opponent match win percentage':
+                    if (a.tiebreaks.oppMatchWinPct !== b.tiebreaks.oppMatchWinPct) {
+                        return b.tiebreaks.oppMatchWinPct - a.tiebreaks.oppMatchWinPct;
+                    } else continue;
+                case 'opponent opponent match win percentage':
+                    if (a.tiebreaks.oppOppMatchWinPct !== b.tiebreaks.oppOppMatchWinPct) {
+                        return b.tiebreaks.oppOppMatchWinPct - a.tiebreaks.oppOppMatchWinPct;
+                    } else continue;
+            }
+        }
+        return parseInt(b.player.getId(), 36) - parseInt(a.player.getId(), 36);
+    }
+
+    /**
+     * Adjusts seating for elimination if seating matters
+     * @param p1 First player in a match
+     * @param p2 Second player in a match
+     * @returns IDs of the players in the order in which they should be seated
+     */
+    private eliminationSeating(p1: Player, p2: Player): [PlayerValues['id'], PlayerValues['id']] {
+        const p1SeatSum = p1.getMatches().reduce((sum, match) => sum + match.seating, 0);
+        const p1LastSeat = p1.getMatches().slice(-1)[0].seating;
+        const p2SeatSum = p2.getMatches().reduce((sum, match) => sum + match.seating, 0);
+        const p2LastSeat = p2.getMatches().slice(-1)[0].seating;
+        if ((p2LastSeat === -1 && p1LastSeat === 1) || (p2SeatSum < p1SeatSum)) {
+            return [p2.getId(), p1.getId()];
+        } else {
+            return [p1.getId(), p2.getId()];
+        }
+    }
+
+    /**
+     * @returns ID of the tournament
+     */
+    getId(): TournamentValues['id'] {
+        return this.id;
+    }
+
+    /**
+     * @returns Name of the tournament
+     */
+    getName(): TournamentValues['name'] {
+        return this.name;
+    }
+
+    /**
+     * @returns Current state of the tournament
+     */
+    getStatus(): TournamentValues['status'] {
+        return this.status;
+    }
+
+    /**
+     * @returns Current round number of the tournament
+     */
+    getRoundNumber(): TournamentValues['round'] {
+        return this.round;
+    }
+
+    /**
+     * @returns An array of players in the tournament
+     */
+    getPlayers(): TournamentValues['players'] {
+        return this.players;
+    }
+
+    /**
+     * @returns An array of currently active players
+     */
+    getActivePlayers(): TournamentValues['players'] {
+        return this.players.filter(p => p.isActive());
+    }
+
+    /**
+     * Throws an error if no player is found
+     * 
+     * @param id ID of the player
+     * @returns The player with the corresponding ID
+     */
+    getPlayer(id: PlayerValues['id']): Player {
+        const player = this.players.find(p => p.getId() === id);
+        if (player === undefined) {
+            throw new Error(`No player found with ID ${id}`);
+        }
+        return player;
+    }
+
+    /**
+     * @returns An array of matches in the tournament
+     */
+    getMatches(): TournamentValues['matches'] {
+        return this.matches;
+    }
+
+    /**
+     * @returns An array of currently active matches
+     */
+    getActiveMatches(): TournamentValues['matches'] {
+        return this.matches.filter(m => m.isActive());
+    }
+
+    /**
+     * @param round Round number
+     * @returns An array of matches with the corresponding round number
+     */
+    getMatchesByRound(round: TournamentValues['round']): TournamentValues['matches'] {
+        return this.matches.filter(m => m.getRoundNumber() === round);
+    }
+
+    /**
+     * @param id ID of the match
+     * @returns The match with the corresponding ID
+     */
+    getMatch(id: MatchValues['id']): Match {
+        const match = this.matches.find(m => m.getId() === id);
+        if (match === undefined) {
+            throw new Error(`No match found with ID ${id}`);
+        }
+        return match;
+    }
+
+    /**
+     * @returns If order of players in matches matters
+     */
+    getSeating(): TournamentValues['seating'] {
+        return this.seatings;
+    }
+
+    /**
+     * @returns Sorting method, if players are rated/seeded
+     */
+    getSorting(): TournamentValues['sorting'] {
+        return this.sorting;
+    }
+
+    /**
+     * @returns An object with details regarding scoring
+     */
+    getScoring(): TournamentValues['scoring'] {
+        return this.scoring;
+    }
+
+    /**
+     * @returns An object with details regarding the tournament
+     */
+    getStageOne(): TournamentValues['stageOne'] {
+        return this.stageOne;
+    }
+
+    /**
+     * @returns An object with details regarding playoffs
+     */
+    getStageTwo(): TournamentValues['stageTwo'] {
+        return this.stageTwo;
+    }
+
+    /**
+     * @returns The current pairing format if stage one or two
+     */
+    getCurrentFormat(): TournamentValues['stageOne']['format'] | null {
+        return this.status === 'stage-one' ? this.getStageOne().format : this.status === 'stage-two' ? this.getStageTwo().format : null;
+    }
+
+    /**
+     * @returns If the current format is an elimination format
+     */
+    isElimination(): Boolean {
+        if (this.status === 'stage-one') {
+            return ['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageOne().format);
+        } else {
+            return this.status === 'stage-two';
+        }
+    }
+
+    /**
+     * @returns The values of the tournament details
+     */
+    getValues(): ExportedTournamentValues {
+        return {
+            id: this.id,
+            name: this.name,
+            status: this.status,
+            round: this.round,
+            players: this.players.map(player => player.getValues()),
+            matches: this.matches.map(match => match.getValues()),
+            seating: this.seatings,
+            sorting: this.sorting,
+            scoring: this.scoring,
+            stageOne: this.stageOne,
+            stageTwo: this.stageTwo,
+            meta: this.meta
+        }
     }
 
     /**
@@ -395,23 +704,20 @@ export class Tournament {
      * @returns The newly created player
      */
     createPlayer(name: string, id: string | undefined = undefined): Player {
-        if ((this.status === 'stage-one' && this.stageOne.format !== 'swiss') || this.status === 'stage-two' || this.status === 'complete') {
-            throw `Players can only be added during setup or stage one (if Swiss format)`;
+        if ((this.status === 'stage-one' && this.getStageOne().format !== 'swiss') || this.status === 'stage-two' || this.status === 'complete') {
+            throw new Error(`Players can only be added during setup or stage one (if Swiss format)`);
         }
-        if (this.stageOne.maxPlayers > 0 && this.players.length === this.stageOne.maxPlayers) {
-            throw `Maximum number of players (${this.stageOne.maxPlayers}) are enrolled`;
+        if (this.getStageOne().maxPlayers > 0 && this.players.length === this.getStageOne().maxPlayers) {
+            throw new Error(`Maximum number of players (${this.getStageOne().maxPlayers}) are enrolled`);
         }
         let ID = id;
         if (ID === undefined) {
             do {
-                ID = randomstring.generate({
-                    length: 12,
-                    charset: 'alphanumeric'
-                });
-            } while (this.players.some(p => p.id === ID));
+                ID = crypto.randomUUID();
+            } while (this.players.some(p => p.getId() === ID));
         } else {
-            if (this.players.some(p => p.id === ID)) {
-                throw `Player with ID ${ID} already exists`;
+            if (this.players.some(p => p.getId() === ID)) {
+                throw new Error(`Player with ID ${ID} already exists`);
             }
         }
         const player = new Player(ID, name);
@@ -430,143 +736,128 @@ export class Tournament {
      * @param id ID of the player
      */
     removePlayer(id: string): void {
-        const player = this.players.find(p => p.id === id);
-        if (player === undefined) {
-            throw `Player with ID ${id} does not exist`;
+        const player = this.getPlayer(id);
+        if (player.isActive() === false) {
+            throw new Error(`Player is already marked inactive`);
         }
-        if (player.active === false) {
-            throw `Player is already marked inactive`;
-        }
-        player.active = false;
-        if ((this.status === 'stage-one' && ['single-elimination', 'double-elimination', 'stepladder'].includes(this.stageOne.format) || this.status === 'stage-two' && ['single-elimination', 'double-elimination', 'stepladder'].includes(this.stageTwo.format))) {
-            const activeMatch = this.matches.find(match => match.active === true && (match.player1.id === player.id || match.player2.id === player.id));
+        player.set({ active: false });
+        if (this.isElimination()) {
+            const activeMatch = this.matches.find(match => match.isActive() === true && (match.getPlayer1().id === player.getId() || match.getPlayer2().id === player.getId()));
             if (activeMatch !== undefined) {
-                const opponent = this.players.find(p => p.id === (activeMatch.player1.id === player.id ? activeMatch.player2.id : activeMatch.player1.id));
-                activeMatch.values = {
+                const opponent = this.getPlayer(activeMatch.getPlayer1().id === player.getId() ? activeMatch.getPlayer2().id : activeMatch.getPlayer1().id);
+                activeMatch.set({
                     active: false,
-                    player1: activeMatch.player1.id === player.id ? {
+                    player1: activeMatch.getPlayer1().id === player.getId() ? {
                         win: 0,
-                        loss: Math.ceil(this.scoring.bestOf / 2)
+                        loss: Math.ceil(this.getScoring().bestOf / 2)
                     } : {
-                        win: Math.ceil(this.scoring.bestOf / 2),
+                        win: Math.ceil(this.getScoring().bestOf / 2),
                         loss: 0
                     },
-                    player2: activeMatch.player1.id === player.id ? {
-                        win: Math.ceil(this.scoring.bestOf / 2),
+                    player2: activeMatch.getPlayer1().id === player.getId() ? {
+                        win: Math.ceil(this.getScoring().bestOf / 2),
                         loss: 0
                     } : {
                         win: 0,
-                        loss: Math.ceil(this.scoring.bestOf / 2)
+                        loss: Math.ceil(this.getScoring().bestOf / 2)
                     }
-                };
-                player.updateMatch(activeMatch.id, {
-                    loss: Math.ceil(this.scoring.bestOf / 2)
                 });
-                opponent.updateMatch(activeMatch.id, {
-                    win: Math.ceil(this.scoring.bestOf / 2)
+                player.updateMatch(activeMatch.getId(), {
+                    loss: Math.ceil(this.getScoring().bestOf / 2)
                 });
-                if (activeMatch.path.win !== null) {
-                    const winMatch = this.matches.find(match => match.id === activeMatch.path.win);
-                    if (winMatch.player1.id === null) {
-                        winMatch.values = {
-                            player1: {
-                                id: opponent.id
-                            }
-                        };
-                    } else {
-                        winMatch.values = {
-                            player2: {
-                                id: opponent.id
-                            }
-                        }
-                    }
-                    if (winMatch.player1.id !== null && winMatch.player2.id !== null) {
-                        winMatch.values = {
-                            active: true
-                        };
-                        this.players.find(p => p.id === winMatch.player1.id).addMatch({
-                            id: winMatch.id,
-                            opponent: winMatch.player2.id
+                opponent.updateMatch(activeMatch.getId(), {
+                    win: Math.ceil(this.getScoring().bestOf / 2)
+                });
+                if (activeMatch.getPath().win !== null) {
+                    const winMatch = this.getMatch(activeMatch.getPath().win);
+                    if (winMatch.getPlayer1().id === null) {
+                        winMatch.set({
+                            player1: { id: opponent.getId() }
                         });
-                        this.players.find(p => p.id === winMatch.player2.id).addMatch({
-                            id: winMatch.id,
-                            opponent: winMatch.player1.id
+                    } else {
+                        winMatch.set({
+                            player2: { id: opponent.getId() }
+                        })
+                    }
+                    if (winMatch.getPlayer1().id !== null && winMatch.getPlayer2().id !== null) {
+                        winMatch.set({ active: true });
+                        this.getPlayer(winMatch.getPlayer1().id).addMatch({
+                            id: winMatch.getId(),
+                            opponent: winMatch.getPlayer2().id
+                        });
+                        this.getPlayer(winMatch.getPlayer2().id).addMatch({
+                            id: winMatch.getId(),
+                            opponent: winMatch.getPlayer1().id
                         });
                     }
                 }
-                if (activeMatch.path.loss !== null) {
-                    const lossMatch = this.matches.find(match => match.id === activeMatch.path.loss);
-                    if (lossMatch.player1.id === null && lossMatch.player2.id === null) {
-                        const prevMatch = this.matches.find(match => (match.path.win === lossMatch.id || match.path.loss === lossMatch.id) && match.player1.id !== player.id && match.player2.id !== player.id);
-                        prevMatch.values = {
+                if (activeMatch.getPath().loss !== null) {
+                    const lossMatch = this.getMatch(activeMatch.getPath().loss);
+                    if (lossMatch.getPlayer1().id === null && lossMatch.getPlayer2().id === null) {
+                        const prevMatch = this.matches.find(match => (match.getPath().win === lossMatch.getId() || match.getPath().loss === lossMatch.getId()) && match.getPlayer1().id !== player.getId() && match.getPlayer2().id !== player.getId());
+                        prevMatch.set({
                             path: {
-                                win: prevMatch.path.win === lossMatch.id ? lossMatch.path.win : prevMatch.path.win,
-                                loss: prevMatch.path.loss === lossMatch.id ? lossMatch.path.win : prevMatch.path.loss
+                                win: prevMatch.getPath().win === lossMatch.getId() ? lossMatch.getPath().win : prevMatch.getPath().win,
+                                loss: prevMatch.getPath().loss === lossMatch.getId() ? lossMatch.getPath().win : prevMatch.getPath().loss
                             }
-                        };
+                        });
                     } else {
-                        const waitingPlayer = this.players.find(player => player.id === (lossMatch.player1.id === null ? lossMatch.player2.id : lossMatch.player1.id));
-                        const winMatch = this.matches.find(match => match.id === lossMatch.path.win);
-                        if (winMatch.player1.id === null) {
-                            winMatch.values = {
-                                player1: {
-                                    id: waitingPlayer.id
-                                }
-                            };
+                        const waitingPlayer = this.getPlayer(lossMatch.getPlayer1().id === null ? lossMatch.getPlayer2().id : lossMatch.getPlayer1().id);
+                        const winMatch = this.getMatch(lossMatch.getPath().win);
+                        if (winMatch.getPlayer1().id === null) {
+                            winMatch.set({
+                                player1: { id: waitingPlayer.getId() }
+                            });
                         } else {
-                            winMatch.values = {
-                                player2: {
-                                    id: waitingPlayer.id
-                                }
-                            }
+                            winMatch.set({
+                                player2: { id: waitingPlayer.getId() }
+                            })
                         }
-                        if (winMatch.player1.id !== null && winMatch.player2.id !== null) {
-                            winMatch.values = {
-                                active: true
-                            };
-                            this.players.find(p => p.id === winMatch.player1.id).addMatch({
-                                id: winMatch.id,
-                                opponent: winMatch.player2.id
+                        if (winMatch.getPlayer1().id !== null && winMatch.getPlayer2().id !== null) {
+                            winMatch.set({ active: true });
+                            this.getPlayer(winMatch.getPlayer1().id).addMatch({
+                                id: winMatch.getId(),
+                                opponent: winMatch.getPlayer2().id
                             });
-                            this.players.find(p => p.id === winMatch.player2.id).addMatch({
-                                id: winMatch.id,
-                                opponent: winMatch.player1.id
+                            this.getPlayer(winMatch.getPlayer2().id).addMatch({
+                                id: winMatch.getId(),
+                                opponent: winMatch.getPlayer1().id
                             });
                         }
                     }
                 }
             }
-            const waitingMatch = this.matches.find(match => (match.player1.id === player.id && match.player2.id === null) || (match.player2.id === player.id && match.player1.id === null));
-            if (waitingMatch !== undefined && waitingMatch.path.win !== null) {
-                const prevMatch = this.matches.find(match => (match.path.win === waitingMatch.id || match.path.loss === waitingMatch.id) && match.player1.id !== player.id && match.player2.id !== player.id);
-                prevMatch.values = {
+            const waitingMatch = this.matches.find(match => (match.getPlayer1().id === player.getId() && match.getPlayer2().id === null) || (match.getPlayer2().id === player.getId() && match.getPlayer1().id === null));
+            if (waitingMatch !== undefined && waitingMatch.getPath().win !== null) {
+                const prevMatch = this.matches.find(match => (match.getPath().win === waitingMatch.getId() || match.getPath().loss === waitingMatch.getId()) && match.getPlayer1().id !== player.getId() && match.getPlayer2().id !== player.getId());
+                prevMatch.set({
                     path: {
-                        win: prevMatch.path.win === waitingMatch.id ? waitingMatch.path.win : prevMatch.path.win,
-                        loss: prevMatch.path.loss === waitingMatch.id ? waitingMatch.path.win : prevMatch.path.loss
+                        win: prevMatch.getPath().win === waitingMatch.getId() ? waitingMatch.getPath().win : prevMatch.getPath().win,
+                        loss: prevMatch.getPath().loss === waitingMatch.getId() ? waitingMatch.getPath().win : prevMatch.getPath().loss
                     }
-                };
-                if (waitingMatch.path.loss !== undefined) {
-                    const prevLossMatch = this.matches.find(match => (match.path.win === waitingMatch.path.loss || match.path.loss === waitingMatch.path.loss) && match.player1.id !== player.id && match.player2.id !== player.id);
-                    const currLossMatch = this.matches.find(match => match.id === waitingMatch.path.loss);
-                    prevLossMatch.values = {
+                });
+                if (waitingMatch.getPath().loss !== undefined) {
+                    const prevLossMatch = this.matches.find(match => (match.getPath().win === waitingMatch.getPath().loss || match.getPath().loss === waitingMatch.getPath().loss) && match.getPlayer1().id !== player.getId() && match.getPlayer2().id !== player.getId());
+                    const currLossMatch = this.matches.find(match => match.getId() === waitingMatch.getPath().loss);
+                    prevLossMatch.set({
                         path: {
-                            win: prevLossMatch.path.win === currLossMatch.id ? currLossMatch.path.win : prevLossMatch.path.win,
-                            loss: prevLossMatch.path.loss === currLossMatch.id ? currLossMatch.path.win : prevLossMatch.path.loss
+                            win: prevLossMatch.getPath().win === currLossMatch.getId() ? currLossMatch.getPath().win : prevLossMatch.getPath().win,
+                            loss: prevLossMatch.getPath().loss === currLossMatch.getId() ? currLossMatch.getPath().win : prevLossMatch.getPath().loss
                         }
-                    }
+                    })
                 }
             }
-        } else if (['round-robin', 'double-round-robin'].includes(this.stageOne.format)) {
-            const byeMatches = this.matches.filter(match => match.round > this.round && (match.player1.id === player.id || match.player2.id === player.id));
+        } else if (['round-robin', 'double-round-robin'].includes(this.getStageOne().format)) {
+            const byeMatches = this.matches.filter(match => match.getRoundNumber() > this.round && (match.getPlayer1().id === player.getId() || match.getPlayer2().id === player.getId()));
             byeMatches.forEach(match => {
-                match.values = {
+                match.set({
                     player1: {
-                        id: match.player1.id === player.id ? null : match.player1.id
+                        id: match.getPlayer1().id === player.getId() ? null : match.getPlayer1().id
                     },
                     player2: {
-                        id: match.player2.id === player.id ? null : match.player2.id
+                        id: match.getPlayer2().id === player.getId() ? null : match.getPlayer2().id
                     }
-                }
+                })
             });
         }
     }
@@ -576,21 +867,21 @@ export class Tournament {
      * 
      * Throws an error if there are an insufficient number of players (4 if double elimination, otherwise 2).
      */
-    start(): void {
-        const players = this.players.filter(p => p.active === true);
-        if ((this.stageOne.format === 'double-elimination' && players.length < 4) || players.length < 2) {
-            throw `Insufficient number of players (${players.length}) to start event`;
+    startTournament(): void {
+        const players = this.getActivePlayers();
+        if ((this.getStageOne().format === 'double-elimination' && players.length < 4) || players.length < 2) {
+            throw new Error(`Insufficient number of players (${players.length}) to start event`);
         }
-        if (this.sorting !== 'none') {
-            players.sort((a, b) => this.sorting === 'ascending' ? a.value - b.value : b.value - a.value);
+        if (this.getSorting() !== 'none') {
+            players.sort((a, b) => this.getSorting() === 'ascending' ? a.getValue() - b.getValue() : b.getValue() - a.getValue());
         }
         this.status = 'stage-one';
-        this.round = this.stageOne.initialRound;
-        this.#createMatches(players);
-        if (this.stageOne.format === 'swiss' && this.stageOne.rounds === 0) {
-            this.stageOne.rounds = Math.ceil(Math.log2(this.players.length));
-        } else if (this.stageOne.format !== 'swiss') {
-            this.stageOne.rounds = this.matches.reduce((max, curr) => Math.max(max, curr.round), 0);
+        this.round = this.getStageOne().initialRound;
+        this.createMatches(players);
+        if (this.getStageOne().format === 'swiss' && this.getStageOne().rounds === 0) {
+            this.getStageOne().rounds = Math.ceil(Math.log2(this.players.length));
+        } else if (this.getStageOne().format !== 'swiss') {
+            this.getStageOne().rounds = Math.max(...this.getMatches().map(match => match.getRoundNumber()));
         }
     }
 
@@ -599,72 +890,70 @@ export class Tournament {
      * 
      * Throws an error if there are active matches, if the current format is elimination or stepladder, or when attempting to create matches for stage two and there are an insufficient number of players.
      */
-    next(): void {
+    nextRound(): void {
         if (this.status !== 'stage-one') {
-            throw `Can only advance rounds during stage one`;
+            throw new Error(`Can only advance rounds during stage one`);
         }
-        if (['single-elimination', 'double-elimination', 'stepladder'].includes(this.stageOne.format)) {
-            throw `Can not advance rounds in elimination or stepladder`;
+        if (this.isElimination()) {
+            throw new Error(`Can not advance rounds in an elimination format`);
         }
-        if (this.matches.filter(match => match.active === true).length > 0) {
-            throw `Can not advance rounds with active matches`;
+        if (this.getActiveMatches().length > 0) {
+            throw new Error(`Can not advance rounds with active matches`);
         }
         this.round++;
-        if (this.round > this.stageOne.rounds + this.stageOne.initialRound - 1) {
-            if (this.stageTwo.format !== null) {
+        if (this.round > this.getStageOne().rounds + this.getStageOne().initialRound - 1) {
+            if (this.getStageTwo().format !== null) {
+                if (this.getStageTwo().advance.method === 'points') {
+                    this.players.filter(player => player.getMatches().reduce((sum, match) => match.win > match.loss ? sum + this.getScoring().win : match.loss > match.win ? sum + this.getScoring().loss : this.getScoring().draw, 0) < this.getStageTwo().advance.value).forEach(player => player.set({ active: false }));
+                } else if (this.getStageTwo().advance.method === 'rank') {
+                    const standings = this.getStandings();
+                    standings.splice(0, this.getStageTwo().advance.value);
+                    standings.forEach(s => this.getPlayer(s.player.getId()).set({ active: false }));
+                }
+                if ((this.getStageTwo().format === 'double-elimination' && this.getActivePlayers().length < 4) || this.getActivePlayers().length < 2) {
+                    throw new Error(`Insufficient number of players (${this.getActivePlayers().length}) to create stage two matches`);
+                }
                 this.status = 'stage-two';
-                if (this.stageTwo.advance.method === 'points') {
-                    this.players.filter(player => player.matches.reduce((sum, match) => match.win > match.loss ? sum + this.scoring.win : match.loss > match.win ? sum + this.scoring.loss : this.scoring.draw, 0) < this.stageTwo.advance.value).forEach(player => player.active = false);
-                } else if (this.stageTwo.advance.method === 'rank') {
-                    const standings = this.standings();
-                    standings.splice(0, this.stageTwo.advance.value);
-                    standings.forEach(s => this.players.find(p => p.id === s.player.id).active = false);
-                }
-                if ((this.stageTwo.format === 'double-elimination' && this.players.filter(player => player.active === true).length < 4) || this.players.filter(player => player.active === true).length < 2) {
-                    throw `Insufficient number of players (${this.players.filter(player => player.active === true).length}) to create stage two matches`;
-                }
-                this.#createMatches(this.standings().map(s => s.player).filter(p => p.active === true));
+                this.createMatches(this.getStandings().map(s => s.player).filter(p => p.isActive() === true));
             } else {
-                this.end();
+                throw new Error(`Predetermined number of rounds have been completed`);
             }
         } else {
-            if (['round-robin', 'double-round-robin'].includes(this.stageOne.format)) {
-                const matches = this.matches.filter(m => m.round === this.round);
+            if (['round-robin', 'double-round-robin'].includes(this.getStageOne().format)) {
+                const matches = this.getMatchesByRound(this.round);
                 matches.forEach(match => {
-                    if (match.player1.id === null || match.player2.id === null) {
-                        this.players.find(p => p.id === (match.player1.id === null ? match.player2.id : match.player1.id)).addMatch({
-                            id: match.id,
+                    if (match.getPlayer1().id === null || match.getPlayer2().id === null) {
+                        this.getPlayer(match.getPlayer1().id === null ? match.getPlayer2().id : match.getPlayer1().id).addMatch({
+                            id: match.getId(),
                             opponent: null,
                             bye: true,
-                            win: Math.ceil(this.scoring.bestOf / 2)
+                            win: Math.ceil(this.getScoring().bestOf / 2)
                         });
-                        match.values = {
+                        match.set({
                             bye: true,
-                            player1: {
-                                win: match.player2.id === null ? Math.ceil(this.scoring.bestOf / 2) : 0
-                            },
-                            player2: {
-                                win: match.player1.id === null ? Math.ceil(this.scoring.bestOf / 2) : 0
-                            }
-                        }
+                            player1: { win: match.getPlayer2().id === null ? Math.ceil(this.getScoring().bestOf / 2) : 0 },
+                            player2: { win: match.getPlayer1().id === null ? Math.ceil(this.getScoring().bestOf / 2) : 0 }
+                        })
                     } else {
-                        match.values = { active: true }
-                        this.players.find(p => p.id === match.player1.id).addMatch({
-                            id: match.id,
-                            opponent: match.player2.id
+                        match.set({ active: true });
+                        this.getPlayer(match.getPlayer1().id).addMatch({
+                            id: match.getId(),
+                            opponent: match.getPlayer2().id,
+                            seating: this.getSeating() ? 1 : null
                         });
-                        this.players.find(p => p.id === match.player2.id).addMatch({
-                            id: match.id,
-                            opponent: match.player1.id
+                        this.getPlayer(match.getPlayer2().id).addMatch({
+                            id: match.getId(),
+                            opponent: match.getPlayer1().id,
+                            seating: this.getSeating() ? -1 : null
                         });
                     }
                 });
             } else {
-                const players = this.players.filter(p => p.active === true);
-                if (this.sorting !== 'none') {
-                    players.sort((a, b) => this.sorting === 'ascending' ? a.value - b.value : b.value - a.value);
+                const players = this.getActivePlayers();
+                if (this.getSorting() !== 'none') {
+                    players.sort((a, b) => this.getSorting() === 'ascending' ? a.getValue() - b.getValue() : b.getValue() - a.getValue());
                 }
-                this.#createMatches(players);
+                this.createMatches(players);
             }
         }
     }
@@ -681,14 +970,14 @@ export class Tournament {
      * @param draws Number of draws
      */
     enterResult(id: string, player1Wins: number, player2Wins: number, draws: number = 0): void {
-        const match = this.matches.find(m => m.id === id);
-        if (match === undefined) {
-            throw `Match with ID ${id} does not exist`;
+        const match = this.getMatch(id);
+        if (player1Wins > Math.round(this.getScoring().bestOf / 2) || player2Wins > Math.round(this.getScoring().bestOf / 2)) {
+            throw new Error(`Players can not win more than ${Math.round(this.getScoring().bestOf / 2)} games in a match`);
         }
-        if (player1Wins > Math.round(this.scoring.bestOf / 2) || player2Wins > Math.round(this.scoring.bestOf / 2)) {
-            throw `Players can not win more than ${Math.round(this.scoring.bestOf / 2)} games in a match`;
+        if (this.isElimination() && player1Wins === player2Wins) {
+            throw new Error('Players can not draw a match during an elimination format');
         }
-        match.values = {
+        match.set({
             active: false,
             player1: {
                 win: player1Wins,
@@ -700,81 +989,111 @@ export class Tournament {
                 loss: player1Wins,
                 draw: draws
             }
-        };
-        const player1 = this.players.find(p => p.id === match.player1.id);
-        player1.updateMatch(match.id, {
+        });
+        const player1 = this.getPlayer(match.getPlayer1().id);
+        player1.updateMatch(match.getId(), {
             win: player1Wins,
             loss: player2Wins,
             draw: draws
         });
-        const player2 = this.players.find(p => p.id === match.player2.id);
-        player2.updateMatch(match.id, {
+        const player2 = this.getPlayer(match.getPlayer2().id);
+        player2.updateMatch(match.getId(), {
             win: player2Wins,
             loss: player1Wins,
             draw: draws
         });
-        if (match.path.win !== null) {
-            const winID = player1Wins > player2Wins ? match.player1.id : match.player2.id;
-            const winMatch = this.matches.find(m => m.id === match.path.win);
-            if (winMatch.player1.id === null) {
-                winMatch.values = {
-                    player1: {
-                        id: winID
-                    }
-                };
+        if (match.getPath().win !== null) {
+            const winMatch = this.getMatch(match.getPath().win);
+            if (winMatch.getPlayer1().id === null) {
+                winMatch.set({
+                    player1: { id: match.getWinner().id }
+                });
             } else {
-                winMatch.values = {
-                    player2: {
-                        id: winID
-                    }
+                if (this.getSeating()) {
+                    const [seat1, seat2] = this.eliminationSeating(this.getPlayer(winMatch.getPlayer1().id), this.getPlayer(match.getWinner().id));
+                    winMatch.set({
+                        player1: { id: seat1 },
+                        player2: { id: seat2 }
+                    });
+                } else {
+                    winMatch.set({
+                        player2: { id: match.getWinner().id }
+                    });
                 }
             }
-            if (winMatch.player1.id !== null && winMatch.player2.id !== null) {
-                winMatch.values = {
-                    active: true
-                };
-                this.players.find(p => p.id === winMatch.player1.id).addMatch({
-                    id: winMatch.id,
-                    opponent: winMatch.player2.id
+            if (winMatch.getPlayer1().id !== null && winMatch.getPlayer2().id !== null) { 
+                winMatch.set({ active: true });
+                this.getPlayer(winMatch.getPlayer1().id).addMatch({
+                    id: winMatch.getId(),
+                    opponent: winMatch.getPlayer2().id,
+                    seating: this.getSeating() ? 1 : null
                 });
-                this.players.find(p => p.id === winMatch.player2.id).addMatch({
-                    id: winMatch.id,
-                    opponent: winMatch.player1.id
+                this.getPlayer(winMatch.getPlayer2().id).addMatch({
+                    id: winMatch.getId(),
+                    opponent: winMatch.getPlayer1().id,
+                    seating: this.getSeating() ? -1 : null
                 });
             }
         }
-        const lossID = player1Wins > player2Wins ? match.player2.id : match.player1.id;
-        if (match.path.loss !== null) {
-            const lossMatch = this.matches.find(m => m.id === match.path.loss);
-            if (lossMatch.player1.id === null) {
-                lossMatch.values = {
-                    player1: {
-                        id: lossID
-                    }
-                };
+        if (match.getPath().loss !== null) {
+            const lossMatch = this.getMatch(match.getPath().loss);
+            if (lossMatch.getPlayer1().id === null) {
+                lossMatch.set({
+                    player1: { id: match.getLoser().id }
+                });
             } else {
-                lossMatch.values = {
-                    player2: {
-                        id: lossID
-                    }
+                if (this.getSeating()) {
+                    const [seat1, seat2] = this.eliminationSeating(this.getPlayer(lossMatch.getPlayer1().id), this.getPlayer(match.getLoser().id));
+                    lossMatch.set({
+                        player1: { id: seat1 },
+                        player2: { id: seat2 }
+                    });
+                } else {
+                    lossMatch.set({
+                        player2: { id: match.getLoser().id }
+                    });
                 }
             }
-            if (lossMatch.player1.id !== null && lossMatch.player2.id !== null) {
-                lossMatch.values = {
-                    active: true
-                };
-
-                this.players.find(p => p.id === lossMatch.player1.id).addMatch({
-                    id: lossMatch.id,
-                    opponent: lossMatch.player2.id
+            if (lossMatch.getPlayer1().id !== null && lossMatch.getPlayer2().id !== null) {
+                lossMatch.set({ active: true });
+                this.getPlayer(lossMatch.getPlayer1().id).addMatch({
+                    id: lossMatch.getId(),
+                    opponent: lossMatch.getPlayer2().id,
+                    seating: this.getSeating() ? 1 : null
                 });
-                this.players.find(p => p.id === lossMatch.player2.id).addMatch({
-                    id: lossMatch.id,
-                    opponent: lossMatch.player1.id
+                this.getPlayer(lossMatch.getPlayer2().id).addMatch({
+                    id: lossMatch.getId(),
+                    opponent: lossMatch.getPlayer1().id,
+                    seating: this.getSeating() ? -1 : null
                 });
             }
-        } else if ((this.status === 'stage-one' && ['single-elimination', 'double-elimination', 'stepladder'].includes(this.stageOne.format)) || this.status === 'stage-two') {
-            this.players.find(p => p.id === lossID).values = { active: false };
+        } else if (this.isElimination()) {
+            if (this.getCurrentFormat() === 'double-elimination' && match.getPath().win === null && match.getMatchNumber() === 1 &&
+            this.getPlayer(match.getPlayer1().id).getMatches().filter(m => m.loss > m.win).length === this.getPlayer(match.getPlayer2().id).getMatches().filter(m => m.loss > m.win).length) {
+                let id: string;
+                do {
+                    id = crypto.randomUUID();
+                } while (this.matches.some(m => m.getId() === id));
+                const newMatch = new Match(id, match.getRoundNumber(), 2);
+                newMatch.set({
+                    active: true,
+                    player1: { id: match.getPlayer2().id },
+                    player2: { id: match.getPlayer1().id }
+                });
+                this.matches.push(newMatch);
+                this.getPlayer(newMatch.getPlayer1().id).addMatch({
+                    id: id,
+                    opponent: newMatch.getPlayer2().id,
+                    seating: this.getSeating() ? 1 : null
+                });
+                this.getPlayer(newMatch.getPlayer2().id).addMatch({
+                    id: id,
+                    opponent: newMatch.getPlayer1().id,
+                    seating: this.getSeating() ? -1 : null
+                });
+            } else {
+                this.getPlayer(match.getLoser().id).set({ active: false });
+            }
         }
     }
 
@@ -787,11 +1106,11 @@ export class Tournament {
      * @param id The ID of the match
      */
     clearResult(id: string): void {
-        const match = this.matches.find(m => m.id === id);
-        if (match === undefined) {
-            throw `Match with ID ${id} does not exist`;
+        const match = this.getMatch(id);
+        if (match.isActive()) {
+            throw new Error('Can not clear an active match');
         }
-        match.values = {
+        match.set({
             active: true,
             player1: {
                 win: 0,
@@ -803,52 +1122,44 @@ export class Tournament {
                 loss: 0,
                 draw: 0
             }
-        }
-        const player1 = this.players.find(player => player.id === match.player1.id);
-        const player2 = this.players.find(player => player.id === match.player2.id);
-        player1.values = { active: true };
-        player1.updateMatch(match.id, {
+        });
+        const player1 = this.getPlayer(match.getPlayer1().id);
+        const player2 = this.getPlayer(match.getPlayer2().id);
+        player1.set({ active: true });
+        player1.updateMatch(match.getId(), {
             win: 0,
             loss: 0,
             draw: 0
         });
-        player2.values = { active: true };
-        player2.updateMatch(match.id, {
+        player2.set({ active: true });
+        player2.updateMatch(match.getId(), {
             win: 0,
             loss: 0,
             draw: 0
         });
-        if (match.path.win !== null) {
-            const winMatch = this.matches.find(m => m.id === match.path.win);
-            if (winMatch.active === true) {
-                this.players.find(player => player.id === winMatch.player1.id).removeMatch(winMatch.id);
-                this.players.find(player => player.id === winMatch.player2.id).removeMatch(winMatch.id);
+        if (match.getPath().win !== null) {
+            const winMatch = this.getMatch(match.getPath().win);
+            if (winMatch.isActive() === true) {
+                this.getPlayer(winMatch.getPlayer1().id).removeMatch(winMatch.getId());
+                this.getPlayer(winMatch.getPlayer2().id).removeMatch(winMatch.getId());
             }
-            winMatch.values = {
+            winMatch.set({
                 active: false,
-                player1: {
-                    id: winMatch.player1.id === player1.id || winMatch.player1.id === player2.id ? null : winMatch.player1.id
-                },
-                player2: {
-                    id: winMatch.player2.id === player1.id || winMatch.player2.id === player2.id ? null : winMatch.player2.id
-                }
-            }
+                player1: { id: winMatch.getPlayer1().id === player1.getId() || winMatch.getPlayer1().id === player2.getId() ? null : winMatch.getPlayer1().id },
+                player2: { id: winMatch.getPlayer2().id === player1.getId() || winMatch.getPlayer2().id === player2.getId() ? null : winMatch.getPlayer2().id }
+            });
         }
-        if (match.path.loss !== null) {
-            const lossMatch = this.matches.find(m => m.id === match.path.loss);
-            if (lossMatch.active === true) {
-                this.players.find(player => player.id === lossMatch.player1.id).removeMatch(lossMatch.id);
-                this.players.find(player => player.id === lossMatch.player2.id).removeMatch(lossMatch.id);
+        if (match.getPath().loss !== null) {
+            const lossMatch = this.getMatch(match.getPath().loss);
+            if (lossMatch.isActive() === true) {
+                this.getPlayer(lossMatch.getPlayer1().id).removeMatch(lossMatch.getId());
+                this.getPlayer(lossMatch.getPlayer2().id).removeMatch(lossMatch.getId());
             }
-            lossMatch.values = {
+            lossMatch.set({
                 active: false,
-                player1: {
-                    id: lossMatch.player1.id === player1.id || lossMatch.player1.id === player2.id ? null : lossMatch.player1.id
-                },
-                player2: {
-                    id: lossMatch.player2.id === player1.id || lossMatch.player2.id === player2.id ? null : lossMatch.player2.id
-                }
-            }
+                player1: { id: lossMatch.getPlayer1().id === player1.getId() || lossMatch.getPlayer1().id === player2.getId() ? null : lossMatch.getPlayer1().id },
+                player2: { id: lossMatch.getPlayer2().id === player1.getId() || lossMatch.getPlayer2().id === player2.getId() ? null : lossMatch.getPlayer2().id }
+            });
         }
     }
 
@@ -860,39 +1171,34 @@ export class Tournament {
      * @param round The round number
      */
     assignBye(id: string, round: number): void {
-        if (this.status !== 'stage-one' || this.stageOne.format !== 'swiss') {
-            throw `Can only assign losses during Swiss pairings`;
+        if (this.status !== 'stage-one' || this.getStageOne().format !== 'swiss') {
+            throw new Error(`Can only assign byes during Swiss pairings`);
         }
-        const player = this.players.find(p => p.id === id);
-        if (player === undefined) {
-            throw `Player with ID ${id} does not exist`;
+        const player = this.getPlayer(id);
+        if (player.isActive() === false) {
+            throw new Error(`Player is currently inactive`);
         }
-        if (player.active === false) {
-            throw `Player is currently inactive`;
-        }
-        if (player.matches.some(match => this.matches.find(m => m.id === match.id).round === round)) {
-            throw `Player already has a match in round ${round}`;
+        if (player.getMatches().some(match => this.matches.find(m => m.getId() === match.id).getRoundNumber() === round)) {
+            throw new Error(`Player already has a match in round ${round}`);
         }
         let byeID: string;
         do {
-            byeID = randomstring.generate({
-                length: 12,
-                charset: 'alphanumeric'
-            });
-        } while (this.matches.some(m => m.id === byeID));
+            byeID = crypto.randomUUID();
+        } while (this.matches.some(m => m.getId() === byeID));
         const bye = new Match(byeID, round, 0);
-        bye.values = {
+        bye.set({
             bye: true,
             player1: {
-                id: player.id,
-                win: Math.ceil(this.scoring.bestOf / 2)
-            }
-        };
+                id: player.getId(),
+                win: Math.ceil(this.getScoring().bestOf / 2)
+            },
+            player2: { loss: Math.ceil(this.getScoring().bestOf / 2) }
+        });
         player.addMatch({
             id: byeID,
             opponent: null,
             bye: true,
-            win: Math.ceil(this.scoring.bestOf / 2)
+            win: Math.ceil(this.getScoring().bestOf / 2)
         });
         this.matches.push(bye);
     }
@@ -907,124 +1213,105 @@ export class Tournament {
      * @param round The round number
      */
     assignLoss(id: string, round: number): void {
-        if (this.status !== 'stage-one' || this.stageOne.format !== 'swiss') {
-            throw `Can only assign losses during Swiss pairings`;
+        if (this.status !== 'stage-one' || this.getStageOne().format !== 'swiss') {
+            throw new Error(`Can only assign losses during Swiss pairings`);
         }
-        const player = this.players.find(p => p.id === id);
-        if (player === undefined) {
-            throw `Player with ID ${id} does not exist`;
+        const player = this.getPlayer(id);
+        if (player.isActive() === false) {
+            throw new Error(`Player is currently inactive`);
         }
-        if (player.active === false) {
-            throw `Player is currently inactive`;
-        }
-        if (player.matches.some(match => this.matches.find(m => m.id === match.id).round === round)) {
-            const currentMatch = this.matches.filter(match => match.round === round).find(match => match.player1.id === player.id || match.player2.id === player.id);
-            this.matches.splice(this.matches.findIndex(match => match.id === currentMatch.id), 1);
-            player.removeMatch(currentMatch.id);
-            const opponent = this.players.find(p => p.id === (currentMatch.player1.id === player.id ? currentMatch.player2.id : currentMatch.player1.id));
+        if (player.getMatches().some(match => this.matches.find(m => m.getId() === match.id).getRoundNumber() === round)) {
+            const currentMatch = this.getMatchesByRound(round).find(match => match.getPlayer1().id === player.getId() || match.getPlayer2().id === player.getId());
+            this.matches.splice(this.matches.findIndex(match => match.getId() === currentMatch.getId()), 1);
+            player.removeMatch(currentMatch.getId());
+            const opponent = this.getPlayer(currentMatch.getPlayer1().id === player.getId() ? currentMatch.getPlayer2().id : currentMatch.getPlayer1().id);
             if (opponent !== undefined) {
-                opponent.removeMatch(currentMatch.id);
-                this.assignBye(opponent.id, round);
+                opponent.removeMatch(currentMatch.getId());
+                this.assignBye(opponent.getId(), round);
             }
         }
         let lossID: string;
         do {
-            lossID = randomstring.generate({
-                length: 12,
-                charset: 'alphanumeric'
-            });
-        } while (this.matches.some(m => m.id === lossID));
+            lossID = crypto.randomUUID();
+        } while (this.matches.some(m => m.getId() === lossID));
         const loss = new Match(lossID, round, 0);
-        loss.values = {
+        loss.set({
+            loss: true,
             player1: {
-                id: player.id,
-                loss: Math.ceil(this.scoring.bestOf / 2)
+                id: player.getId(),
+                loss: Math.ceil(this.getScoring().bestOf / 2)
             },
-            player2: {
-                win: Math.ceil(this.scoring.bestOf / 2)
-            }
-        };
+            player2: { win: Math.ceil(this.getScoring().bestOf / 2) }
+        });
         player.addMatch({
             id: lossID,
             opponent: null,
-            loss: Math.ceil(this.scoring.bestOf / 2)
+            loss: Math.ceil(this.getScoring().bestOf / 2)
         });
         this.matches.push(loss);
     }
 
     /**
      * Computes tiebreakers for all players and ranks the players by points and tiebreakers.
-     * @param activeOnly If the array contains only active players
      * @returns A sorted array of players with scores and tiebreaker values
      */
-    standings(activeOnly: boolean = true): Array<StandingsValues> {
-        let players = this.#computeScores();
-        if (activeOnly === true) {
-            players = players.filter(p => p.player.active === true);
-        }
-        players.sort((a, b) => {
-            if (a.matchPoints !== b.matchPoints) {
-                return b.matchPoints - a.matchPoints;
-            }
-            for (let i = 0; i < this.scoring.tiebreaks.length; i++) {
-                switch (this.scoring.tiebreaks[i]) {
-                    case 'median buchholz':
-                        if (a.tiebreaks.medianBuchholz !== b.tiebreaks.medianBuchholz) {
-                            return b.tiebreaks.medianBuchholz - a.tiebreaks.medianBuchholz;
-                        } else continue;
-                    case 'solkoff':
-                        if (a.tiebreaks.solkoff !== b.tiebreaks.solkoff) {
-                            return b.tiebreaks.solkoff - a.tiebreaks.solkoff;
-                        } else continue;
-                    case 'sonneborn berger':
-                        if (a.tiebreaks.sonnebornBerger !== b.tiebreaks.sonnebornBerger) {
-                            return b.tiebreaks.sonnebornBerger - a.tiebreaks.sonnebornBerger;
-                        } else continue;
-                    case 'cumulative':
-                        if (a.tiebreaks.cumulative !== b.tiebreaks.cumulative) {
-                            return b.tiebreaks.cumulative - a.tiebreaks.cumulative;
-                        } else if (a.tiebreaks.oppCumulative !== b.tiebreaks.oppCumulative) {
-                            return b.tiebreaks.oppCumulative - a.tiebreaks.oppCumulative;
-                        } else continue;
-                    case 'versus':
-                        const matchIDs = a.player.matches.filter(m => m.opponent === b.player.id).map(m => m.id);
-                        if (matchIDs.length === 0) {
-                            continue;
+    getStandings(): Array<StandingsValues> {
+        const maximumRound = Math.max(...this.getMatches().map(match => match.getRoundNumber()));
+        if (['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageOne().format) || ((this.getStatus() === 'stage-two' || this.getStatus() === 'complete') && ['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageTwo().format))) {
+            let players = this.computeScores(maximumRound);
+            const activePlayers = players.filter(p => p.player.isActive()).sort((a, b) => this.sortForStandings(a, b, maximumRound));
+            players = players.filter(p => !activePlayers.includes(p));
+            let eliminatedPlayers = [];
+            const initialEliminationRound = this.getMatches().filter(m => m.getPath().win !== null).reduce((min, match) => Math.min(min, match.getRoundNumber()), !['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageOne().format) ? this.getStageOne().rounds + 1 : maximumRound);
+            const eliminationMatches = this.getMatches().filter(m => m.getRoundNumber() >= initialEliminationRound && m.getPath().loss === null);
+            if (eliminationMatches.length > 0) {
+                const finalsRoundNumber = eliminationMatches.find(m => m.getPath().win === null).getRoundNumber();
+                eliminationMatches.filter(m => m.getRoundNumber() === finalsRoundNumber).sort((a, b) => a.getMatchNumber() - b.getMatchNumber()).forEach(match => {
+                    if (match.hasEnded()) {
+                        const winningPlayer = players.find(p => p.player.getId() === match.getWinner().id);
+                        if (winningPlayer !== undefined && !eliminatedPlayers.includes(winningPlayer)) {
+                            eliminatedPlayers.push(winningPlayer);
                         }
-                        const pointsA = a.player.matches.filter(m => matchIDs.some(i => i === m.id)).reduce((sum, curr) => curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
-                        const pointsB = b.player.matches.filter(m => matchIDs.some(i => i === m.id)).reduce((sum, curr) => curr.win > curr.loss ? sum + this.scoring.win : curr.loss > curr.win ? sum + this.scoring.loss : sum + this.scoring.draw, 0);
-                        if (pointsA !== pointsB) {
-                            return pointsB - pointsA;
-                        } else continue;
-                    case 'game win percentage':
-                        if (a.tiebreaks.gameWinPct !== b.tiebreaks.gameWinPct) {
-                            return b.tiebreaks.gameWinPct - a.tiebreaks.gameWinPct;
-                        } else continue;
-                    case 'opponent game win percentage':
-                        if (a.tiebreaks.oppGameWinPct !== b.tiebreaks.oppGameWinPct) {
-                            return b.tiebreaks.oppGameWinPct - a.tiebreaks.oppGameWinPct;
-                        } else continue;
-                    case 'opponent match win percentage':
-                        if (a.tiebreaks.oppMatchWinPct !== b.tiebreaks.oppMatchWinPct) {
-                            return b.tiebreaks.oppMatchWinPct - a.tiebreaks.oppMatchWinPct;
-                        } else continue;
-                    case 'opponent opponent match win percentage':
-                        if (a.tiebreaks.oppOppMatchWinPct !== b.tiebreaks.oppOppMatchWinPct) {
-                            return b.tiebreaks.oppOppMatchWinPct - a.tiebreaks.oppOppMatchWinPct;
-                        } else continue;
+                        const losingPlayer = players.find(p => p.player.getId() === match.getLoser().id);
+                        if (losingPlayer !== undefined && !eliminatedPlayers.includes(losingPlayer)) {
+                            eliminatedPlayers.push(losingPlayer);
+                        }
+                    }
+                });
+                for (let i = maximumRound; i >= initialEliminationRound; i--) {
+                    if (i === finalsRoundNumber) continue;
+                    const currentRoundEliminatedPlayers = [];
+                    eliminationMatches.filter(m => m.getRoundNumber() === i && m.hasEnded()).sort((a, b) => a.getMatchNumber() - b.getMatchNumber()).forEach(match => {
+                        currentRoundEliminatedPlayers.push(players.find(p => p.player.getId() === match.getLoser().id));
+                    });
+                    eliminatedPlayers = [...eliminatedPlayers, ...currentRoundEliminatedPlayers.sort((a, b) => this.sortForStandings(a, b, maximumRound))];
                 }
             }
-            return parseInt(b.player.id, 36) - parseInt(a.player.id, 36);
-        });
-        return players;
+            players = players.filter(p => !eliminatedPlayers.includes(p));
+            return [...activePlayers, ...eliminatedPlayers, ...players.sort((a, b) => this.sortForStandings(a, b, maximumRound))];
+        } else {
+            return this.computeScores(maximumRound).sort((a, b) => this.sortForStandings(a, b, maximumRound));
+        }
+    }
+
+    /**
+     * Computes tiebreakers for all players, using only the games from stage one, and ranks the players by points and tiebreakers.
+     * @returns A sorted array of players with scores and tiebreaker values
+     */
+    getStageOneStandings(): Array<StandingsValues> {
+        if (this.getStatus() === 'stage-one') {
+            return this.getStandings();
+        } else {
+            return this.computeScores(this.getStageOne().rounds).sort((a, b) => this.sortForStandings(a, b, this.getStageOne().rounds));
+        }
     }
 
     /**
      * Ends the tournament and marks all players and matches as inactive.
      */
-    end(): void {
+    endTournament(): void {
         this.status = 'complete';
-        this.players.forEach(player => player.active = false);
-        this.matches.forEach(match => match.active = false);
+        this.getPlayers().forEach(player => player.set({ active: false }));
+        this.getMatches().forEach(match => match.set({ active: false }));
     }
 }

@@ -1,19 +1,38 @@
-import randomstring from 'randomstring';
 import { LoadableTournamentValues } from '../interfaces/LoadableTournamentValues.js';
+import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
+
 import { Match } from './Match.js';
 import { Tournament } from './Tournament.js';
-import { SettableTournamentValues } from '../interfaces/SettableTournamentValues.js';
 
 /** 
  * Class representing a tournament manager.
  */
 export class Manager {
     /** Array of all tournaments being managed. */
-    tournaments: Array<Tournament>;
+    private tournaments: Array<Tournament>;
 
     /** Create a tournament manager. */
     constructor() {
         this.tournaments = [];
+    }
+
+    /**
+     * @returns An array of tournaments being managed
+     */
+    getTournaments(): Array<Tournament> {
+        return this.tournaments;
+    }
+
+    /**
+     * @param id The ID of a tournament
+     * @returns The tournament with the corresponding ID
+     */
+    getTournament(id: string): Tournament {
+        const tournament = this.tournaments.find(t => t.getId() === id);
+        if (tournament === undefined) {
+            throw new Error(`No tournament with ID ${id} exists`);
+        }
+        return tournament;
     }
 
     /**
@@ -29,18 +48,15 @@ export class Manager {
         let ID = id;
         if (ID === undefined) {
             do {
-                ID = randomstring.generate({
-                    length: 12,
-                    charset: 'alphanumeric'
-                });
-            } while (this.tournaments.some(t => t.id === ID));
+                ID = crypto.randomUUID();
+            } while (this.tournaments.some(t => t.getId() === ID));
         } else {
-            if (this.tournaments.some(t => t.id === ID)) {
-                throw `Tournament with ID ${ID} already exists`;
+            if (this.tournaments.some(t => t.getId() === ID)) {
+                throw new Error(`Tournament with ID ${ID} already exists`);
             }
         }
         const tournament = new Tournament(ID, name);
-        tournament.settings = settings;
+        tournament.set(settings);
         this.tournaments.push(tournament);
         return tournament;
     }
@@ -50,9 +66,9 @@ export class Manager {
      * @param tourney Plain object of a tournament
      * @returns The newly reloaded tournament
      */
-    reloadTournament(tourney: LoadableTournamentValues): Tournament {
+    loadTournament(tourney: LoadableTournamentValues): Tournament {
         const tournament = new Tournament(tourney.id, tourney.name);
-        tournament.settings = {
+        tournament.set({
             round: tourney.round,
             sorting: tourney.sorting,
             seating: tourney.seating,
@@ -60,31 +76,33 @@ export class Manager {
             stageOne: tourney.stageOne,
             stageTwo: tourney.stageTwo,
             meta: tourney.meta
-        };
+        });
         tourney.players.forEach(player => {
             const newPlayer = tournament.createPlayer(player.name, player.id);
-            newPlayer.values = {
+            newPlayer.set({
                 active: player.active,
                 value: player.value,
                 matches: player.matches,
                 meta: player.meta
-            }
+            });
         });
+        const newMatches = [];
         tourney.matches.forEach(match => {
             const newMatch = new Match(match.id, match.round, match.match);
-            newMatch.values = {
+            newMatch.set({
                 active: match.active,
                 bye: match.bye,
                 player1: match.player1,
                 player2: match.player2,
                 path: match.path,
                 meta: match.meta
-            }
-            tournament.matches.push(newMatch);
+            });
+            newMatches.push(newMatch);
         });
-        tournament.settings = {
+        tournament.set({ 
+            matches: newMatches,
             status: tourney.status
-        };
+        });
         this.tournaments.push(tournament);
         return tournament;
     }
@@ -97,12 +115,9 @@ export class Manager {
      * @returns The removed tournament
      */
     removeTournament(id: string): Tournament {
-        const tournament = this.tournaments.find(t => t.id === id);
-        if (tournament === undefined) {
-            throw `No tournament with ID ${id} exists`;
-        }
-        tournament.end();
-        this.tournaments.splice(this.tournaments.findIndex(t => t.id === tournament.id), 1);
+        const tournament = this.getTournament(id);
+        tournament.endTournament();
+        this.tournaments.splice(this.tournaments.findIndex(t => t.getId() === tournament.getId()), 1);
         return tournament;
     }
 }

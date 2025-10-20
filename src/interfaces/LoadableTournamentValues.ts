@@ -1,9 +1,10 @@
+import { Manager } from '../components/Manager.js';
 import { MatchValues } from './MatchValues.js';
 import { PlayerValues } from './PlayerValues.js';
 import { TournamentValues } from './TournamentValues.js';
 
 /**
- * Properties of tournaments to be loaded with {@link Manager.reloadTournament}
+ * Properties of tournaments to be loaded with {@link Manager.loadTournament}
  * 
  * The only difference from {@link TournamentValues} is that matches and players are arrays of {@link MatchValues} and {@link PlayerValues}, respectively, as opposed to arrays of the classes.
  * 

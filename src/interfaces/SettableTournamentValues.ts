@@ -4,7 +4,7 @@ import { Tournament } from '../components/Tournament.js';
 import { TournamentValues } from './TournamentValues.js';
 
 /**
- * All properties that can be set with {@link Tournament.settings}.
+ * All properties that can be set with {@link Tournament.set}.
  * 
  * See {@link TournamentValues} for detailed descriptions of properties.
  */
@@ -12,7 +12,6 @@ export interface SettableTournamentValues {
     name?: string,
     status?: 'setup' | 'stage-one' | 'stage-two' | 'complete',
     round?: number,
-    players?: Array<Player>,
     matches?: Array<Match>,
     seating?: boolean,
     sorting?: 'ascending' | 'descending' | 'none',
@@ -26,8 +25,16 @@ export interface SettableTournamentValues {
             'median buchholz' |
             'solkoff' |
             'sonneborn berger' |
+            'koya system' |
             'cumulative' |
+            'earned match wins' |
+            'earned match losses' |
+            'earned game wins' |
+            'earned game losses' |
+            'game win differential' |
+            'neighborhood record' |
             'versus' |
+            'mutual versus' |
             'game win percentage' |
             'opponent game win percentage' |
             'opponent match win percentage' |

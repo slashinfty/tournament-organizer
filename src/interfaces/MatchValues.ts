@@ -21,11 +21,17 @@ export interface MatchValues {
      */
     active: boolean,
     /**
-     * If the match is a bye.
+     * If the match is an assigned bye.
      * 
      * Initialized as `false`
      */
     bye: boolean,
+    /**
+     * If the match is an assigned loss.
+     * 
+     * Initialized as `false`
+     */
+    loss: boolean,
     /**
      * Details about player one in the match.
      * 

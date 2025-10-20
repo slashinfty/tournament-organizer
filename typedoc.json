@@ -5,7 +5,7 @@
     "out": "docs",
     "githubPages": true,
     "tsconfig": "tsconfig.json",
-    "readme": "DOCS.md",
+    "readme": "./docs.md",
     "plugin": ["typedoc-plugin-merge-modules"],
     "mergeModulesRenameDefaults": true,
     "mergeModulesMergeMode": "project"
