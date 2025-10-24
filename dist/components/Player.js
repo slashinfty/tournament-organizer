@@ -33,8 +33,19 @@ export class Player {
             this.active = options.active;
         if (options.hasOwnProperty('value'))
             this.value = options.value;
-        if (options.hasOwnProperty('matches'))
-            this.matches = [...this.matches, ...options.matches];
+        if (options.hasOwnProperty('matches')) {
+            const existingMatches = options.matches.filter(match => this.matches.some(m => m.id === match.id));
+            existingMatches.forEach(match => this.updateMatch(match.id, {
+                opponent: match.opponent,
+                pairUpDown: match.pairUpDown,
+                seating: match.seating,
+                bye: match.bye,
+                win: match.win,
+                loss: match.loss,
+                draw: match.draw
+            }));
+            this.matches = [...this.matches, ...options.matches.filter(match => !existingMatches.includes(match))];
+        }
         if (options.hasOwnProperty('meta'))
             Object.assign(this.meta, options.meta);
     }

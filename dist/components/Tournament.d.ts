@@ -65,9 +65,10 @@ export declare class Tournament {
      */
     sortForStandings(a: StandingsValues, b: StandingsValues, r: TournamentValues['round']): number;
     /**
-     * Adjusts seating for elimination if seating matters
+     * Adjusts seating for elimination
      * @param p1 First player in a match
      * @param p2 Second player in a match
+     * @param m The match ID being considered
      * @returns IDs of the players in the order in which they should be seated
      */
     private eliminationSeating;

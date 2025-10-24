@@ -97,7 +97,38 @@ export class Tournament {
         if (options.hasOwnProperty('name')) this.name = options.name;
         if (options.hasOwnProperty('status')) this.status = options.status;
         if (options.hasOwnProperty('round')) this.round = options.round;
-        if (options.hasOwnProperty('matches')) this.matches = [...this.matches, ...options.matches];
+        if (options.hasOwnProperty('matches')) {
+            const existingMatches = options.matches.filter(match => this.matches.some(m => m.getId() === match.getId()));
+            existingMatches.forEach(match => {
+                const existingMatch = this.matches.find(m => m.getId() === match.getId());
+                existingMatch.set({
+                    active: match.isActive(),
+                    bye: match.isBye(),
+                    loss: match.isLoss(),
+                    match: match.getMatchNumber(),
+                    meta: match.getMeta(),
+                    path: match.getPath(),
+                    player1: match.getPlayer1(),
+                    player2: match.getPlayer2(),
+                    round: match.getRoundNumber()
+                });
+            });
+            this.matches = [...this.matches, ...options.matches.filter(match => !existingMatches.includes(match))];
+        }
+        if (options.hasOwnProperty('players')) {
+            const existingPlayers = options.players.filter(player => this.players.some(p => p.getId() === player.getId()));
+            existingPlayers.forEach(player => {
+                const existingPlayer = this.players.find(p => p.getId() === player.getId());
+                existingPlayer.set({
+                    active: player.isActive(),
+                    matches: player.getMatches(),
+                    meta: player.getMeta(),
+                    name: player.getName(),
+                    value: player.getValue()
+                });
+            });
+            this.players = [...this.players, ...options.players.filter(player => !existingPlayers.includes(player))];
+        }
         if (options.hasOwnProperty('seating')) this.seatings = options.seating;
         if (options.hasOwnProperty('sorting')) this.sorting = options.sorting;
         if (options.hasOwnProperty('scoring')) Object.assign(this.scoring, options.scoring);
@@ -515,21 +546,41 @@ export class Tournament {
     }
 
     /**
-     * Adjusts seating for elimination if seating matters
+     * Adjusts seating for elimination
      * @param p1 First player in a match
      * @param p2 Second player in a match
+     * @param m The match ID being considered
      * @returns IDs of the players in the order in which they should be seated
      */
-    private eliminationSeating(p1: Player, p2: Player): [PlayerValues['id'], PlayerValues['id']] {
-        const p1SeatSum = p1.getMatches().reduce((sum, match) => sum + match.seating, 0);
-        const p1LastSeat = p1.getMatches().slice(-1)[0].seating;
-        const p2SeatSum = p2.getMatches().reduce((sum, match) => sum + match.seating, 0);
-        const p2LastSeat = p2.getMatches().slice(-1)[0].seating;
-        if ((p2LastSeat === -1 && p1LastSeat === 1) || (p2SeatSum < p1SeatSum)) {
-            return [p2.getId(), p1.getId()];
+    private eliminationSeating(p1: Player, p2: Player, m: string): [PlayerValues['id'], PlayerValues['id']] {
+        if (this.getSeating()) {
+            const p1SeatSum = p1.getMatches().reduce((sum, match) => sum + match.seating, 0);
+            const p1LastSeat = p1.getMatches().slice(-1)[0].seating;
+            const p2SeatSum = p2.getMatches().reduce((sum, match) => sum + match.seating, 0);
+            const p2LastSeat = p2.getMatches().slice(-1)[0].seating;
+            if ((p2LastSeat === -1 && p1LastSeat === 1) || (p2SeatSum < p1SeatSum)) {
+                return [p2.getId(), p1.getId()];
+            }
         } else {
-            return [p1.getId(), p2.getId()];
+            let [previousMatch1, previousMatch2] = this.getMatches().filter(match => match.getPath().win === m || match.getPath().loss === m);
+            if (previousMatch2 === undefined) {
+                return [p1.getId(), p2.getId()];
+            }
+            if (p2.getId() === previousMatch1.getPlayer1().id || p2.getId() === previousMatch1.getPlayer2().id) {
+                [previousMatch1, previousMatch2] = [previousMatch2, previousMatch1];
+            }
+            if (previousMatch1.getRoundNumber() === previousMatch2.getRoundNumber() && previousMatch1.getMatchNumber() > previousMatch2.getMatchNumber()) {
+                return [p2.getId(), p1.getId()];
+            }
+            if (this.getMatch(m).getRoundNumber() > Math.max(previousMatch1.getRoundNumber(), previousMatch2.getRoundNumber())) {
+                if (previousMatch2.getRoundNumber() > previousMatch1.getRoundNumber()) {
+                    return [p2.getId(), p1.getId()];
+                }
+            } else if (previousMatch2.getRoundNumber() < previousMatch1.getRoundNumber()) {
+                return [p2.getId(), p1.getId()];
+            }
         }
+        return [p1.getId(), p2.getId()];
     }
 
     /**
@@ -1009,18 +1060,12 @@ export class Tournament {
                     player1: { id: match.getWinner().id }
                 });
             } else {
-                if (this.getSeating()) {
-                    const [seat1, seat2] = this.eliminationSeating(this.getPlayer(winMatch.getPlayer1().id), this.getPlayer(match.getWinner().id));
-                    winMatch.set({
-                        player1: { id: seat1 },
-                        player2: { id: seat2 }
-                    });
-                } else {
-                    winMatch.set({
-                        player2: { id: match.getWinner().id }
-                    });
-                }
-            }
+                const [seat1, seat2] = this.eliminationSeating(this.getPlayer(winMatch.getPlayer1().id), this.getPlayer(match.getWinner().id), winMatch.getId());
+                winMatch.set({
+                    player1: { id: seat1 },
+                    player2: { id: seat2 }
+                });
+        }
             if (winMatch.getPlayer1().id !== null && winMatch.getPlayer2().id !== null) { 
                 winMatch.set({ active: true });
                 this.getPlayer(winMatch.getPlayer1().id).addMatch({
@@ -1042,17 +1087,11 @@ export class Tournament {
                     player1: { id: match.getLoser().id }
                 });
             } else {
-                if (this.getSeating()) {
-                    const [seat1, seat2] = this.eliminationSeating(this.getPlayer(lossMatch.getPlayer1().id), this.getPlayer(match.getLoser().id));
-                    lossMatch.set({
-                        player1: { id: seat1 },
-                        player2: { id: seat2 }
-                    });
-                } else {
-                    lossMatch.set({
-                        player2: { id: match.getLoser().id }
-                    });
-                }
+                const [seat1, seat2] = this.eliminationSeating(this.getPlayer(lossMatch.getPlayer1().id), this.getPlayer(match.getLoser().id), lossMatch.getId());
+                lossMatch.set({
+                    player1: { id: seat1 },
+                    player2: { id: seat2 }
+                });
             }
             if (lossMatch.getPlayer1().id !== null && lossMatch.getPlayer2().id !== null) {
                 lossMatch.set({ active: true });

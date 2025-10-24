@@ -13,6 +13,7 @@ export interface SettableTournamentValues {
     status?: 'setup' | 'stage-one' | 'stage-two' | 'complete',
     round?: number,
     matches?: Array<Match>,
+    players?: Array<Player>,
     seating?: boolean,
     sorting?: 'ascending' | 'descending' | 'none',
     scoring?: {
