@@ -16,7 +16,7 @@
     "node": ">=16.7"
   },
   "scripts": {
-    "build": "rm -rf dist/* && tsc -p tsconfig.json",
+    "build": "npx rimraf dist && tsc -p tsconfig.json",
     "docs": "typedoc --options typedoc.json",
     "prepare": "npm run build"
   },
