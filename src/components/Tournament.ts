@@ -968,8 +968,10 @@ export class Tournament {
      * @param player1Wins Number of wins for player one
      * @param player2Wins Number of wins for player two
      * @param draws Number of draws
+     * @returns Array of matches that were updated
      */
-    enterResult(id: string, player1Wins: number, player2Wins: number, draws: number = 0): void {
+    enterResult(id: string, player1Wins: number, player2Wins: number, draws: number = 0): Array<Match> {
+        const updatedMatches: Array<Match> = [];
         const match = this.getMatch(id);
         if (player1Wins > Math.round(this.getScoring().bestOf / 2) || player2Wins > Math.round(this.getScoring().bestOf / 2)) {
             throw new Error(`Players can not win more than ${Math.round(this.getScoring().bestOf / 2)} games in a match`);
@@ -990,6 +992,7 @@ export class Tournament {
                 draw: draws
             }
         });
+        updatedMatches.push(match);
         const player1 = this.getPlayer(match.getPlayer1().id);
         player1.updateMatch(match.getId(), {
             win: player1Wins,
@@ -1004,6 +1007,7 @@ export class Tournament {
         });
         if (match.getPath().win !== null) {
             const winMatch = this.getMatch(match.getPath().win);
+            updatedMatches.push(winMatch);
             if (winMatch.getPlayer1().id === null) {
                 winMatch.set({
                     player1: { id: match.getWinner().id }
@@ -1037,6 +1041,7 @@ export class Tournament {
         }
         if (match.getPath().loss !== null) {
             const lossMatch = this.getMatch(match.getPath().loss);
+            updatedMatches.push(lossMatch);
             if (lossMatch.getPlayer1().id === null) {
                 lossMatch.set({
                     player1: { id: match.getLoser().id }
@@ -1081,6 +1086,7 @@ export class Tournament {
                     player2: { id: match.getPlayer1().id }
                 });
                 this.matches.push(newMatch);
+                updatedMatches.push(newMatch);
                 this.getPlayer(newMatch.getPlayer1().id).addMatch({
                     id: id,
                     opponent: newMatch.getPlayer2().id,
@@ -1095,6 +1101,7 @@ export class Tournament {
                 this.getPlayer(match.getLoser().id).set({ active: false });
             }
         }
+        return updatedMatches;
     }
 
     /**
@@ -1104,8 +1111,10 @@ export class Tournament {
      * 
      * In elimination and stepladder formats, it reverses the progression of players in the bracket.
      * @param id The ID of the match
+     * @returns Array of matches that were updated
      */
-    clearResult(id: string): void {
+    clearResult(id: string): Array<Match> {
+        const updatedMatches: Array<Match> = [];
         const match = this.getMatch(id);
         if (match.isActive()) {
             throw new Error('Can not clear an active match');
@@ -1123,6 +1132,7 @@ export class Tournament {
                 draw: 0
             }
         });
+        updatedMatches.push(match);
         const player1 = this.getPlayer(match.getPlayer1().id);
         const player2 = this.getPlayer(match.getPlayer2().id);
         player1.set({ active: true });
@@ -1148,6 +1158,7 @@ export class Tournament {
                 player1: { id: winMatch.getPlayer1().id === player1.getId() || winMatch.getPlayer1().id === player2.getId() ? null : winMatch.getPlayer1().id },
                 player2: { id: winMatch.getPlayer2().id === player1.getId() || winMatch.getPlayer2().id === player2.getId() ? null : winMatch.getPlayer2().id }
             });
+            updatedMatches.push(winMatch);
         }
         if (match.getPath().loss !== null) {
             const lossMatch = this.getMatch(match.getPath().loss);
@@ -1160,7 +1171,9 @@ export class Tournament {
                 player1: { id: lossMatch.getPlayer1().id === player1.getId() || lossMatch.getPlayer1().id === player2.getId() ? null : lossMatch.getPlayer1().id },
                 player2: { id: lossMatch.getPlayer2().id === player1.getId() || lossMatch.getPlayer2().id === player2.getId() ? null : lossMatch.getPlayer2().id }
             });
+            updatedMatches.push(lossMatch);
         }
+        return updatedMatches;
     }
 
     /**
