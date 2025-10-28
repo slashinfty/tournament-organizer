@@ -551,7 +551,7 @@ export class Tournament {
      * @param m The match being considered
      */
     private eliminationSeatingFirst(p: Player, m: Match): void {
-        let [previousMatch1, previousMatch2] = this.getMatches().filter(match => match.getId() === m.getPath().win || match.getId() === m.getPath().loss);
+        let [previousMatch1, previousMatch2] = this.getMatches().filter(match => m.getId() === match.getPath().win || m.getId() === match.getPath().loss);
         const playerInMatch1 = previousMatch1.getPlayer1().id === p.getId() || previousMatch1.getPlayer2().id === p.getId();
         if (previousMatch1.getRoundNumber() === previousMatch2.getRoundNumber()) {
             if ((previousMatch1.getMatchNumber() < previousMatch2.getMatchNumber() && playerInMatch1) || (previousMatch1.getMatchNumber() > previousMatch2.getMatchNumber() && !playerInMatch1)) {
