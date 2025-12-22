@@ -745,7 +745,7 @@ export class Tournament {
     /**
      * @returns If the current format is an elimination format
      */
-    isElimination(): Boolean {
+    isElimination(): boolean {
         if (this.status === 'stage-one') {
             return ['single-elimination', 'double-elimination', 'stepladder'].includes(this.getStageOne().format);
         } else {
