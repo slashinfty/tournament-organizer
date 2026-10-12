@@ -5,6 +5,11 @@ Supports multiple formats of tournaments, including playoffs, with a variety of 
 
 [Documentation](https://slashinfty.github.io/tournament-organizer/) is available online.
 
+## Related Projects
+If you are looking for a web-based implementation of this library, check out [Apothem](https://apothem-sk.com/).
+
+If you only need the pairings algorithms, check out [tournament-pairings](https://github.com/slashinfty/tournament-pairings).
+
 ## Contributing
 Please submit an issue if you encounter a bug or have a feature suggestion.
 
